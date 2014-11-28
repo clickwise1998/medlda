@@ -42,4 +42,7 @@ public class STRUCT_LEARN_PARM {
 	
 	public int num_features;
 	
+	/**for medlda***/
+	public double delta_ell;
+	
 }

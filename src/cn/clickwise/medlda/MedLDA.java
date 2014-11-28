@@ -8,7 +8,10 @@ import org.apache.log4j.Logger;
 import cn.clickwise.classify.svm_struct.KERNEL_PARM;
 import cn.clickwise.classify.svm_struct.LEARN_PARM;
 import cn.clickwise.classify.svm_struct.STRUCT_LEARN_PARM;
-import cn.clickwise.classify.svm_struct.svm_struct_main;
+import cn.clickwise.classify.svm_struct.svm_common;
+import cn.clickwise.classify.svm_struct.svm_struct_api;
+import cn.clickwise.classify.svm_struct.svm_struct_common;
+import cn.clickwise.classify.svm_struct.svm_struct_learn;
 import cn.clickwise.time.utils.TimeOpera;
 
 public class MedLDA {
@@ -41,6 +44,7 @@ public class MedLDA {
 
 	/**
 	 * perform inference on a Document and update sufficient statistics
+	 * 
 	 * @param doc
 	 * @param gamma
 	 * @param phi
@@ -84,14 +88,77 @@ public class MedLDA {
 		return lhood;
 	}
 
+	/**
+	 * compute MLE lda model from sufficient statistics
+	 * 
+	 * @param ss
+	 * @param param
+	 * @param bInit
+	 * @return
+	 */
 	public boolean mle(SuffStats ss, Params param, boolean bInit) {
+		int k;
+		int w;
 
-		return false;
+		// beta parameters(K*N)
+		for (k = 0; k < m_nK; k++) {
+			for (w = 0; w < m_nNumTerms; w++) {
+				if (ss.class_word[k][w] > 0) {
+					m_dLogProbW[k][w] = Math.log(ss.class_word[k][w])
+							- Math.log(ss.class_total[k]);
+				} else {
+					m_dLogProbW[k][w] = -100;
+				}
+			}
+		}
+
+		// alpha parameters
+		if ((!bInit) && param.ESTIMATE_ALPHA == 1) {// the same prior for all
+													// topics
+
+			double alpha_suffstats = 0;
+			for (k = 0; k < m_nK; k++) {
+				alpha_suffstats += ss.alpha_suffstats[k];
+			}
+
+			double alpha = OptAlpha.opt_alpha(alpha_suffstats, ss.num_docs,
+					m_nK);
+			for (k = 0; k < m_nK; k++) {
+				m_alpha[k] = alpha;
+			}
+
+		} else if ((!bInit) && param.ESTIMATE_ALPHA == 2)// different priors for
+															// different topics
+		{
+			double alpha_sum = 0;
+			for (k = 0; k < m_nK; k++) {
+				alpha_sum += m_alpha[k];
+			}
+
+			for (k = 0; k < m_nK; k++) {
+				alpha_sum -= m_alpha[k];
+
+				m_alpha[k] = OptAlpha.opt_alpha(ss.alpha_suffstats[k],
+						alpha_sum, ss.num_docs, m_nK);
+			}
+
+			logger.info("new alpha: ");
+			for (k = 0; k < m_nK; k++) {
+				logger.info(m_alpha[k]);
+			}
+		}
+
+		boolean bRes = true;
+		if (!bInit) {
+			svmStructSolver(ss, param, m_dMu);
+		}
+
+		return bRes;
 	}
 
 	public int run_em(String start, String directory, Corpus corpus,
 			Params param) {
-		
+
 		m_dDeltaEll = param.getDELTA_ELL();
 
 		int d, n;
@@ -269,63 +336,64 @@ public class MedLDA {
 		double[][] exp = new double[corpus.num_docs][m_nK];
 
 		filename = model_dir + "/evl-lda-lhood.dat";
-		double dAcc=0;
-		
+		double dAcc = 0;
+
 		try {
 			PrintWriter fileptr = new PrintWriter(new FileWriter(filename));
 
-			for(d=0;d<corpus.num_docs;d++)
-			{
-				if(((d%1000)==0)&&(d>0))
-				{
-					logger.info("Document "+d);
+			for (d = 0; d < corpus.num_docs; d++) {
+				if (((d % 1000) == 0) && (d > 0)) {
+					logger.info("Document " + d);
 				}
-				
-				doc=corpus.docs[d];
-				phi=new double[doc.length][m_nK];
-				
-				for(n=0;n<doc.length;n++)
-				{
-					//initialize to uniform distribution
-					for(int k=0;k<m_nK;k++)
-					{
-						phi[n][k]=1.0;
+
+				doc = corpus.docs[d];
+				phi = new double[doc.length][m_nK];
+
+				for (n = 0; n < doc.length; n++) {
+					// initialize to uniform distribution
+					for (int k = 0; k < m_nK; k++) {
+						phi[n][k] = 1.0;
 					}
 				}
-				
-				lhood=inference_pred(doc, var_gamma[d], phi, param);
-				
-				//do prediction
-				predict(doc,phi);
-				doc.lhood=lhood;
-				
+
+				lhood = inference_pred(doc, var_gamma[d], phi, param);
+
+				// do prediction
+				predict(doc, phi);
+				doc.lhood = lhood;
+
 				fileptr.println(lhood);
-				
-				//update the exp
-				for(int k=0;k<m_nK;k++){
-					double dVal=0;
-					for(n=0;n<doc.length;n++){
-						dVal+=phi[n][k]*(double)doc.counts[n]/(double)doc.total;
+
+				// update the exp
+				for (int k = 0; k < m_nK; k++) {
+					double dVal = 0;
+					for (n = 0; n < doc.length; n++) {
+						dVal += phi[n][k] * (double) doc.counts[n]
+								/ (double) doc.total;
 					}
-					
-					exp[d][k]=dVal;	
-				}					
+
+					exp[d][k] = dVal;
+				}
 			}
-			
-			filename="MedLDA_("+m_nK+"topic)_test.txt";
+
+			filename = "MedLDA_(" + m_nK + "topic)_test.txt";
 			outputData2(filename, corpus, exp, m_nK, m_nLabelNum);
-			
-			filename=model_dir+"/evl-gamma.dat";
-			save_gamma(filename,var_gamma,corpus.num_docs,m_nK);
-			
-			filename=model_dir+"/evl-performance.dat";
-		    dAcc=save_prediction(filename,corpus);
+
+			filename = model_dir + "/evl-gamma.dat";
+			save_gamma(filename, var_gamma, corpus.num_docs, m_nK);
+
+			filename = model_dir + "/evl-performance.dat";
+			dAcc = save_prediction(filename, corpus);
 			fileptr.close();
-			
-			fileptr=new PrintWriter(new FileWriter("overall-res.txt",true));
-			fileptr.printf("setup (K: %d; C: %.3f; fold: %d; ell: %.2f; dual-opt: %d; alpha: %d; svm_alg: %d; maxIt: %d): accuracy %.3f\n", m_nK, m_dC, param.NFOLDS, param.DELTA_ELL, param.PHI_DUALOPT, param.ESTIMATE_ALPHA, param.SVM_ALGTYPE, param.EM_MAX_ITER, dAcc);
-			
-	
+
+			fileptr = new PrintWriter(new FileWriter("overall-res.txt", true));
+			fileptr.printf(
+					"setup (K: %d; C: %.3f; fold: %d; ell: %.2f; dual-opt: %d; alpha: %d; svm_alg: %d; maxIt: %d): accuracy %.3f\n",
+					m_nK, m_dC, param.NFOLDS, param.DELTA_ELL,
+					param.PHI_DUALOPT, param.ESTIMATE_ALPHA, param.SVM_ALGTYPE,
+					param.EM_MAX_ITER, dAcc);
+			fileptr.close();
+
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -460,8 +528,25 @@ public class MedLDA {
 
 	public double compute_mrgterm(Document doc, int d, int n, int k,
 			Params param) {
+		double dval = 0;
+		int gndetaIx = doc.gndlabel * m_nK + k;
+		param.PHI_DUALOPT = 1;
 
-		return 0;
+		if (param.PHI_DUALOPT == 1) {
+			for (int m = 0; m < m_nLabelNum; m++) {
+				int muIx = d * m_nLabelNum + m;
+				int etaIx = m * m_nK + k;
+
+				dval += m_dMu[muIx] * (m_dEta[gndetaIx] - m_dEta[etaIx]);
+			}
+		} else {
+			int etaIx = doc.lossAugLabel * m_nK + k;
+			dval = m_dC * (m_dEta[gndetaIx] - m_dEta[etaIx]);
+		}
+
+		dval = dval * doc.counts[n] / doc.total;
+
+		return dval;
 	}
 
 	public double compute_lhood(Document doc, double[][] phi, double[] var_gamma) {
@@ -526,14 +611,11 @@ public class MedLDA {
 		}
 
 	}
-	
-	public double save_prediction(String filename, Corpus corpus)
-	{
-		
+
+	public double save_prediction(String filename, Corpus corpus) {
+
 		return 0;
 	}
-	
-
 
 	public void loss_aug_predict(Document doc, double[] zbar_mean) {
 
@@ -572,9 +654,138 @@ public class MedLDA {
 	public void set_init_param(STRUCT_LEARN_PARM struct_parm,
 			LEARN_PARM learn_parm, KERNEL_PARM kernel_parm, int alg_type) {
 
+		/* set default */
+		alg_type = svm_struct_common.DEFAULT_ALG_TYPE;
+		struct_parm.C = -0.01;
+		struct_parm.slack_norm = 1;
+		struct_parm.epsilon = svm_struct_common.DEFAULT_EPS;
+		struct_parm.custom_argc = 0;
+		struct_parm.loss_function = svm_struct_common.DEFAULT_LOSS_FCT;
+		struct_parm.loss_type = svm_struct_common.DEFAULT_RESCALING;
+		struct_parm.newconstretrain = 100;
+		struct_parm.ccache_size = 5;
+		struct_parm.batch_size = 100;
+		struct_parm.delta_ell = m_dDeltaEll;
+
+		learn_parm.predfile = "trans_predictions";
+		learn_parm.alphafile = "";
+		svm_common.verbosity = 0;/* verbosity for svm_light */
+		svm_struct_common.struct_verbosity = 1;/*
+												 * verbosity for struct learning
+												 * portion
+												 */
+		learn_parm.biased_hyperplane = 1;
+		learn_parm.remove_inconsistent = 0;
+		learn_parm.skip_final_opt_check = 0;
+		learn_parm.svm_maxqpsize = 10;
+		learn_parm.svm_newvarsinqp = 0;
+		learn_parm.svm_iter_to_shrink = -9999;
+		learn_parm.maxiter = 100000;
+		learn_parm.kernel_cache_size = 40;
+		learn_parm.svm_c = 99999999; /* overridden by struct_parm->C */
+		learn_parm.eps = 0.001; /* overridden by struct_parm->epsilon */
+
+		learn_parm.transduction_posratio = -1.0;
+		learn_parm.svm_costratio = 1.0;
+		learn_parm.svm_costratio_unlab = 1.0;
+		learn_parm.svm_unlabbound = 1E-5;
+		learn_parm.epsilon_crit = 0.001;
+		learn_parm.epsilon_a = 1E-10; /* changed from 1e-15 */
+		learn_parm.compute_loo = 0;
+		learn_parm.rho = 1.0;
+		learn_parm.xa_depth = 0;
+		kernel_parm.kernel_type = 0;
+		kernel_parm.poly_degree = 3;
+		kernel_parm.rbf_gamma = 1.0;
+		kernel_parm.coef_lin = 1;
+		kernel_parm.coef_const = 1;
+
+		kernel_parm.custom = "empty";
+		if (learn_parm.svm_iter_to_shrink == -9999) {
+			learn_parm.svm_iter_to_shrink = 100;
+		}
+
+		if ((learn_parm.skip_final_opt_check != 0)
+				&& (kernel_parm.kernel_type == svm_common.LINEAR)) {
+			logger.info("\nIt does not make sense to skip the final optimality check for linear kernels.\n\n");
+			learn_parm.skip_final_opt_check = 0;
+		}
+
+		if ((learn_parm.skip_final_opt_check != 0)
+				&& (learn_parm.remove_inconsistent != 0)) {
+			logger.info("\nIt is necessary to do the final optimality check when removing inconsistent \nexamples.\n");
+
+		}
+
+		if ((learn_parm.svm_maxqpsize < 2)) {
+			logger.info("\nMaximum size of QP-subproblems not in valid range: "
+					+ learn_parm.svm_maxqpsize + " [2..]\n");
+
+		}
+
+		if ((learn_parm.svm_maxqpsize < learn_parm.svm_newvarsinqp)) {
+			logger.info("\nMaximum size of QP-subproblems ["
+					+ learn_parm.svm_maxqpsize
+					+ "] must be larger than the number of\n");
+			logger.info("new variables [" + learn_parm.svm_newvarsinqp
+					+ "] entering the working set in each iteration.\n");
+		}
+
+		if (learn_parm.svm_iter_to_shrink < 1) {
+			logger.info("\nMaximum number of iterations for shrinking not in valid range: "
+					+ learn_parm.svm_iter_to_shrink + " [1,..]\n");
+		}
+
+		if (((alg_type) < 0) || (((alg_type) > 5) && ((alg_type) != 9))) {
+			logger.info("\nAlgorithm type must be either '0', '1', '2', '3', '4', or '9'!\n\n");
+		}
+
+		if (learn_parm.transduction_posratio > 1) {
+			logger.info("\nThe fraction of unlabeled examples to classify as positives must\n");
+			logger.info("be less than 1.0 !!!\n\n");
+		}
+		if (learn_parm.svm_costratio <= 0) {
+			logger.info("\nThe COSTRATIO parameter must be greater than zero!\n\n");
+		}
+
+		if (struct_parm.epsilon <= 0) {
+			logger.info("\nThe epsilon parameter must be greater than zero!\n\n");
+		}
+
+		if ((struct_parm.ccache_size <= 0) && ((alg_type) == 4)) {
+			logger.info("\nThe cache size must be at least 1!\n\n");
+		}
+		
+        if(((struct_parm.batch_size<=0) || (struct_parm.batch_size>100))
+                && ((alg_type) == 4)) {
+        	logger.info("\nThe batch size must be in the interval ]0,100]!\n\n");              
+        }
+        
+        if((struct_parm.slack_norm<1) || (struct_parm.slack_norm>2)) {
+        	logger.info("\nThe norm of the slacks must be either 1 (L1-norm) or 2 (L2-norm)!\n\n");
+        }
+        if((struct_parm.loss_type != svm_struct_learn.SLACK_RESCALING)
+                && (struct_parm.loss_type != svm_struct_learn.MARGIN_RESCALING)) {
+        	logger.info("\nThe loss type must be either 1 (slack rescaling) or 2 (margin rescaling)!\n\n");
+                  
+        }
+        
+        if(learn_parm.rho<0) {
+        	logger.info("\nThe parameter rho for xi/alpha-estimates and leave-one-out pruning must\n");
+        	logger.info("be greater than zero (typically 1.0 or 2.0, see T. Joachims, Estimating the\n");
+        	logger.info("Generalization Performance of an SVM Efficiently, ICML, 2000.)!\n\n");
+         }
+        
+        if((learn_parm.xa_depth<0) || (learn_parm.xa_depth>100)) {
+        	logger.info("\nThe parameter depth for ext. xi/alpha-estimates must be in [0..100] (zero\n");
+        	logger.info("for switching to the conventional xa/estimates described in T. Joachims,\n");
+        	logger.info("Estimating the Generalization Performance of an SVM Efficiently, ICML, 2000.)\n");
+         }
+
+         svm_struct_api.parse_struct_parameters(struct_parm);
 	}
 
-	public void svmStructSolver(SuffStats ss, Params param, double res) {
+	public void svmStructSolver(SuffStats ss, Params param, double[] res) {
 
 	}
 
@@ -592,14 +803,11 @@ public class MedLDA {
 
 	}
 
-	public void outputData2(String filename,Corpus corpus,double[][] exp,int ntopic,int nLabels)
-	{
-		
-		
-		
+	public void outputData2(String filename, Corpus corpus, double[][] exp,
+			int ntopic, int nLabels) {
+
 	}
-	
-	
+
 	public double[] getM_alpha() {
 		return m_alpha;
 	}

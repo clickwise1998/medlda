@@ -99,6 +99,10 @@ public class svm_common {
 	public static double[] read_target = null;
 
 	public static int progress_n;
+	
+	
+	
+	
 
 	private static Logger logger = Logger.getLogger(svm_common.class);
 
