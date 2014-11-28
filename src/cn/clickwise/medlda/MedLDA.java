@@ -39,10 +39,52 @@ public class MedLDA {
 
 	private static Logger logger = Logger.getLogger(MedLDA.class);
 
+	/**
+	 * perform inference on a Document and update sufficient statistics
+	 * @param doc
+	 * @param gamma
+	 * @param phi
+	 * @param ss
+	 * @param param
+	 * @return
+	 */
 	public double doc_e_step(Document doc, double[] gamma, double[][] phi,
 			SuffStats ss, Params param) {
 
-		return 0;
+		//posterior inference
+		double lhood=inference(doc,ss.getNum_docs(),gamma,phi,param);
+		
+		//update sufficient statistics
+		double gamma_sum = 0;
+		for(int k=0;k<m_nK;k++)
+		{
+			gamma_sum+=gamma[k];
+			ss.alpha_suffstats[k]+=Utils.digamma(gamma[k]);
+		}
+		
+		for(int k=0;k<m_nK;k++)
+		{
+			ss.alpha_suffstats[k]-=Utils.digamma(gamma_sum);
+		}
+		
+		for(int k=0;k<m_nK;k++)
+		{
+			double dVal=0;
+			for(int n=0;n<doc.getLength();n++)
+			{
+				ss.class_word[k][doc.words[n]]+=doc.counts[n]*phi[n][k];
+				ss.class_total[k]+=doc.counts[n]*phi[n][k];
+				dVal+=phi[n][k]*(double)doc.counts[n]/(double)doc.getTotal();
+			}
+			
+			//suff-stats for supervised LDA
+			ss.exp[ss.num_docs][k]=dVal;
+			
+		}
+		
+		ss.num_docs=ss.num_docs+1;
+			
+		return lhood;
 	}
 
 	public boolean mle(SuffStats ss, Params param, boolean bInit) {

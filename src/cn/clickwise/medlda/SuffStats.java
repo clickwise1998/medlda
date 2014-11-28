@@ -3,26 +3,26 @@ package cn.clickwise.medlda;
 public class SuffStats {
 
 	//主题、单词频率统计，行是主题，列是单词
-	private double[][] class_word;
+	public double[][] class_word;
 	
 	//主题里的词数统计，行是主题
-	private double[] class_total;
+	public double[] class_total;
 	
 	//alpha的充分统计量
-	private double[] alpha_suffstats;
+	public double[] alpha_suffstats;
 	
 	
-	private int num_docs;
+	public int num_docs;
 	
 	/**
 	 * exp应该是sum{z1,...,zn}
 	 * 二维向量，行是文档、列是主题
 	 */
-	private double[][] exp;
+	public double[][] exp;
 	
-	private int[] y;
+	public int[] y;
 	
-	private String dir;
+	public String dir;
 
 	public double[][] getClass_word() {
 		return class_word;

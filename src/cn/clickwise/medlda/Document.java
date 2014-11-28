@@ -2,19 +2,19 @@ package cn.clickwise.medlda;
 
 public class Document {
 
-	private int gndlabel;
+	public int gndlabel;
 	
-	private int predlabel;
+	public int predlabel;
 	
-	private int lossAugLabel;
+	public int lossAugLabel;
 	
-	private double lhood;
+	public double lhood;
 	
-	private int[] words;
+	public int[] words;
 	
-	private int[] counts;
+	public int[] counts;
 	
-	private int length;
+	public int length;
 	
 	private int total;
 
