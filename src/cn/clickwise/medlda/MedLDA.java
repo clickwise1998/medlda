@@ -7,6 +7,8 @@ import org.apache.log4j.Logger;
 
 import cn.clickwise.classify.svm_struct.KERNEL_PARM;
 import cn.clickwise.classify.svm_struct.LEARN_PARM;
+import cn.clickwise.classify.svm_struct.SAMPLE;
+import cn.clickwise.classify.svm_struct.STRUCTMODEL;
 import cn.clickwise.classify.svm_struct.STRUCT_LEARN_PARM;
 import cn.clickwise.classify.svm_struct.svm_common;
 import cn.clickwise.classify.svm_struct.svm_struct_api;
@@ -755,38 +757,66 @@ public class MedLDA {
 		if ((struct_parm.ccache_size <= 0) && ((alg_type) == 4)) {
 			logger.info("\nThe cache size must be at least 1!\n\n");
 		}
-		
-        if(((struct_parm.batch_size<=0) || (struct_parm.batch_size>100))
-                && ((alg_type) == 4)) {
-        	logger.info("\nThe batch size must be in the interval ]0,100]!\n\n");              
-        }
-        
-        if((struct_parm.slack_norm<1) || (struct_parm.slack_norm>2)) {
-        	logger.info("\nThe norm of the slacks must be either 1 (L1-norm) or 2 (L2-norm)!\n\n");
-        }
-        if((struct_parm.loss_type != svm_struct_learn.SLACK_RESCALING)
-                && (struct_parm.loss_type != svm_struct_learn.MARGIN_RESCALING)) {
-        	logger.info("\nThe loss type must be either 1 (slack rescaling) or 2 (margin rescaling)!\n\n");
-                  
-        }
-        
-        if(learn_parm.rho<0) {
-        	logger.info("\nThe parameter rho for xi/alpha-estimates and leave-one-out pruning must\n");
-        	logger.info("be greater than zero (typically 1.0 or 2.0, see T. Joachims, Estimating the\n");
-        	logger.info("Generalization Performance of an SVM Efficiently, ICML, 2000.)!\n\n");
-         }
-        
-        if((learn_parm.xa_depth<0) || (learn_parm.xa_depth>100)) {
-        	logger.info("\nThe parameter depth for ext. xi/alpha-estimates must be in [0..100] (zero\n");
-        	logger.info("for switching to the conventional xa/estimates described in T. Joachims,\n");
-        	logger.info("Estimating the Generalization Performance of an SVM Efficiently, ICML, 2000.)\n");
-         }
 
-         svm_struct_api.parse_struct_parameters(struct_parm);
+		if (((struct_parm.batch_size <= 0) || (struct_parm.batch_size > 100))
+				&& ((alg_type) == 4)) {
+			logger.info("\nThe batch size must be in the interval ]0,100]!\n\n");
+		}
+
+		if ((struct_parm.slack_norm < 1) || (struct_parm.slack_norm > 2)) {
+			logger.info("\nThe norm of the slacks must be either 1 (L1-norm) or 2 (L2-norm)!\n\n");
+		}
+		if ((struct_parm.loss_type != svm_struct_learn.SLACK_RESCALING)
+				&& (struct_parm.loss_type != svm_struct_learn.MARGIN_RESCALING)) {
+			logger.info("\nThe loss type must be either 1 (slack rescaling) or 2 (margin rescaling)!\n\n");
+
+		}
+
+		if (learn_parm.rho < 0) {
+			logger.info("\nThe parameter rho for xi/alpha-estimates and leave-one-out pruning must\n");
+			logger.info("be greater than zero (typically 1.0 or 2.0, see T. Joachims, Estimating the\n");
+			logger.info("Generalization Performance of an SVM Efficiently, ICML, 2000.)!\n\n");
+		}
+
+		if ((learn_parm.xa_depth < 0) || (learn_parm.xa_depth > 100)) {
+			logger.info("\nThe parameter depth for ext. xi/alpha-estimates must be in [0..100] (zero\n");
+			logger.info("for switching to the conventional xa/estimates described in T. Joachims,\n");
+			logger.info("Estimating the Generalization Performance of an SVM Efficiently, ICML, 2000.)\n");
+		}
+
+		svm_struct_api.parse_struct_parameters(struct_parm);
 	}
 
 	public void svmStructSolver(SuffStats ss, Params param, double[] res) {
 
+		LEARN_PARM learn_parm = new LEARN_PARM();
+		KERNEL_PARM kernel_parm = new KERNEL_PARM();
+		STRUCT_LEARN_PARM struct_parm = new STRUCT_LEARN_PARM();
+		STRUCTMODEL structmodel=new STRUCTMODEL();
+		int alg_type = 0;
+
+		/* set the parameters. */
+		set_init_param(struct_parm, learn_parm, kernel_parm, alg_type);
+		struct_parm.C = m_dC;
+
+		// output the features
+		String buff;
+		buff = ss.dir + "/Feature.txt";
+		outputLowDimData(buff, ss);
+		
+		/* read the training examples */
+		SAMPLE sample = svm_struct_api.read_struct_examples(buff, struct_parm);
+
+		svm_struct_learn sl=new svm_struct_learn();
+		if(param.SVM_ALGTYPE==0)
+		{
+			sl.svm_learn_struct(sample, struct_parm, learn_parm, kernel_parm, structmodel, alg_type);
+		}
+		else if(param.SVM_ALGTYPE == 2)
+		{
+            struct_parm.C = m_dC * ss.num_docs;   // Note: in n-slack formulation, C is not divided by N.
+            sl.svm_learn_struct_joint(sample, struct_parm, learn_parm, kernel_parm, structmodel, svm_struct_learn.ONESLACK_PRIMAL_ALG);
+		}
 	}
 
 	public void save_model(String model_root) {
@@ -806,6 +836,27 @@ public class MedLDA {
 	public void outputData2(String filename, Corpus corpus, double[][] exp,
 			int ntopic, int nLabels) {
 
+	}
+
+	public void outputLowDimData(String filename, SuffStats ss) {
+		try {
+			PrintWriter fileptr = new PrintWriter(new FileWriter(filename));
+
+			for (int d = 0; d < ss.num_docs; d++) {
+				int label = ss.y[d];
+				fileptr.printf("%d %d", m_nK, label);
+
+				for (int k = 0; k < m_nK; k++) {
+					fileptr.printf(" %d:%.10f", k, ss.exp[d][k]);
+				}
+				fileptr.println();
+
+			}
+			fileptr.close();
+
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 	}
 
 	public double[] getM_alpha() {
