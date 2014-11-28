@@ -16,7 +16,7 @@ public class Document {
 	
 	public int length;
 	
-	private int total;
+	public int total;
 
 	public int getGndlabel() {
 		return gndlabel;

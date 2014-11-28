@@ -251,12 +251,124 @@ public class MedLDA {
 
 	public double inference(Document doc, int docix, double[] var_gamma,
 			double[][] phi, Params param) {
-
+		
+		double converged = 1;
+		double phisum = 0, lhood = 0;
+		double lhood_old = 0;
+		double[] oldphi=new double[m_nK];
+		double[] digamma_gam=new double[m_nK];
+		
+		//compute poster for dirichlet
+		for(int k=0;k<m_nK;k++)
+		{
+			var_gamma[k]=m_alpha[k]+(double)doc.total/(double)m_nK;
+			digamma_gam[k]=Utils.digamma(var_gamma[k]);
+			for(int n=0;n<doc.length;n++)
+			{
+				phi[n][k]=1.0/(double)m_nK;
+			}	
+		}
+		
+		int var_iter=0;
+		while((converged > param.VAR_CONVERGED)&&((var_iter < param.VAR_MAX_ITER)
+                || (param.VAR_MAX_ITER == -1)))
+		{
+			 var_iter ++;
+			 for(int n=0;n<doc.length;n++)
+			 {
+				 phisum=0;
+				 
+				 for(int k=0;k<m_nK;k++)
+				 {
+					 oldphi[k] = phi[n][k];
+					 
+					 /* update the phi: add additional terms here for supervised LDA */
+					 double dVal = compute_mrgterm(doc, docix, n, k, param);
+					 phi[n][k]=digamma_gam[k] +m_dLogProbW[k][doc.words[n]]+dVal;
+					 
+					 if(k>0) phisum=Utils.log_sum(phisum,phi[n][k]);
+					 else   phisum=phi[n][k];
+				 }
+				 
+				 //update gamma and normalize phi
+				 for(int k=0;k<m_nK;k++)
+				 {
+					 phi[n][k]=Math.exp(phi[n][k]-phisum);
+					 var_gamma[k]=var_gamma[k]+doc.counts[n]*(phi[n][k]-oldphi[k]);
+					 
+					 digamma_gam[k]=Utils.digamma(var_gamma[k]);
+				 } 
+			 }
+			 lhood=compute_lhood(doc,phi,var_gamma);
+			 converged = (lhood_old - lhood) / lhood_old;
+			 lhood_old = lhood;	
+		}
+		
 		return 0;
 	}
 
+	/**
+	 * Given the model and w, compute the E[Z] for prediction
+	 * @param doc
+	 * @param var_gamma
+	 * @param phi
+	 * @param param
+	 * @return
+	 */
 	public double inference_pred(Document doc, double[] var_gamma,
 			double[][] phi, Params param) {
+		
+	    double converged = 1;
+	    double phisum = 0, lhood = 0;
+	    double lhood_old = 0;
+	    double[] oldphi=new double[m_nK];
+	    int k,n,var_iter;
+	    double[] digamma_gam=new double[m_nK];
+	    
+	    //compute posterior dirichlet
+	    for(k=0;k<m_nK;k++){
+	    	var_gamma[k]=m_alpha[k]+(double)doc.total/(double)m_nK;
+	    	digamma_gam[k]=Utils.digamma(var_gamma[k]);
+	    	for(n=0;n<doc.length;n++)
+	    	{
+	    		phi[n][k]=1.0/m_nK;
+	    	}
+	    	
+	    }
+	    
+	    var_iter=0;
+	    
+	    while((converged>param.VAR_CONVERGED)&&((var_iter<param.VAR_MAX_ITER)||(param.VAR_MAX_ITER==-1)))
+	    {
+	    	var_iter++;
+	    	for(n=0;n<doc.length;n++)
+	    	{
+	    		phisum=0;
+	    		for(k=0;k<m_nK;k++){
+	    			oldphi[k]=phi[n][k];
+	    			
+	    			phi[n][k]= digamma_gam[k] + m_dLogProbW[k][doc.words[n]];
+
+	    			if(k>0) phisum=Utils.log_sum(phisum,phi[n][k]);
+	    			else phisum=phi[n][k];
+	    		}
+	    		
+	    		//update gamma and normalize phi
+	    		for(k=0;k<m_nK;k++)
+	    		{
+	    			phi[n][k]=Math.exp(phi[n][k]-phisum);
+	    			var_gamma[k]=var_gamma[k]+doc.counts[n]*(phi[n][k]-oldphi[k]);
+	    			digamma_gam[k]=Utils.digamma(var_gamma[k]);
+	    		}
+	    		
+	    	}
+	    	
+            lhood = compute_lhood(doc, phi, var_gamma);
+            converged = (lhood_old - lhood) / lhood_old;
+            lhood_old = lhood;
+	    		
+	    }
+		
 
 		return 0;
 	}
@@ -269,6 +381,37 @@ public class MedLDA {
 
 	public double compute_lhood(Document doc, double[][] phi, double[] var_gamma) {
 
+		double lhood = 0, digsum = 0, var_gamma_sum = 0, alpha_sum = 0;
+		double[] dig=new double[m_nK];
+		
+		for(int k=0;k<m_nK;k++){
+			dig[k]=Utils.digamma(var_gamma[k]);
+			var_gamma_sum+=var_gamma[k];
+			alpha_sum+=m_alpha[k];
+		}
+		
+		digsum=Utils.digamma(var_gamma_sum);
+		
+		lhood = Utils.lgamma( alpha_sum ) - (Utils.lgamma(var_gamma_sum));
+		for(int k=0;k<m_nK;k++)
+		{
+			lhood-=Utils.lgamma(m_alpha[k]);
+		}
+		
+		for(int k=0;k<m_nK;k++)
+		{
+			lhood+=(m_alpha[k]-1)*(dig[k]-digsum)+Utils.lgamma(var_gamma[k])-(var_gamma[k]-1)*(dig[k]-digsum);
+			
+			double dVal=0;
+			for(int n=0;n<doc.length;n++)
+			{
+				if(phi[n][k]>0){
+					lhood+=doc.counts[n]*(phi[n][k]*((dig[k]-digsum)-Math.log(phi[n][k])+m_dLogProbW[k][doc.words[n]]));
+				}
+				dVal+=phi[n][k]*doc.counts[n]/doc.total;
+			}
+		}
+		
 		return 0;
 	}
 

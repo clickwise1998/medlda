@@ -2,47 +2,47 @@ package cn.clickwise.medlda;
 
 public class Params {
 
-	private int LAG;
+	public int LAG;
 	
-	private double EM_CONVERGED;
+	public double EM_CONVERGED;
 	
-	private int EM_MAX_ITER;
+	public int EM_MAX_ITER;
 	
-	private int ESTIMATE_ALPHA;
+	public int ESTIMATE_ALPHA;
 	
-	private double INITIAL_ALPHA;
+	public double INITIAL_ALPHA;
 	
-	private double INITIAL_C;
+	public double INITIAL_C;
 	
-	private int NTOPICS;
+	public int NTOPICS;
 	
-	private int NLABELS;
+	public int NLABELS;
 	
-	private int NFOLDS;
+	public int NFOLDS;
 	
-	private int FOLDIX;
+	public int FOLDIX;
 	
-	private boolean INNER_CV;
+	public boolean INNER_CV;
 	
-	private double DELTA_ELL;
+	public double DELTA_ELL;
 	
-	private int PHI_DUALOPT;
+	public int PHI_DUALOPT;
 	
-	private int VAR_MAX_ITER;
+	public int VAR_MAX_ITER;
 	
-	private double VAR_CONVERGED;
+	public double VAR_CONVERGED;
 	
-	private double[] vec_cvparam;
+	public double[] vec_cvparam;
 	
-	private int INNER_FOLDNUM;
+	public int INNER_FOLDNUM;
 	
-	private int CV_PARAMNUM;
+	public int CV_PARAMNUM;
 	
-	private int SVM_ALGTYPE;
+	public int SVM_ALGTYPE;
 	
-	private String train_filename;
+	public String train_filename;
 	
-	private String test_filename;
+	public String test_filename;
 	
 	public void read_settings(String filename)
 	{
