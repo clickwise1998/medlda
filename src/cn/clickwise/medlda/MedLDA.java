@@ -2,6 +2,7 @@ package cn.clickwise.medlda;
 
 import java.io.BufferedReader;
 import java.io.FileInputStream;
+import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.PrintWriter;
 import java.util.Scanner;
@@ -18,6 +19,7 @@ import cn.clickwise.classify.svm_struct.svm_common;
 import cn.clickwise.classify.svm_struct.svm_struct_api;
 import cn.clickwise.classify.svm_struct.svm_struct_common;
 import cn.clickwise.classify.svm_struct.svm_struct_learn;
+import cn.clickwise.str.basic.SSO;
 import cn.clickwise.time.utils.TimeOpera;
 
 public class MedLDA {
@@ -798,16 +800,41 @@ public class MedLDA {
 		Scanner sc=null;
 		int i,j,num_terms,num_topics,num_labels,num_docs;
 		double x,alpha,C,learnRate;
-		Vector<Double> vecAlpha;
+		Vector<Double> vecAlpha=new Vector<Double>();
 		
 		filename=model_root+".other";
 		logger.info("loading "+filename);
 		
+		String line="";
 		try{
-			//fileptr=new PrintWriter(new FileWriter(filename));
-			sc=new Scanner(new FileInputStream(filename));
+			fileptr=new BufferedReader(new FileReader(filename));
+			line=fileptr.readLine();
+			num_topics=Integer.parseInt(SSO.afterStr(line, "num_topics").trim());
 			
+			line=fileptr.readLine();
+			num_labels=Integer.parseInt(SSO.afterStr(line, "num_labels").trim());
 			
+			line=fileptr.readLine();
+			num_terms=Integer.parseInt(SSO.afterStr(line, "num_terms").trim());
+			
+			line=fileptr.readLine();
+			num_docs=Integer.parseInt(SSO.afterStr(line, "num_docs").trim());
+			
+			line=fileptr.readLine();
+			line=SSO.afterStr(line, "alpha ");
+			sc=new Scanner(line);
+			
+			for(int k=0;k<num_topics;k++){
+				alpha=sc.nextDouble();
+				m_alpha[k]=alpha;
+			}
+			
+			line=fileptr.readLine();
+			C=Integer.parseInt(SSO.afterStr(line, "C ").trim());
+			
+			new_model(num_docs,num_terms,num_topics,num_labels,C);
+			
+		
 			
 		}catch(Exception e){
 			e.printStackTrace();
