@@ -1,7 +1,11 @@
 package cn.clickwise.medlda;
 
+import java.io.BufferedReader;
+import java.io.FileInputStream;
 import java.io.FileWriter;
 import java.io.PrintWriter;
+import java.util.Scanner;
+import java.util.Vector;
 
 import org.apache.log4j.Logger;
 
@@ -42,6 +46,8 @@ public class MedLDA {
 
 	private double m_dDeltaEll;
 
+	private static final int  NUM_INIT=1;
+	
 	private static Logger logger = Logger.getLogger(MedLDA.class);
 
 	/**
@@ -693,23 +699,120 @@ public class MedLDA {
 	}
 
 	public SuffStats new_suffstats() {
-		return null;
+		int num_topics=m_nK;
+		int num_terms=m_nNumTerms;
+		
+		SuffStats ss = new SuffStats();
+		ss.class_total=new double[num_topics];
+		ss.class_word=new double[num_topics][num_terms];
+		
+		for(int i=0;i<num_topics;i++){
+			ss.class_total[i]=0;
+			for(int j=0;j<num_terms;j++){
+				ss.class_word[i][j]=0;
+			}
+		}
+		
+		ss.alpha_suffstats=new double[m_nK];
+		
+		for(int i=0;i<ss.alpha_suffstats.length;i++)
+		{
+		  ss.alpha_suffstats[i]=0;	
+		}
+		
+		return ss;
 	}
 
 	public void corpus_init_ss(SuffStats ss, Corpus c) {
 
+		int num_topics=m_nK;
+		int i,k,d,n;
+		Document doc;
+		
+		for(k=0;k<num_topics;k++){
+			for(i=0;i<NUM_INIT;i++){
+				d=(int)Math.floor(Math.random()*(c.num_docs));
+				doc=c.docs[d];
+				for(n=0;n<doc.length;n++){
+					ss.class_word[k][doc.words[n]]+=doc.counts[n];
+				}
+			}
+			
+			for (n = 0; n < m_nNumTerms; n++) {
+				ss.class_word[k][n] += 1.0;//避免单词个数为0的情况
+				ss.class_total[k] = ss.class_total[k] + ss.class_word[k][n];
+			}
+			
+		}
+		
+		//for sLDA only
+		ss.y=new int[c.num_docs];
+		ss.exp=new double[c.num_docs][num_topics];
+		
+		for(d=0;d<c.num_docs;d++){
+			ss.y[d]=c.docs[d].gndlabel;
+		}
+		
 	}
 
 	public void random_init_ss(SuffStats ss, Corpus c) {
 
+		int num_topics = m_nK;
+		int num_terms = m_nNumTerms;
+		for(int k=0;k<num_topics;k++){
+			for(int n=0;n<num_terms;n++){
+				ss.class_word[k][n]+=10.0+Math.random();
+				ss.class_total[k]+=ss.class_word[k][n];
+			}			
+		}
+		
+		ss.y=new int[c.num_docs];
+		ss.exp=new double[c.num_docs][m_nK];
+		
+		for(int k=0;k<c.num_docs;k++){
+			ss.y[k]=c.docs[k].gndlabel;
+		}
+		
 	}
 
 	public void zero_init_ss(SuffStats ss) {
+		
+		for(int k=0;k<m_nK;k++){
+			ss.class_total[k]=0;
+			for(int w=0;w<m_nNumTerms;w++){
+				ss.class_word[k][w]=0;
+			}
+		}
+		ss.num_docs=0;
+		
+		for(int i=0;i<ss.alpha_suffstats.length;i++){
+			ss.alpha_suffstats[i]=0;
+		}
 
 	}
 
 	public void load_model(String model_root) {
 
+		String filename="";
+		BufferedReader fileptr=null;
+		Scanner sc=null;
+		int i,j,num_terms,num_topics,num_labels,num_docs;
+		double x,alpha,C,learnRate;
+		Vector<Double> vecAlpha;
+		
+		filename=model_root+".other";
+		logger.info("loading "+filename);
+		
+		try{
+			//fileptr=new PrintWriter(new FileWriter(filename));
+			sc=new Scanner(new FileInputStream(filename));
+			
+			
+			
+		}catch(Exception e){
+			e.printStackTrace();
+		}
+		
 	}
 
 	public void set_init_param(STRUCT_LEARN_PARM struct_parm,
