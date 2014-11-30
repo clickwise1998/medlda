@@ -829,13 +829,34 @@ public class MedLDA {
 				m_alpha[k]=alpha;
 			}
 			
+			fileptr.close();
+			
 			line=fileptr.readLine();
 			C=Integer.parseInt(SSO.afterStr(line, "C ").trim());
 			
 			new_model(num_docs,num_terms,num_topics,num_labels,C);
 			
-		
-			
+		    filename=model_root+".beta";
+		    logger.info("loading "+filename);
+		    if(sc!=null)
+		    {
+		     sc.close();
+		    }
+		    //fileptr=new BufferedReader(new FileReader(filename));
+		    sc=new Scanner(new FileInputStream(filename)); 
+		    m_dB=sc.nextDouble();
+		    
+		    for ( i=0; i<m_nK; i++) {
+				for ( int k=0; k<m_nLabelNum; k++ ) {
+					x=sc.nextDouble();
+					m_dEta[i+k*m_nK] = x;
+				}
+
+				for ( j=0; j<m_nNumTerms; j++) {
+					x=sc.nextDouble();
+					m_dLogProbW[i][j] = x;
+				}
+			}
 		}catch(Exception e){
 			e.printStackTrace();
 		}
