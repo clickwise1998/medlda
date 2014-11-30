@@ -3,11 +3,13 @@ package cn.clickwise.classify.svm_struct;
 
 public class DOC {
 	  public int docnum;
+	  public int    orgDocNum; 
 	  public int queryid;
 	  public double costfactor;
 	  public int slackid;
 	  public int kernelid;
 	  public SVECTOR fvec;
+	  public int[] lvec;
 	  
 	  public DOC copyDoc()
 	  {

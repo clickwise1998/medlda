@@ -10,6 +10,7 @@ public class SVECTOR {
 	  public int kernel_id;
 	  public SVECTOR next;
 	  public double factor;
+	 
 	  
 	  public SVECTOR copySVECTOR()
 	  {

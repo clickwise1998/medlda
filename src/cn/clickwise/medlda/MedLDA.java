@@ -1028,6 +1028,30 @@ public class MedLDA {
 					kernel_parm, structmodel,
 					svm_struct_learn.ONESLACK_PRIMAL_ALG);
 		}
+		
+		int nVar=ss.num_docs*m_nLabelNum;
+		
+		if ( param.SVM_ALGTYPE == 0 ) {
+			for ( int k=1; k<structmodel.svm_model.sv_num; k++ ) {
+				int n = structmodel.svm_model.supvec[k].docnum;
+				int docnum = structmodel.svm_model.supvec[k].orgDocNum;
+				m_dMu[docnum] = structmodel.svm_model.alpha[k];
+			}
+		} else if ( param.SVM_ALGTYPE == 2 ) {
+			for ( int k=1; k<structmodel.svm_model.sv_num; k++ ) {
+				int[] vecLabel = structmodel.svm_model.supvec[k].lvec;
+
+				double dval = structmodel.svm_model.alpha[k] / ss.num_docs;
+				for ( int d=0; d<ss.num_docs; d++ ) {
+					int label = vecLabel[d];
+					m_dMu[d*m_nLabelNum + label] += dval;
+				}
+			}
+		}
+		
+		
+		//待续
+		
 	}
 
 	public void save_model(String model_root) {
