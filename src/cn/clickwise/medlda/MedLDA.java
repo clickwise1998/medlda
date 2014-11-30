@@ -459,7 +459,7 @@ public class MedLDA {
 			lhood_old = lhood;
 		}
 
-		return 0;
+		return lhood;
 	}
 
 	/**
@@ -471,6 +471,7 @@ public class MedLDA {
 	 * @param param
 	 * @return
 	 */
+
 	public double inference_pred(Document doc, double[] var_gamma,
 			double[][] phi, Params param) {
 
@@ -525,7 +526,7 @@ public class MedLDA {
 
 		}
 
-		return 0;
+		return lhood;
 	}
 
 	public double compute_mrgterm(Document doc, int d, int n, int k,
@@ -585,7 +586,7 @@ public class MedLDA {
 			}
 		}
 
-		return 0;
+		return lhood;
 	}
 
 	public void predict(Document doc, double[][] phi) {
@@ -616,21 +617,79 @@ public class MedLDA {
 
 	public double save_prediction(String filename, Corpus corpus) {
 
-		return 0;
+		double dmean = 0;
+		double sumlikelihood = 0;
+		int nterms = 0;
+		double sumavglikelihood = 0;
+		for (int d = 0; d < corpus.num_docs; d++) {
+			sumlikelihood += corpus.docs[d].lhood;
+			nterms += corpus.docs[d].total;
+			sumavglikelihood += corpus.docs[d].lhood
+					/ ((double) corpus.docs[d].total);
+		}
+		double perwordlikelihood1 = sumlikelihood / nterms;
+		double perwordlikelihood2 = sumavglikelihood / corpus.num_docs;
+
+		int nAcc = 0;
+		for (int d = 0; d < corpus.num_docs; d++)
+			if (corpus.docs[d].gndlabel == corpus.docs[d].predlabel)
+				nAcc += 1;
+		double dAcc = (double) nAcc / corpus.num_docs;
+
+		logger.info("Accuracy:" + dAcc);
+		PrintWriter fileptr = null;
+
+		try {
+			fileptr = new PrintWriter(new FileWriter(filename));
+			fileptr.printf("accuracy: %5.10f\n", dAcc);
+			fileptr.printf("perword likelihood1: %5.10f\n", perwordlikelihood1);
+			fileptr.printf("perword likelihood2: %5.10f\n", perwordlikelihood2);
+
+			for (int d = 0; d < corpus.num_docs; d++)
+				fileptr.printf("%d\t%d\n", corpus.docs[d].predlabel,
+						corpus.docs[d].gndlabel);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return dAcc;
 	}
 
-	public void loss_aug_predict(Document doc, double[] zbar_mean) {
-
-	}
+	/*
+	 * public void loss_aug_predict(Document doc, double[] zbar_mean) {
+	 * 
+	 * }
+	 */
 
 	public double loss(int y, int gnd) {
-
-		return 0;
+		if ( y == gnd ) return 0;
+		else return m_dDeltaEll;
 	}
 
 	public void new_model(int num_docs, int num_terms, int num_topics,
 			int num_labels, double C) {
+		int i,j;
+		m_nK = num_topics;
+		m_nLabelNum = num_labels;
+		m_nNumTerms = num_terms;
 
+		m_alpha = new double [m_nK];
+		for ( int k=0; k<m_nK; k++ ) m_alpha[k] = 1.0 / num_topics;
+		m_dLogProbW =new double[num_topics][num_terms];
+		m_dEta = new double[num_topics * num_labels];//Eta使用向量存储二维矩阵，行是主题，列是标记，元素
+		//[i*num_labels + j]指主题i和标记j的转换概率
+		m_dMu = new double[num_docs * num_labels];//Mu使用向量存储二维矩阵，行是文档，列是标记，元素[i*num_labels + j]
+		//指文档i和标记j之间的关系值
+		for (i = 0; i < num_topics; i++)
+		{
+			for (j = 0; j < num_terms; j++) m_dLogProbW[i][j] = 0;
+			for (j = 0; j < num_labels; j++) m_dEta[i*num_labels + j] = 0;
+		}
+		for (i = 0; i < num_docs; i ++)
+			for (j = 0; j < num_labels; j++)
+				m_dMu[i*num_labels + j] = 0;
+
+		m_nDim = num_docs;
+		m_dC = C;
 	}
 
 	public SuffStats new_suffstats() {
@@ -792,7 +851,7 @@ public class MedLDA {
 		LEARN_PARM learn_parm = new LEARN_PARM();
 		KERNEL_PARM kernel_parm = new KERNEL_PARM();
 		STRUCT_LEARN_PARM struct_parm = new STRUCT_LEARN_PARM();
-		STRUCTMODEL structmodel=new STRUCTMODEL();
+		STRUCTMODEL structmodel = new STRUCTMODEL();
 		int alg_type = 0;
 
 		/* set the parameters. */
@@ -803,19 +862,20 @@ public class MedLDA {
 		String buff;
 		buff = ss.dir + "/Feature.txt";
 		outputLowDimData(buff, ss);
-		
+
 		/* read the training examples */
 		SAMPLE sample = svm_struct_api.read_struct_examples(buff, struct_parm);
 
-		svm_struct_learn sl=new svm_struct_learn();
-		if(param.SVM_ALGTYPE==0)
-		{
-			sl.svm_learn_struct(sample, struct_parm, learn_parm, kernel_parm, structmodel, alg_type);
-		}
-		else if(param.SVM_ALGTYPE == 2)
-		{
-            struct_parm.C = m_dC * ss.num_docs;   // Note: in n-slack formulation, C is not divided by N.
-            sl.svm_learn_struct_joint(sample, struct_parm, learn_parm, kernel_parm, structmodel, svm_struct_learn.ONESLACK_PRIMAL_ALG);
+		svm_struct_learn sl = new svm_struct_learn();
+		if (param.SVM_ALGTYPE == 0) {
+			sl.svm_learn_struct(sample, struct_parm, learn_parm, kernel_parm,
+					structmodel, alg_type);
+		} else if (param.SVM_ALGTYPE == 2) {
+			struct_parm.C = m_dC * ss.num_docs; // Note: in n-slack formulation,
+												// C is not divided by N.
+			sl.svm_learn_struct_joint(sample, struct_parm, learn_parm,
+					kernel_parm, structmodel,
+					svm_struct_learn.ONESLACK_PRIMAL_ALG);
 		}
 	}
 
