@@ -11,5 +11,5 @@ public class STRUCTMODEL {
 	public MODEL svm_model;
 	public int sizePsi;
 	public double walpha;
-	
+	public double primalobj;
 }

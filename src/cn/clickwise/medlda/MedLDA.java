@@ -48,8 +48,8 @@ public class MedLDA {
 
 	private double m_dDeltaEll;
 
-	private static final int  NUM_INIT=1;
-	
+	private static final int NUM_INIT = 1;
+
 	private static Logger logger = Logger.getLogger(MedLDA.class);
 
 	/**
@@ -669,198 +669,204 @@ public class MedLDA {
 	 */
 
 	public double loss(int y, int gnd) {
-		if ( y == gnd ) return 0;
-		else return m_dDeltaEll;
+		if (y == gnd)
+			return 0;
+		else
+			return m_dDeltaEll;
 	}
 
 	public void new_model(int num_docs, int num_terms, int num_topics,
 			int num_labels, double C) {
-		int i,j;
+		int i, j;
 		m_nK = num_topics;
 		m_nLabelNum = num_labels;
 		m_nNumTerms = num_terms;
 
-		m_alpha = new double [m_nK];
-		for ( int k=0; k<m_nK; k++ ) m_alpha[k] = 1.0 / num_topics;
-		m_dLogProbW =new double[num_topics][num_terms];
-		m_dEta = new double[num_topics * num_labels];//Eta使用向量存储二维矩阵，行是主题，列是标记，元素
-		//[i*num_labels + j]指主题i和标记j的转换概率
-		m_dMu = new double[num_docs * num_labels];//Mu使用向量存储二维矩阵，行是文档，列是标记，元素[i*num_labels + j]
-		//指文档i和标记j之间的关系值
-		for (i = 0; i < num_topics; i++)
-		{
-			for (j = 0; j < num_terms; j++) m_dLogProbW[i][j] = 0;
-			for (j = 0; j < num_labels; j++) m_dEta[i*num_labels + j] = 0;
-		}
-		for (i = 0; i < num_docs; i ++)
+		m_alpha = new double[m_nK];
+		for (int k = 0; k < m_nK; k++)
+			m_alpha[k] = 1.0 / num_topics;
+		m_dLogProbW = new double[num_topics][num_terms];
+		m_dEta = new double[num_topics * num_labels];// Eta使用向量存储二维矩阵，行是主题，列是标记，元素
+		// [i*num_labels + j]指主题i和标记j的转换概率
+		m_dMu = new double[num_docs * num_labels];// Mu使用向量存储二维矩阵，行是文档，列是标记，元素[i*num_labels
+													// + j]
+		// 指文档i和标记j之间的关系值
+		for (i = 0; i < num_topics; i++) {
+			for (j = 0; j < num_terms; j++)
+				m_dLogProbW[i][j] = 0;
 			for (j = 0; j < num_labels; j++)
-				m_dMu[i*num_labels + j] = 0;
+				m_dEta[i * num_labels + j] = 0;
+		}
+		for (i = 0; i < num_docs; i++)
+			for (j = 0; j < num_labels; j++)
+				m_dMu[i * num_labels + j] = 0;
 
 		m_nDim = num_docs;
 		m_dC = C;
 	}
 
 	public SuffStats new_suffstats() {
-		int num_topics=m_nK;
-		int num_terms=m_nNumTerms;
-		
+		int num_topics = m_nK;
+		int num_terms = m_nNumTerms;
+
 		SuffStats ss = new SuffStats();
-		ss.class_total=new double[num_topics];
-		ss.class_word=new double[num_topics][num_terms];
-		
-		for(int i=0;i<num_topics;i++){
-			ss.class_total[i]=0;
-			for(int j=0;j<num_terms;j++){
-				ss.class_word[i][j]=0;
+		ss.class_total = new double[num_topics];
+		ss.class_word = new double[num_topics][num_terms];
+
+		for (int i = 0; i < num_topics; i++) {
+			ss.class_total[i] = 0;
+			for (int j = 0; j < num_terms; j++) {
+				ss.class_word[i][j] = 0;
 			}
 		}
-		
-		ss.alpha_suffstats=new double[m_nK];
-		
-		for(int i=0;i<ss.alpha_suffstats.length;i++)
-		{
-		  ss.alpha_suffstats[i]=0;	
+
+		ss.alpha_suffstats = new double[m_nK];
+
+		for (int i = 0; i < ss.alpha_suffstats.length; i++) {
+			ss.alpha_suffstats[i] = 0;
 		}
-		
+
 		return ss;
 	}
 
 	public void corpus_init_ss(SuffStats ss, Corpus c) {
 
-		int num_topics=m_nK;
-		int i,k,d,n;
+		int num_topics = m_nK;
+		int i, k, d, n;
 		Document doc;
-		
-		for(k=0;k<num_topics;k++){
-			for(i=0;i<NUM_INIT;i++){
-				d=(int)Math.floor(Math.random()*(c.num_docs));
-				doc=c.docs[d];
-				for(n=0;n<doc.length;n++){
-					ss.class_word[k][doc.words[n]]+=doc.counts[n];
+
+		for (k = 0; k < num_topics; k++) {
+			for (i = 0; i < NUM_INIT; i++) {
+				d = (int) Math.floor(Math.random() * (c.num_docs));
+				doc = c.docs[d];
+				for (n = 0; n < doc.length; n++) {
+					ss.class_word[k][doc.words[n]] += doc.counts[n];
 				}
 			}
-			
+
 			for (n = 0; n < m_nNumTerms; n++) {
-				ss.class_word[k][n] += 1.0;//避免单词个数为0的情况
+				ss.class_word[k][n] += 1.0;// 避免单词个数为0的情况
 				ss.class_total[k] = ss.class_total[k] + ss.class_word[k][n];
 			}
-			
+
 		}
-		
-		//for sLDA only
-		ss.y=new int[c.num_docs];
-		ss.exp=new double[c.num_docs][num_topics];
-		
-		for(d=0;d<c.num_docs;d++){
-			ss.y[d]=c.docs[d].gndlabel;
+
+		// for sLDA only
+		ss.y = new int[c.num_docs];
+		ss.exp = new double[c.num_docs][num_topics];
+
+		for (d = 0; d < c.num_docs; d++) {
+			ss.y[d] = c.docs[d].gndlabel;
 		}
-		
+
 	}
 
 	public void random_init_ss(SuffStats ss, Corpus c) {
 
 		int num_topics = m_nK;
 		int num_terms = m_nNumTerms;
-		for(int k=0;k<num_topics;k++){
-			for(int n=0;n<num_terms;n++){
-				ss.class_word[k][n]+=10.0+Math.random();
-				ss.class_total[k]+=ss.class_word[k][n];
-			}			
+		for (int k = 0; k < num_topics; k++) {
+			for (int n = 0; n < num_terms; n++) {
+				ss.class_word[k][n] += 10.0 + Math.random();
+				ss.class_total[k] += ss.class_word[k][n];
+			}
 		}
-		
-		ss.y=new int[c.num_docs];
-		ss.exp=new double[c.num_docs][m_nK];
-		
-		for(int k=0;k<c.num_docs;k++){
-			ss.y[k]=c.docs[k].gndlabel;
+
+		ss.y = new int[c.num_docs];
+		ss.exp = new double[c.num_docs][m_nK];
+
+		for (int k = 0; k < c.num_docs; k++) {
+			ss.y[k] = c.docs[k].gndlabel;
 		}
-		
+
 	}
 
 	public void zero_init_ss(SuffStats ss) {
-		
-		for(int k=0;k<m_nK;k++){
-			ss.class_total[k]=0;
-			for(int w=0;w<m_nNumTerms;w++){
-				ss.class_word[k][w]=0;
+
+		for (int k = 0; k < m_nK; k++) {
+			ss.class_total[k] = 0;
+			for (int w = 0; w < m_nNumTerms; w++) {
+				ss.class_word[k][w] = 0;
 			}
 		}
-		ss.num_docs=0;
-		
-		for(int i=0;i<ss.alpha_suffstats.length;i++){
-			ss.alpha_suffstats[i]=0;
+		ss.num_docs = 0;
+
+		for (int i = 0; i < ss.alpha_suffstats.length; i++) {
+			ss.alpha_suffstats[i] = 0;
 		}
 
 	}
 
 	public void load_model(String model_root) {
 
-		String filename="";
-		BufferedReader fileptr=null;
-		Scanner sc=null;
-		int i,j,num_terms,num_topics,num_labels,num_docs;
-		double x,alpha,C,learnRate;
-		Vector<Double> vecAlpha=new Vector<Double>();
-		
-		filename=model_root+".other";
-		logger.info("loading "+filename);
-		
-		String line="";
-		try{
-			fileptr=new BufferedReader(new FileReader(filename));
-			line=fileptr.readLine();
-			num_topics=Integer.parseInt(SSO.afterStr(line, "num_topics").trim());
-			
-			line=fileptr.readLine();
-			num_labels=Integer.parseInt(SSO.afterStr(line, "num_labels").trim());
-			
-			line=fileptr.readLine();
-			num_terms=Integer.parseInt(SSO.afterStr(line, "num_terms").trim());
-			
-			line=fileptr.readLine();
-			num_docs=Integer.parseInt(SSO.afterStr(line, "num_docs").trim());
-			
-			line=fileptr.readLine();
-			line=SSO.afterStr(line, "alpha ");
-			sc=new Scanner(line);
-			
-			for(int k=0;k<num_topics;k++){
-				alpha=sc.nextDouble();
-				m_alpha[k]=alpha;
+		String filename = "";
+		BufferedReader fileptr = null;
+		Scanner sc = null;
+		int i, j, num_terms, num_topics, num_labels, num_docs;
+		double x, alpha, C, learnRate;
+		Vector<Double> vecAlpha = new Vector<Double>();
+
+		filename = model_root + ".other";
+		logger.info("loading " + filename);
+
+		String line = "";
+		try {
+			fileptr = new BufferedReader(new FileReader(filename));
+			line = fileptr.readLine();
+			num_topics = Integer.parseInt(SSO.afterStr(line, "num_topics")
+					.trim());
+
+			line = fileptr.readLine();
+			num_labels = Integer.parseInt(SSO.afterStr(line, "num_labels")
+					.trim());
+
+			line = fileptr.readLine();
+			num_terms = Integer
+					.parseInt(SSO.afterStr(line, "num_terms").trim());
+
+			line = fileptr.readLine();
+			num_docs = Integer.parseInt(SSO.afterStr(line, "num_docs").trim());
+
+			line = fileptr.readLine();
+			line = SSO.afterStr(line, "alpha ");
+			sc = new Scanner(line);
+
+			for (int k = 0; k < num_topics; k++) {
+				alpha = sc.nextDouble();
+				m_alpha[k] = alpha;
 			}
-			
+
 			fileptr.close();
-			
-			line=fileptr.readLine();
-			C=Integer.parseInt(SSO.afterStr(line, "C ").trim());
-			
-			new_model(num_docs,num_terms,num_topics,num_labels,C);
-			
-		    filename=model_root+".beta";
-		    logger.info("loading "+filename);
-		    if(sc!=null)
-		    {
-		     sc.close();
-		    }
-		    //fileptr=new BufferedReader(new FileReader(filename));
-		    sc=new Scanner(new FileInputStream(filename)); 
-		    m_dB=sc.nextDouble();
-		    
-		    for ( i=0; i<m_nK; i++) {
-				for ( int k=0; k<m_nLabelNum; k++ ) {
-					x=sc.nextDouble();
-					m_dEta[i+k*m_nK] = x;
+
+			line = fileptr.readLine();
+			C = Integer.parseInt(SSO.afterStr(line, "C ").trim());
+
+			new_model(num_docs, num_terms, num_topics, num_labels, C);
+
+			filename = model_root + ".beta";
+			logger.info("loading " + filename);
+			if (sc != null) {
+				sc.close();
+			}
+			// fileptr=new BufferedReader(new FileReader(filename));
+			sc = new Scanner(new FileInputStream(filename));
+			m_dB = sc.nextDouble();
+
+			for (i = 0; i < m_nK; i++) {
+				for (int k = 0; k < m_nLabelNum; k++) {
+					x = sc.nextDouble();
+					m_dEta[i + k * m_nK] = x;
 				}
 
-				for ( j=0; j<m_nNumTerms; j++) {
-					x=sc.nextDouble();
+				for (j = 0; j < m_nNumTerms; j++) {
+					x = sc.nextDouble();
 					m_dLogProbW[i][j] = x;
 				}
 			}
-		}catch(Exception e){
+		} catch (Exception e) {
 			e.printStackTrace();
 		}
-		
+
 	}
 
 	public void set_init_param(STRUCT_LEARN_PARM struct_parm,
@@ -1028,49 +1034,169 @@ public class MedLDA {
 					kernel_parm, structmodel,
 					svm_struct_learn.ONESLACK_PRIMAL_ALG);
 		}
-		
-		int nVar=ss.num_docs*m_nLabelNum;
-		
-		if ( param.SVM_ALGTYPE == 0 ) {
-			for ( int k=1; k<structmodel.svm_model.sv_num; k++ ) {
+
+		int nVar = ss.num_docs * m_nLabelNum;
+
+		if (param.SVM_ALGTYPE == 0) {
+			for (int k = 1; k < structmodel.svm_model.sv_num; k++) {
 				int n = structmodel.svm_model.supvec[k].docnum;
 				int docnum = structmodel.svm_model.supvec[k].orgDocNum;
 				m_dMu[docnum] = structmodel.svm_model.alpha[k];
 			}
-		} else if ( param.SVM_ALGTYPE == 2 ) {
-			for ( int k=1; k<structmodel.svm_model.sv_num; k++ ) {
+		} else if (param.SVM_ALGTYPE == 2) {
+			for (int k = 1; k < structmodel.svm_model.sv_num; k++) {
 				int[] vecLabel = structmodel.svm_model.supvec[k].lvec;
 
 				double dval = structmodel.svm_model.alpha[k] / ss.num_docs;
-				for ( int d=0; d<ss.num_docs; d++ ) {
+				for (int d = 0; d < ss.num_docs; d++) {
 					int label = vecLabel[d];
-					m_dMu[d*m_nLabelNum + label] += dval;
+					m_dMu[d * m_nLabelNum + label] += dval;
 				}
 			}
 		}
-		
-		
-		//待续
-		
+
+		PrintWriter fileptr = null;
+		try {
+			fileptr = new PrintWriter(new FileWriter("MuSolution.txt", true));
+			for (int i = 0; i < ss.num_docs; i++) {
+				for (int k = 0; k < m_nLabelNum; k++) {
+					int muIx = i * m_nLabelNum + k;
+					if (m_dMu[muIx] > 0) {
+						fileptr.printf("%d:%.5f ", k, m_dMu[muIx]);
+					}
+					fileptr.println();
+				}
+			}
+			fileptr.println();
+			fileptr.close();
+
+			m_dB = structmodel.svm_model.b;
+
+			for (int y = 0; y < m_nLabelNum; y++) {
+				for (int k = 0; k < m_nK; k++) {
+					int etaIx = y * m_nK + k;
+					m_dEta[etaIx] = structmodel.w[etaIx + 1];
+				}
+			}
+
+			m_dsvm_primalobj = structmodel.primalobj;
+
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		// 待续
+
 	}
 
 	public void save_model(String model_root) {
+
+		String filename = "";
+		PrintWriter fileptr = null;
+		int i, j;
+
+		filename = model_root + ".beta";
+
+		try {
+			fileptr = new PrintWriter(new FileWriter(filename));
+			fileptr.printf("%5.10f\n", m_dB);
+
+			for (i = 0; i < m_nK; i++) {
+				// the first element is eta[k]
+				for (int k = 0; k < m_nLabelNum; k++) {
+					if (k == m_nLabelNum - 1)
+						fileptr.printf("%5.10f", m_dEta[i + k * m_nK]);
+					else
+						fileptr.printf("%5.10f ", m_dEta[i + k * m_nK]);
+				}
+
+				for (j = 0; j < m_nNumTerms; j++) {
+					fileptr.printf(" %5.10f", m_dLogProbW[i][j]);
+				}
+				fileptr.println();
+			}
+			fileptr.close();
+			
+			filename=model_root+".other";
+			fileptr=new PrintWriter(new FileWriter(filename));
+			
+			fileptr.printf( "num_topics %d\n", m_nK);
+			fileptr.printf( "num_labels %d\n", m_nLabelNum);
+			fileptr.printf( "num_terms %d\n", m_nNumTerms);
+			fileptr.printf( "num_docs %d\n", m_nDim);
+			fileptr.printf( "alpha ");
+			for ( int k=0; k<m_nK; k++ ) {
+				fileptr.printf( "%5.10f ", m_alpha[k]);
+			}
+			fileptr.printf( "\n");
+			fileptr.printf( "C %5.10f\n", m_dC);
+			fileptr.close();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 
 	}
 
 	public void save_gamma(String filename, double[][] gamma, int num_docs,
 			int num_topics) {
 
+		PrintWriter fileptr=null;
+		int d,k;
+		try{
+			fileptr=new PrintWriter(new FileWriter(filename));
+			
+			for (d = 0; d < num_docs; d++) {
+				fileptr.printf( "%5.10f", gamma[d][0]);
+				for (k = 1; k < num_topics; k++) {
+					fileptr.printf(" %5.10f", gamma[d][k]);
+				}
+				fileptr.printf("\n");
+			}
+			
+			fileptr.close();
+		}
+		catch(Exception e)
+		{
+			e.printStackTrace();
+		}
+		
 	}
 
-	public void write_word_assignment(PrintWriter f, Document doc,
+	public void write_word_assignment(PrintWriter fileptr, Document doc,
 			double[][] phi) {
-
+		
+		fileptr.printf( "%03d", doc.length);
+		for (int n = 0; n < doc.length; n++) {
+			fileptr.printf( " %04d:%02d", doc.words[n], Utils.argmax(phi[n], m_nK));
+		}
+		fileptr.println();
+		fileptr.flush();
+		
 	}
 
 	public void outputData2(String filename, Corpus corpus, double[][] exp,
 			int ntopic, int nLabels) {
+		
+		PrintWriter fileptr = null;
+		try{
+			fileptr=new PrintWriter(new FileWriter(filename));
+		for ( int i=0; i<corpus.num_docs; i++ ) {
+			int label = corpus.docs[i].gndlabel;
+			if ( nLabels == 2 ) {
+				if ( corpus.docs[i].gndlabel == -1 ) label = 1;
+				if ( corpus.docs[i].gndlabel == 1 ) label = 0;
+			}
 
+			fileptr.printf( "%d %d", ntopic, label);
+			for ( int k=0; k<ntopic; k++ ) 
+				fileptr.printf( " %d:%.10f", k, exp[i][k]);
+			fileptr.println();
+		}
+		fileptr.close();
+		}
+		catch(Exception e)
+		{
+			e.printStackTrace();
+		}
 	}
 
 	public void outputLowDimData(String filename, SuffStats ss) {
