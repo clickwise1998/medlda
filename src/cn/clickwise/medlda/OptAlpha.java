@@ -5,7 +5,7 @@ public class OptAlpha {
 	//for estimating alpha that is shared by all topics
 	public static double alhood(double a, double ss, int D, int K)
 	{
-		
+		//return(D * (lgamma(K * a) - K * lgamma(a)) + (a - 1) * ss);
 		return 0;
 	}
 	
