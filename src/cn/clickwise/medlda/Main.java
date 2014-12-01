@@ -2,17 +2,22 @@ package cn.clickwise.medlda;
 
 import java.io.File;
 
+import cn.clickwise.file.utils.FileCreateUtil;
+
 public class Main {
+	
 	public static CorpusFactory corpusFactory;
 	
 	public static  void main(String[] args)
 	{
 		corpusFactory=CorpusFactoryInstantiate.getCorpusFactory();
+		
 		if (args.length > 1)
 		{
 			Corpus c = corpusFactory.getCorpus();
 			Params param=new Params();
 			param.INNER_CV = true;
+			
 			if ( args[0].equals("estinf")  ) {
 				param.read_settings("settings.txt");
 				param.NTOPICS = Integer.parseInt(args[1]);
@@ -26,23 +31,17 @@ public class Main {
 
 				c.read_data(param.train_filename, param.NLABELS);
 				String dir="";
-				System.err.printf(dir, "20ng%d_c%d_f%d", param.NTOPICS, (int)param.INITIAL_C, param.NFOLDS);
-				File dirHandle=new File(dir);
-				if(!(dirHandle.exists()))
-				{
-					dirHandle.mkdirs();
-				}
+				dir="20ng"+param.NTOPICS+"_c"+param.INITIAL_C+"_f"+param.NFOLDS;
+				//System.err.printf(dir, "20ng%d_c%d_f%d", param.NTOPICS, (int)param.INITIAL_C, param.NFOLDS);
+			
+				FileCreateUtil.make_directory(dir);
 
 				if ( param.INNER_CV ) {
 					c.shuffle();
 
 					String modelDir="";
 					modelDir=dir+"/innercv";
-					File modelDirHandle=new File(modelDir);
-					if(!(modelDirHandle.exists()))
-					{
-						modelDirHandle.mkdirs();
-					}
+					FileCreateUtil.make_directory(modelDir);
 	
 					param.INITIAL_C = innerCV(modelDir, c, param);
 					System.err.printf("\n\nBest C: %f\n", param.INITIAL_C);
@@ -70,11 +69,7 @@ public class Main {
 				String dir="";
 				dir=args[6]+param.NTOPICS+"_c"+param.INITIAL_C+"_f"+param.NFOLDS;
 			
-				File dirHandle=new File(dir);
-				if(!(dirHandle.exists()))
-				{
-					dirHandle.mkdirs();
-				}
+			    FileCreateUtil.make_directory(dir);
 
 				if ( param.INNER_CV ) {
 					c.shuffle();
@@ -82,11 +77,7 @@ public class Main {
 					String modelDir="";
 					modelDir=dir+"/innercv";
 					
-					File modelDirHandle=new File(modelDir);
-					if(!(modelDirHandle.exists()))
-					{
-						modelDirHandle.mkdirs();
-					}
+					 FileCreateUtil.make_directory(modelDir);
 
 					param.INITIAL_C = innerCV(modelDir, c, param);
 					System.err.printf("\n\nBest C: %f\n", param.INITIAL_C);
