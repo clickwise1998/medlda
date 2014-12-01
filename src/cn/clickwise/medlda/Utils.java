@@ -122,9 +122,10 @@ public class Utils {
 	{
 		for ( int i=0; i<n; i++ ) {
 			for ( int j=0; j<n; j++ ) {
-				System.out.printf("\t%f", A[i][j]);
+				System.err.printf("\t%f", A[i][j]);
 			}
-			System.out.println();
+			System.err.println();
 		}
 	}
+	
 }
