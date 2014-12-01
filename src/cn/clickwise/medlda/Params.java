@@ -1,5 +1,10 @@
 package cn.clickwise.medlda;
 
+import java.io.BufferedReader;
+import java.io.FileReader;
+
+import cn.clickwise.str.basic.SSO;
+
 public class Params {
 
 	public int LAG;
@@ -46,6 +51,64 @@ public class Params {
 	
 	public void read_settings(String filename)
 	{
+		BufferedReader fileptr=null;
+		try{
+			String alpha_action="";
+			fileptr=new BufferedReader(new FileReader(filename));
+			String line="";
+			line=fileptr.readLine();
+			VAR_MAX_ITER=Integer.parseInt(SSO.afterStr(line, "var max iter").trim());
+			
+			line=fileptr.readLine();
+			VAR_CONVERGED=Double.parseDouble(SSO.afterStr(line, "var convergence").trim());
+			
+			line=fileptr.readLine();
+			EM_MAX_ITER=Integer.parseInt(SSO.afterStr(line, "em max iter").trim());
+			
+			line=fileptr.readLine();
+			EM_CONVERGED=Double.parseDouble(SSO.afterStr(line, "em convergence").trim());
+			
+			line=fileptr.readLine();
+			INITIAL_C=Double.parseDouble(SSO.afterStr(line, "model C").trim());
+			
+			line=fileptr.readLine();
+			INITIAL_ALPHA=Double.parseDouble(SSO.afterStr(line, "init alpha").trim());
+			
+			line=fileptr.readLine();
+			SVM_ALGTYPE=Integer.parseInt(SSO.afterStr(line, "svm_alg_type").trim());
+			
+			line=fileptr.readLine();
+			ESTIMATE_ALPHA=Integer.parseInt(SSO.afterStr(line, "alpha").trim());
+			
+			line=fileptr.readLine();
+			PHI_DUALOPT=Integer.parseInt(SSO.afterStr(line, "phi-dual-opt").trim());
+			
+			line=fileptr.readLine();
+			alpha_action=SSO.afterStr(line, "inner-cv").trim();
+			
+			line=fileptr.readLine();
+			INNER_FOLDNUM=Integer.parseInt(SSO.afterStr(line, "inner_foldnum").trim());
+			
+			line=fileptr.readLine();
+			CV_PARAMNUM=Integer.parseInt(SSO.afterStr(line, "cv_paramnum").trim());
+			
+			vec_cvparam = new double[CV_PARAMNUM];
+			for ( int i=0; i<CV_PARAMNUM; i++ ) {
+				double tmp;
+				line=fileptr.readLine();
+				tmp=Double.parseDouble(line);
+				vec_cvparam[i] = tmp;
+			}
+			
+			line=fileptr.readLine();
+			train_filename=SSO.afterStr(line, "train_file:").trim();
+			line=fileptr.readLine();
+			test_filename=SSO.afterStr(line, "test_file:").trim();
+		}
+		catch(Exception e)
+		{
+			e.printStackTrace();
+		}
 		
 	}
 

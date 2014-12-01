@@ -11,6 +11,7 @@ import cn.clickwise.str.basic.SSO;
 public class SimpleCorpus extends Corpus{
 
 	private static final int OFFSET =0;  
+	
 	@Override
 	public void read_data(String data_filename, int nLabels) {
 		
