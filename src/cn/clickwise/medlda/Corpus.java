@@ -10,7 +10,7 @@ public abstract class Corpus {
 	
 	public abstract void read_data(String data_filename,int nLabels);
 	
-	public abstract void read_buf(String data_filename,int nLabels);
+	//public abstract void read_buf(String data_filename,int nLabels);
 	
 	public abstract Corpus get_traindata(int nfold,int foldix);
 	
