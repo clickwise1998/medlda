@@ -7,6 +7,8 @@ package cn.clickwise.math.random;
  */
 public class SimFunc {
 
+
+
 	public static long maxl(long  a, long  b)
 	{
 	  if(a>b)
@@ -29,5 +31,7 @@ public class SimFunc {
 		y=-x*Math.log(x)-(1-x)*Math.log(1-x);
 		return y;
 	}
+	
+	
 	
 }
