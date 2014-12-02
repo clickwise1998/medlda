@@ -3274,7 +3274,7 @@ public class svm_learn {
 
 			if (svm_common.verbosity >= 0) {
 				//if (iteration % 51 == 0) {
-					System.out.println("Iteration " + iteration + ": ");
+					//System.out.println("Iteration " + iteration + ": ");
 					logger.info("Iteration " + iteration + ": ");
 				//}
 			} else if (svm_common.verbosity == 1) {

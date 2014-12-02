@@ -858,7 +858,7 @@ public class svm_struct_learn {
 
 				/* create sparse vector from dense sum */
 				// logger.info("kernel type is "+kparm.kernel_type);
-				System.out.println("kernel type is " + kparm.kernel_type);
+				//System.out.println("kernel type is " + kparm.kernel_type);
 				if (kparm.kernel_type == svm_common.LINEAR) {
 					// logger.info("kernel type is linear and lhs+n="+lhs_n.toString());
 					lhs_g = svm_common.create_svector_n_r(lhs_n, sm.sizePsi,null, 1.0,svm_struct_common.COMPACT_ROUNDING_THRESH);

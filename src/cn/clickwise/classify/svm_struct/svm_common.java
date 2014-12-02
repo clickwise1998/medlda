@@ -436,7 +436,9 @@ public class svm_common {
 					// System.exit(1);
 					continue;
 				}
-				label[dnum] = read_doc_label;
+				//label[dnum] = read_doc_label;
+				/*********medlda +1*************/
+				label[dnum] = read_doc_label+1;
 				/* printf("docnum=%ld: Class=%f ",dnum,doc_label); */
 				if (read_doc_label > 0)
 					dpos++;
