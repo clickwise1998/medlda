@@ -31,7 +31,7 @@ public class Main {
 
 				c.read_data(param.train_filename, param.NLABELS);
 				String dir="";
-				dir="20ng"+param.NTOPICS+"_c"+param.INITIAL_C+"_f"+param.NFOLDS;
+				dir="20ng"+param.NTOPICS+"_c"+(int)param.INITIAL_C+"_f"+param.NFOLDS;
 				//System.err.printf(dir, "20ng%d_c%d_f%d", param.NTOPICS, (int)param.INITIAL_C, param.NFOLDS);
 			
 				FileCreateUtil.make_directory(dir);
@@ -64,10 +64,10 @@ public class Main {
 				param.NFOLDS = Integer.parseInt(args[3]);
 				param.INITIAL_C = Double.parseDouble(args[4]);
 				param.DELTA_ELL = Double.parseDouble(args[5]);
-
+				param.INNER_CV=false;
 				c.read_data(param.train_filename, param.NLABELS);
 				String dir="";
-				dir=args[6]+param.NTOPICS+"_c"+param.INITIAL_C+"_f"+param.NFOLDS;
+				dir=args[6]+param.NTOPICS+"_c"+(int)param.INITIAL_C+"_f"+param.NFOLDS;
 			
 			    FileCreateUtil.make_directory(dir);
 
@@ -89,6 +89,7 @@ public class Main {
 			{
 				param.read_settings("settings.txt");
 				param.NLABELS = Integer.parseInt(args[1]);
+				param.INNER_CV=false;
 				c.read_data(param.test_filename, param.NLABELS);
 				MedLDA model=new MedLDA();
 				double dAcc = model.infer(args[2], c, param,"");

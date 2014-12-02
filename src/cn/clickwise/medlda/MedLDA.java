@@ -84,8 +84,7 @@ public class MedLDA {
 			for (int n = 0; n < doc.getLength(); n++) {
 				ss.class_word[k][doc.words[n]] += doc.counts[n] * phi[n][k];
 				ss.class_total[k] += doc.counts[n] * phi[n][k];
-				dVal += phi[n][k] * (double) doc.counts[n]
-						/ (double) doc.getTotal();
+				dVal += phi[n][k] * (double) doc.counts[n]/ (double) doc.getTotal();
 			}
 
 			// suff-stats for supervised LDA
@@ -123,23 +122,25 @@ public class MedLDA {
 		}
 
 		// alpha parameters
-		if ((!bInit) && param.ESTIMATE_ALPHA == 1) {// the same prior for all
-													// topics
-
+		logger.info("param.ESTIMATE_ALPHA:"+param.ESTIMATE_ALPHA);
+		if ((!bInit) && param.ESTIMATE_ALPHA == 1) {// the same prior for all topics
+													
+			logger.info("param.ESTIMATE_ALPHA is 1");  
 			double alpha_suffstats = 0;
 			for (k = 0; k < m_nK; k++) {
 				alpha_suffstats += ss.alpha_suffstats[k];
 			}
-
+            logger.info("alpha_suffstats:"+alpha_suffstats);
+            
 			double alpha = OptAlpha.opt_alpha(alpha_suffstats, ss.num_docs,
 					m_nK);
 			for (k = 0; k < m_nK; k++) {
 				m_alpha[k] = alpha;
 			}
 
-		} else if ((!bInit) && param.ESTIMATE_ALPHA == 2)// different priors for
-															// different topics
+		} else if ((!bInit) && param.ESTIMATE_ALPHA == 2)// different priors for														// different topics
 		{
+			logger.info("param.ESTIMATE_ALPHA is 2"); 
 			double alpha_sum = 0;
 			for (k = 0; k < m_nK; k++) {
 				alpha_sum += m_alpha[k];
@@ -227,13 +228,18 @@ public class MedLDA {
 
 			int i = 0;
 			double lhood = 0, lhood_old = 0, converged = 1;
-
+            int ci=0;
 			while (((converged < 0) || (converged > param.getEM_CONVERGED() || (i <= 2)))
 					&& (i <= param.getEM_MAX_ITER())) {
 				logger.info("**** em iteration " + (i + 1) + " ****");
 				lhood = 0;
 				zero_init_ss(ss);
 
+				if(ci>0)
+				{
+					break;
+				}
+				ci++;
 				// e-step
 				for (d = 0; d < corpus.num_docs; d++) {
 					for (n = 0; n < max_length; n++)// initialize to uniform
@@ -241,13 +247,14 @@ public class MedLDA {
 						for (int k = 0; k < param.getNTOPICS(); k++) {
 							phi[n][k] = 1.0 / (double) param.getNTOPICS();
 						}
-
-						if (d % 1000 == 0) {
-							logger.info("Document " + d);
-							lhood += doc_e_step(corpus.docs[d], var_gamma[d],
-									phi, ss, param);
-						}
 					}
+						//if (d % 1000 == 0) {
+							logger.info("Document " + d);
+						//}
+					lhood += doc_e_step(corpus.docs[d], var_gamma[d],
+									phi, ss, param);
+						
+					
 				}
 
 				// m-step
@@ -463,6 +470,7 @@ public class MedLDA {
 				}
 			}
 			lhood = compute_lhood(doc, phi, var_gamma);
+			logger.info("var_iter:"+var_iter+" lhood:"+lhood);
 			converged = (lhood_old - lhood) / lhood_old;
 			lhood_old = lhood;
 		}
