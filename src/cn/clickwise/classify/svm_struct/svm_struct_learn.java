@@ -325,6 +325,8 @@ public class svm_struct_learn {
 								int tmp = cset.lhs[cset.m-1].orgDocNum;
 								int tmp2 = 0;
 								
+								/************************/
+								
 							} else {
 								// logger.info("+");
 								if (opti[i] != opti_round) {

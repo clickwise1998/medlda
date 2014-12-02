@@ -99,6 +99,11 @@ public class SimpleCorpus extends Corpus{
 		subc.num_terms = 0;
 		int nd = 0, nw = 0;
 		subc.docs=new Document[num_docs];
+		for(int i=0;i<num_docs;i++)
+		{
+			subc.docs[i]=new Document();
+		}
+		
 		for ( int i=0; i<num_docs; i++ )
 		{
 			if ( foldix < nfold ) {
@@ -139,6 +144,11 @@ public class SimpleCorpus extends Corpus{
 		subc.num_terms = 0;
 		int nd = 0, nw = 0;
 		subc.docs=new Document[num_docs];
+		for(int i=0;i<num_docs;i++)
+		{
+		  subc.docs[i]=new Document();	
+		}
+		
 		for ( int i=0; i<num_docs; i++ )
 		{
 			if ( foldix < nfold ) {

@@ -80,8 +80,8 @@ public class Params {
 			line=fileptr.readLine();
 			ESTIMATE_ALPHA=Integer.parseInt(SSO.afterStr(line, "alpha").trim());
 			
-			line=fileptr.readLine();
-			PHI_DUALOPT=Integer.parseInt(SSO.afterStr(line, "phi-dual-opt").trim());
+			//line=fileptr.readLine();
+			//PHI_DUALOPT=Integer.parseInt(SSO.afterStr(line, "phi-dual-opt").trim());
 			
 			line=fileptr.readLine();
 			alpha_action=SSO.afterStr(line, "inner-cv").trim();
