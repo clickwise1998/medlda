@@ -1237,6 +1237,12 @@ public class svm_common {
 				weight = fa * (double) ai[i].weight + fb
 						* (double) bj[j].weight;
 				if ((weight < -min_non_zero) || (weight > min_non_zero)) {
+					/////******medlda*****************
+					if(sumi[s]==null||ai[i]==null)
+					{
+						continue;
+					}
+				/////*********************************
 					sumi[s].wnum = ai[i].wnum;
 					sumi[s].weight = weight;
 					if (sumi[s].weight != 0)
