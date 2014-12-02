@@ -3605,7 +3605,7 @@ public class svm_learn {
 						+ " SV at u-bound), max violation=" + maxdiff + ")");
 			}
 			if (svm_common.verbosity >= 3) {
-				System.out.println();
+				//System.out.println();
 			}
 
 			if (((iteration % 10) == 0) && (noshrink == 0)) {
