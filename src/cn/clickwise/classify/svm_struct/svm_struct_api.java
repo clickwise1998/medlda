@@ -244,6 +244,7 @@ public class svm_struct_api {
 		}
 		if (bestclass == -1)
 			logger.debug("ERROR: Only one class\n");
+		logger.info("bestclass is "+bestclass);
 		ybar.class_index = bestclass;
 		// logger.info("ybar_class_index:"+ybar.class_index);
 		if (svm_struct_common.struct_verbosity >= 3) {

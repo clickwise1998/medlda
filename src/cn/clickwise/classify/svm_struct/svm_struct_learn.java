@@ -761,7 +761,7 @@ public class svm_struct_learn {
 						// + i);
 					
 						///*********medlda add ybar return value**************************
-						LABEL ybar=find_most_violated_constraint(ex[i], fycache[i], n, sm,sparm);
+						LABEL yybar=find_most_violated_constraint(ex[i], fycache[i], n, sm,sparm);
 						
 						// logger.info("fydelta in call yeah:"+fydelta_g.toString());
 
@@ -836,7 +836,7 @@ public class svm_struct_learn {
 					 */
 					////****medlda add ybar return value************
 					LABEL ybar=find_most_violated_constraint(ex[i], fycache[i], n, sm,sparm);
-					
+					logger.info("ybar label is :"+ybar.class_index);
 					//***************medlda***********************
 					vecLabel[i] = ybar.class_index - 1;
 					//********************************************
@@ -894,6 +894,13 @@ public class svm_struct_learn {
 				cset.lhs[cset.m] = svm_common.create_example(cset.m, 0, 1, 1,lhs_g);
 				// logger.info("cset m="+cset.m+"  cset.lhs[cset.m] kernel id:"+cset.lhs[cset.m].kernelid);
 
+				/**************medlda**********************/
+				cset.lhs[cset.m].lvec = new int[n];
+				for ( i=0; i<n; i++ ) {
+					cset.lhs[cset.m].lvec[i] = vecLabel[i];
+				}
+				
+				/******************************************/
 				// cset.rhs = new double[cset.m + 1];
 				cset.rhs = svm_struct_api.reallocDoubleArr(cset.rhs, cset.m + 1);
 				cset.rhs[cset.m] = rhs_g;

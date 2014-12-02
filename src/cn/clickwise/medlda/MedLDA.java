@@ -468,8 +468,8 @@ public class MedLDA {
 					 * LDA
 					 */
 					double dVal = compute_mrgterm(doc, docix, n, k, param);
-					phi[n][k] = digamma_gam[k] + m_dLogProbW[k][doc.words[n]]
-							+ dVal;
+					phi[n][k] = digamma_gam[k] + m_dLogProbW[k][doc.words[n]];
+							//+ dVal;
 
 					if (k > 0)
 						phisum = Utils.log_sum(phisum, phi[n][k]);
@@ -1068,16 +1068,25 @@ public class MedLDA {
 		int nVar = ss.num_docs * m_nLabelNum;
 
 		if (param.SVM_ALGTYPE == 0) {
+			logger.info("svm param.SVM_ALGTYPE is 0");
 			for (int k = 1; k < structmodel.svm_model.sv_num; k++) {
 				int n = structmodel.svm_model.supvec[k].docnum;
 				int docnum = structmodel.svm_model.supvec[k].orgDocNum;
 				m_dMu[docnum] = structmodel.svm_model.alpha[k];
 			}
 		} else if (param.SVM_ALGTYPE == 2) {
+			logger.info("svm param.SVM_ALGTYPE is 2");
 			for (int k = 1; k < structmodel.svm_model.sv_num; k++) {
 				int[] vecLabel = structmodel.svm_model.supvec[k].lvec;
-
+                String str="";
+                logger.info("k="+k);
+                for(int ak=0;ak<vecLabel.length;ak++)
+                {
+                	str=str+ak+":"+vecLabel[ak]+" ";
+                }
+                logger.info(str);
 				double dval = structmodel.svm_model.alpha[k] / ss.num_docs;
+				 logger.info("dval:"+dval);
 				for (int d = 0; d < ss.num_docs; d++) {
 					int label = vecLabel[d];
 					m_dMu[d * m_nLabelNum + label] += dval;
@@ -1094,7 +1103,7 @@ public class MedLDA {
 					if (m_dMu[muIx] > 0) {
 						fileptr.printf("%d:%.5f ", k, m_dMu[muIx]);
 					}
-					fileptr.println();
+					//fileptr.println();
 				}
 			}
 			fileptr.println();
