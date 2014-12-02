@@ -1231,8 +1231,8 @@ public class MedLDA {
 
 			for (int d = 0; d < ss.num_docs; d++) {
 				int label = ss.y[d];
-				fileptr.printf("%d %d", m_nK, label);
-
+				//fileptr.printf("%d %d", m_nK, label);
+				fileptr.printf("%d",  label);
 				for (int k = 0; k < m_nK; k++) {
 					fileptr.printf(" %d:%.5f", k, ss.exp[d][k]*10000);
 				}
