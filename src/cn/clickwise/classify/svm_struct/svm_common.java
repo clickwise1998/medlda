@@ -543,6 +543,11 @@ public class svm_common {
 				read_costfactor = Double.parseDouble(sstr);
 			} else if (Pattern.matches("[\\d]+", pstr)) {
 				read_words[wpos].wnum = Integer.parseInt(pstr);
+				
+				/***********medlda+1*************/
+				read_words[wpos].wnum= read_words[wpos].wnum+1;
+				/********************************/
+				
 				read_words[wpos].weight = Double.parseDouble(sstr);
 				wpos++;
 			}

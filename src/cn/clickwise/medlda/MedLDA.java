@@ -862,16 +862,20 @@ public class MedLDA {
 
 			for (int k = 0; k < num_topics; k++) {
 				alpha = sc.nextDouble();
-				m_alpha[k] = alpha;
+				vecAlpha.add(alpha);
 			}
 
-			fileptr.close();
+		
 
 			line = fileptr.readLine();
-			C = Integer.parseInt(SSO.afterStr(line, "C ").trim());
-
+			C = Double.parseDouble(SSO.afterStr(line, "C ").trim());
+			fileptr.close();
 			new_model(num_docs, num_terms, num_topics, num_labels, C);
 
+			for(int k=0;k<num_topics;k++)
+			{
+				m_alpha[k] = vecAlpha.get(k);
+			}
 			filename = model_root + ".beta";
 			logger.info("loading " + filename);
 			if (sc != null) {
