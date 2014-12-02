@@ -12,5 +12,9 @@ public class ScanTest {
 		System.out.println(scan.next());
 		System.out.println(scan.next());
 		System.out.println(scan.next());
+		double a=0;
+		double c=Math.random();
+		a+=10+Math.random();
+		System.out.println("a="+a);
 	}
 }

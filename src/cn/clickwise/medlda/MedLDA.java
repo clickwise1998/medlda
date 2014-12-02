@@ -79,7 +79,8 @@ public class MedLDA {
 			ss.alpha_suffstats[k] -= Utils.digamma(gamma_sum);
 		}
 
-		
+		logger.info("phi is:");
+		Utils.printinqmatrix(phi, doc.length, m_nK);
 		
 		for (int k = 0; k < m_nK; k++) {
 			double dVal = 0;
@@ -485,6 +486,7 @@ public class MedLDA {
 					digamma_gam[k] = Utils.digamma(var_gamma[k]);
 				}
 			}
+			
 			lhood = compute_lhood(doc, phi, var_gamma);
 			//logger.info("var_iter:"+var_iter+" lhood:"+lhood);
 			converged = (lhood_old - lhood) / lhood_old;
@@ -757,6 +759,7 @@ public class MedLDA {
 
 	public void corpus_init_ss(SuffStats ss, Corpus c) {
 
+		logger.info("in corpus_init_ss");
 		int num_topics = m_nK;
 		int i, k, d, n;
 		Document doc;
@@ -788,12 +791,12 @@ public class MedLDA {
 	}
 
 	public void random_init_ss(SuffStats ss, Corpus c) {
-
+		logger.info("in random_init_ss");
 		int num_topics = m_nK;
 		int num_terms = m_nNumTerms;
 		for (int k = 0; k < num_topics; k++) {
 			for (int n = 0; n < num_terms; n++) {
-				ss.class_word[k][n] += 10.0 + Math.random();
+				ss.class_word[k][n] += (10.0 + Math.random());
 				ss.class_total[k] += ss.class_word[k][n];
 			}
 		}
@@ -808,7 +811,7 @@ public class MedLDA {
 	}
 
 	public void zero_init_ss(SuffStats ss) {
-
+		logger.info("in zero_init_ss");
 		for (int k = 0; k < m_nK; k++) {
 			ss.class_total[k] = 0;
 			for (int w = 0; w < m_nNumTerms; w++) {
@@ -914,10 +917,7 @@ public class MedLDA {
 		learn_parm.predfile = "trans_predictions";
 		learn_parm.alphafile = "";
 		svm_common.verbosity = 0;/* verbosity for svm_light */
-		svm_struct_common.struct_verbosity = 1;/*
-												 * verbosity for struct learning
-												 * portion
-												 */
+		svm_struct_common.struct_verbosity = 1;
 		learn_parm.biased_hyperplane = 1;
 		learn_parm.remove_inconsistent = 0;
 		learn_parm.skip_final_opt_check = 0;
@@ -1234,7 +1234,7 @@ public class MedLDA {
 				fileptr.printf("%d %d", m_nK, label);
 
 				for (int k = 0; k < m_nK; k++) {
-					fileptr.printf(" %d:%.10f", k, ss.exp[d][k]);
+					fileptr.printf(" %d:%.5f", k, ss.exp[d][k]*10000);
 				}
 				fileptr.println();
 

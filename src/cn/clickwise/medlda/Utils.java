@@ -137,10 +137,10 @@ public class Utils {
 	public static void printinqmatrix(double[][] A,double m ,double n)
 	{
 		String line="";
-		for ( int i=0; i<m; i++ ) {
+		for ( int i=0; i<1; i++ ) {
 			line="";
 			for ( int j=0; j<n; j++ ) {
-				line+=(A[i][j]+" ");
+				line+=(j+":"+A[i][j]+" ");
 				//System.err.printf("\t%f", A[i][j]);
 			}
 			logger.info("line:"+i+" "+line);
@@ -151,7 +151,7 @@ public class Utils {
 	{
 		String line="";
 		for ( int j=0; j<n; j++ ) {
-			line+=(A[j]+" ");
+			line+=(j+":"+A[j]+" ");
 			//System.err.printf("\t%f", A[j]);
 		}
 		logger.info(line);
