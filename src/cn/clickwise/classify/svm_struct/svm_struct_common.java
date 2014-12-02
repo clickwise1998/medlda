@@ -18,7 +18,7 @@ public class svm_struct_common {
     public static final int   USE_FYCACHE=0;
   //  public static final double COMPACT_ROUNDING_THRESH= 10E-15;
     public static final double COMPACT_ROUNDING_THRESH= 10E-15;
-    public static final int   DEFAULT_ALG_TYPE  = 0;
+    public static final int   DEFAULT_ALG_TYPE  = 2;
     
     
     /* default precision for solving the optimization problem */

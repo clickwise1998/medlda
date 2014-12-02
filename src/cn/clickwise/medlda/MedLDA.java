@@ -1234,7 +1234,7 @@ public class MedLDA {
 				//fileptr.printf("%d %d", m_nK, label);
 				fileptr.printf("%d",  label);
 				for (int k = 0; k < m_nK; k++) {
-					fileptr.printf(" %d:%.5f", k, ss.exp[d][k]*10000);
+					fileptr.printf(" %d:%.10f", k, ss.exp[d][k]);
 				}
 				fileptr.println();
 
