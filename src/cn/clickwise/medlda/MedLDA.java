@@ -79,6 +79,8 @@ public class MedLDA {
 			ss.alpha_suffstats[k] -= Utils.digamma(gamma_sum);
 		}
 
+		
+		
 		for (int k = 0; k < m_nK; k++) {
 			double dVal = 0;
 			for (int n = 0; n < doc.getLength(); n++) {
@@ -128,8 +130,10 @@ public class MedLDA {
 			logger.info("param.ESTIMATE_ALPHA is 1");  
 			double alpha_suffstats = 0;
 			for (k = 0; k < m_nK; k++) {
-				alpha_suffstats += ss.alpha_suffstats[k];
+				alpha_suffstats += (ss.alpha_suffstats[k]);
 			}
+			logger.info("alpha_suffstats e:");
+			Utils.printvector(ss.alpha_suffstats, m_nK);
             logger.info("alpha_suffstats:"+alpha_suffstats);
             
 			double alpha = OptAlpha.opt_alpha(alpha_suffstats, ss.num_docs,
@@ -137,6 +141,7 @@ public class MedLDA {
 			for (k = 0; k < m_nK; k++) {
 				m_alpha[k] = alpha;
 			}
+			logger.info("new alpha: "+alpha);
 
 		} else if ((!bInit) && param.ESTIMATE_ALPHA == 2)// different priors for														// different topics
 		{
@@ -190,7 +195,7 @@ public class MedLDA {
 			corpus_init_ss(ss, corpus);
 			mle(ss, param, true);
 			for (int k = 0; k < m_nK; k++) {
-				m_alpha[k] = param.getINITIAL_ALPHA();
+				m_alpha[k] = param.getINITIAL_ALPHA()/(double) param.NTOPICS;
 			}
 
 		} else if (start.equals("random")) {
@@ -200,7 +205,7 @@ public class MedLDA {
 			random_init_ss(ss, corpus);
 			mle(ss, param, true);
 			for (int k = 0; k < m_nK; k++) {
-				m_alpha[k] = param.getINITIAL_ALPHA();
+				m_alpha[k] = param.getINITIAL_ALPHA()/(double) param.NTOPICS;
 			}
 
 		} else {
@@ -248,9 +253,9 @@ public class MedLDA {
 							phi[n][k] = 1.0 / (double) param.getNTOPICS();
 						}
 					}
-						//if (d % 1000 == 0) {
+						if (d % 1000 == 0) {
 							logger.info("Document " + d);
-						//}
+						}
 					lhood += doc_e_step(corpus.docs[d], var_gamma[d],
 									phi, ss, param);
 						
@@ -436,6 +441,17 @@ public class MedLDA {
 			}
 		}
 
+		/*
+		logger.info("m_alpha is:");
+		Utils.printvector(m_alpha, m_nK);	
+		logger.info("var_gamma is:");
+		Utils.printvector(var_gamma, m_nK);
+		logger.info("digamma_gam is:");
+		Utils.printvector(digamma_gam, m_nK);
+		logger.info("phi is:");
+		Utils.printinqmatrix(phi, doc.length, m_nK);
+		*/
+		
 		int var_iter = 0;
 		while ((converged > param.VAR_CONVERGED)
 				&& ((var_iter < param.VAR_MAX_ITER) || (param.VAR_MAX_ITER == -1))) {
@@ -470,7 +486,7 @@ public class MedLDA {
 				}
 			}
 			lhood = compute_lhood(doc, phi, var_gamma);
-			logger.info("var_iter:"+var_iter+" lhood:"+lhood);
+			//logger.info("var_iter:"+var_iter+" lhood:"+lhood);
 			converged = (lhood_old - lhood) / lhood_old;
 			lhood_old = lhood;
 		}
@@ -693,6 +709,8 @@ public class MedLDA {
 		m_alpha = new double[m_nK];
 		for (int k = 0; k < m_nK; k++)
 			m_alpha[k] = 1.0 / num_topics;
+		//logger.info("new model: num_topics:"+num_topics);
+		//Utils.printvector(m_alpha, m_nK);
 		m_dLogProbW = new double[num_topics][num_terms];
 		m_dEta = new double[num_topics * num_labels];// Eta使用向量存储二维矩阵，行是主题，列是标记，元素
 		// [i*num_labels + j]指主题i和标记j的转换概率

@@ -1,7 +1,11 @@
 package cn.clickwise.medlda;
 
-public class Utils {
+import org.apache.log4j.Logger;
 
+public class Utils {
+	
+	private static Logger logger = Logger.getLogger(Utils.class);
+	
 	public static double log_sum(double log_a, double log_b)
 	{
 		double v;
@@ -118,6 +122,8 @@ public class Utils {
 		return res;
 	}
 	
+
+	
 	public static void printmatrix(double[][] A, double n)
 	{
 		for ( int i=0; i<n; i++ ) {
@@ -127,5 +133,30 @@ public class Utils {
 			System.err.println();
 		}
 	}
+	
+	public static void printinqmatrix(double[][] A,double m ,double n)
+	{
+		String line="";
+		for ( int i=0; i<m; i++ ) {
+			line="";
+			for ( int j=0; j<n; j++ ) {
+				line+=(A[i][j]+" ");
+				//System.err.printf("\t%f", A[i][j]);
+			}
+			logger.info("line:"+i+" "+line);
+			//System.err.println();
+		}
+	}
+	public static void printvector(double[] A, double n)
+	{
+		String line="";
+		for ( int j=0; j<n; j++ ) {
+			line+=(A[j]+" ");
+			//System.err.printf("\t%f", A[j]);
+		}
+		logger.info(line);
+		
+	}
+	
 	
 }

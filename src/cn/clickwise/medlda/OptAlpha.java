@@ -1,10 +1,12 @@
 package cn.clickwise.medlda;
 
+import org.apache.log4j.Logger;
+
 public class OptAlpha {
 
 	private static final double NEWTON_THRESH=1e-5;
 	private static final int MAX_ALPHA_ITER= 1000;
-	
+	private static Logger logger = Logger.getLogger(OptAlpha.class);
 	//for estimating alpha that is shared by all topics
 	public static double alhood(double a, double ss, int D, int K)
 	{
@@ -43,7 +45,7 @@ public class OptAlpha {
 		        df = d_alhood(a, ss, D, K);
 		        d2f = d2_alhood(a, D, K);
 		        log_a = log_a - df/(d2f * a + df);
-		        System.err.printf("alpha maximization : %5.5f   %5.5f\n", f, df);
+		        logger.info("alpha maximization : "+ f+"\t"+df);
 		    }
 		    while ((Math.abs(df) > NEWTON_THRESH) && (iter < MAX_ALPHA_ITER));
 		    return(Math.exp(log_a));
