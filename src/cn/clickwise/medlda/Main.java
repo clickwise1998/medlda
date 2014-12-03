@@ -60,6 +60,8 @@ public class Main {
 				MedLDA evlModel=new MedLDA();
 				double dAcc = evlModel.infer(dir, tstC, param,"");
 				System.err.printf("Accuracy: %.3f\n", dAcc);
+				model=null;
+				evlModel=null;
 		
 			}
 			if ( args[0].equals("est")) {
@@ -89,6 +91,7 @@ public class Main {
 				}
 				MedLDA model=new MedLDA();
 				model.run_em(args[7], dir, c, param);
+				model=null;
 			}
 			if (args[0].equals("inf"))
 			{
@@ -99,6 +102,7 @@ public class Main {
 				MedLDA model=new MedLDA();
 				double dAcc = model.infer(args[2], c, param,"");
 				System.err.printf("Accuracy: %.3f\n", dAcc);
+				model=null;
 			}
 
 		} else {
