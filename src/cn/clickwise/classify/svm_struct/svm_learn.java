@@ -694,11 +694,10 @@ public class svm_learn {
 			// logger.info("doc:"+t+"  "+docs[t].fvec.toString());
 			// }
 			// logger.info("learn_parm.svm_maxqpsize 11:"+learn_parm.svm_maxqpsize+" learn_parm.svm_newvarsinqp:"+learn_parm.svm_newvarsinqp);
-			logger.info("before calculate svm model");
+
 			calculate_svm_model(docs, label, unlabeled, lin, alpha, a, c,
 					learn_parm, index2dnum, index2dnum, model);
-			logger.info("after calculate svm model");
-			svm_common.printLvec(model.supvec);
+
 			// logger.info("learn_parm.svm_maxqpsize 12:"+learn_parm.svm_maxqpsize+" learn_parm.svm_newvarsinqp:"+learn_parm.svm_newvarsinqp);
 			for (i = 0; i < totdoc; i++) {
 				a[i] = alpha[i];
@@ -724,21 +723,17 @@ public class svm_learn {
 		}
 		// // learn_parm.sharedslack=0;
 		if (learn_parm.sharedslack != 0) {
-			 logger.info("learn  sharedslack");
+			 //logger.info("learn  sharedslack");
 			iterations = optimize_to_convergence_sharedslack(docs, label,
 					totdoc, totwords, learn_parm, kernel_parm, kernel_cache,
 					shrink_state, model, a, lin, c, timing_profile);
-			logger.info("after optimize_to_convergence_sharedslack");
-			svm_common.printLvec(model.supvec);
 
 		} else {
-			 logger.info("learn not sharedslack");
+			 //logger.info("learn not sharedslack");
 			// logger.info("learn_parm.svm_maxqpsize2:"+learn_parm.svm_maxqpsize+" learn_parm.svm_newvarsinqp:"+learn_parm.svm_newvarsinqp);
 			iterations = optimize_to_convergence(docs, label, totdoc, totwords,
 					learn_parm, kernel_parm, kernel_cache, shrink_state, model,
 					inconsistent, unlabeled, a, lin, c, timing_profile, -1, 1);
-			logger.info("after optimize_to_convergence");
-			svm_common.printLvec(model.supvec);
 
 		}
 
@@ -888,8 +883,6 @@ public class svm_learn {
 			}
 		}
 		
-		logger.info("end svm learn optimization");
-		svm_common.printLvec(model.supvec);
 
 	}
 

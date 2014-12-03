@@ -2,6 +2,8 @@ package cn.clickwise.medlda;
 
 import java.io.File;
 
+import cn.clickwise.classify.svm_struct.svm_common;
+import cn.clickwise.classify.svm_struct.svmconfig;
 import cn.clickwise.file.utils.FileCreateUtil;
 
 public class Main {
@@ -11,6 +13,9 @@ public class Main {
 	public static  void main(String[] args)
 	{
 		corpusFactory=CorpusFactoryInstantiate.getCorpusFactory();
+		
+		/*******设置 label 和  word 的格式和medlda一致，label=originLabel+1,word=originWord+1**********/
+		svmconfig.model_type=1;
 		
 		if (args.length > 1)
 		{

@@ -950,8 +950,7 @@ public class svm_struct_learn {
 														  														  														
 				// logger.info("svm_learn_struct_joint call svm_learn_optimization in loop");
 				sl.svm_learn_optimization(cset.lhs, cset.rhs, cset.m, sizePsi,lparm, kparm, null, svmModel, alpha_g);
-				logger.info("after sl.svm_learn_optimization");
-				svm_common.printLvec(svmModel.supvec);
+
 				kparm.kernel_type = (short) kernel_type_org;
                 svmModel.kernel_parm.kernel_type = (short) kernel_type_org;
 				
@@ -1028,8 +1027,7 @@ public class svm_struct_learn {
 		} while (cached_constraint != 0|| (ceps > sparm.epsilon)
 				|| svm_struct_api.finalize_iteration(ceps, cached_constraint,sample, sm, cset, alpha_g, sparm));
 
-		logger.info("end train");
-		svm_common.printLvec(svmModel.supvec);
+
 		/************medlda***********************/
 		if(kparm.kernel_type == svm_common.LINEAR) modellength = svm_common.model_length_n(svmModel);
 		else modellength = svm_common.model_length_s(svmModel);
@@ -1105,8 +1103,7 @@ public class svm_struct_learn {
 
 			/**********medlda***************/
 			/* record the loss-augmented prediction in support vectors. */
-			logger.info("before assiginment");
-			svm_common.printLvec(svmModel.supvec);
+
 			for ( i=1; i<svmModel.sv_num; i++ ) {
 				//sm.svm_model.supvec[i].lvec = new int[n];
 				//logger.info("sl vec i="+i+":"+svmModel.supvec[i].lvecString());
@@ -1116,9 +1113,7 @@ public class svm_struct_learn {
 				//}
 				
 			}	
-			logger.info("after assiginment");
-			svm_common.printLvec(svmModel.supvec);
-			
+		
 		}
 		/*
 		 * if(sm.svm_model==null) { logger.info("the svm model is null"); }
@@ -1126,8 +1121,10 @@ public class svm_struct_learn {
 		 * logger.info("the svm model kernel_parm is null"); }
 		 */
 
-		//svm_struct_api.print_struct_learning_stats(sample, sm, cset, alpha_g,sparm);
-
+		if(svmconfig.model_type==0)//medlda不要把特征向量加和
+		{
+		  svm_struct_api.print_struct_learning_stats(sample, sm, cset, alpha_g,sparm);
+		}
 	}
 
 	public void remove_inactive_constraints(CONSTSET cset, int currentiter,

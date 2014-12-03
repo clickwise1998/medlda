@@ -16,6 +16,7 @@ import cn.clickwise.time.utils.TimeOpera;
 
 public class svm_common {
 
+	
 	public static final String VERSION = "V6.20";
 	public static final String VERSION_DATE = "14.08.08";
 
@@ -101,9 +102,6 @@ public class svm_common {
 	public static int progress_n;
 	
 	
-	
-	
-
 	private static Logger logger = Logger.getLogger(svm_common.class);
 
 	public static SVECTOR create_svector(WORD[] words, String userdefined,
@@ -438,7 +436,15 @@ public class svm_common {
 				}
 				//label[dnum] = read_doc_label;
 				/*********medlda +1*************/
-				label[dnum] = read_doc_label+1;
+				if(svmconfig.model_type==0)
+				{
+					label[dnum] = read_doc_label;
+				}
+				else
+				{
+					label[dnum] = read_doc_label+1;
+				}
+				
 				/* printf("docnum=%ld: Class=%f ",dnum,doc_label); */
 				if (read_doc_label > 0)
 					dpos++;
@@ -545,7 +551,14 @@ public class svm_common {
 				read_words[wpos].wnum = Integer.parseInt(pstr);
 				
 				/***********medlda+1*************/
-				read_words[wpos].wnum= read_words[wpos].wnum+1;
+				if(svmconfig.model_type==0)
+				{
+					read_words[wpos].wnum= read_words[wpos].wnum;
+				}
+				else{
+					read_words[wpos].wnum= read_words[wpos].wnum+1;
+				}
+				
 				/********************************/
 				
 				read_words[wpos].weight = Double.parseDouble(sstr);
@@ -1752,7 +1765,7 @@ public class svm_common {
 		return len;
 	}
 	
-	public static void printLvec(DOC[] supvec){
+	public static void pprintLvec(DOC[] supvec){
 		String str="supvec abstract:\n";
 		if(supvec==null)
 		{
