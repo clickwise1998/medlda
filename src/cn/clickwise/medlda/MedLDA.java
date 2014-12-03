@@ -79,8 +79,8 @@ public class MedLDA {
 			ss.alpha_suffstats[k] -= Utils.digamma(gamma_sum);
 		}
 
-		logger.info("phi is:");
-		Utils.printinqmatrix(phi, doc.length, m_nK);
+		//logger.info("phi is:");
+		//Utils.printinqmatrix(phi, doc.length, m_nK);
 		
 		for (int k = 0; k < m_nK; k++) {
 			double dVal = 0;
@@ -128,25 +128,25 @@ public class MedLDA {
 		logger.info("param.ESTIMATE_ALPHA:"+param.ESTIMATE_ALPHA);
 		if ((!bInit) && param.ESTIMATE_ALPHA == 1) {// the same prior for all topics
 													
-			logger.info("param.ESTIMATE_ALPHA is 1");  
+			//logger.info("param.ESTIMATE_ALPHA is 1");  
 			double alpha_suffstats = 0;
 			for (k = 0; k < m_nK; k++) {
 				alpha_suffstats += (ss.alpha_suffstats[k]);
 			}
-			logger.info("alpha_suffstats e:");
-			Utils.printvector(ss.alpha_suffstats, m_nK);
-            logger.info("alpha_suffstats:"+alpha_suffstats);
+			//logger.info("alpha_suffstats e:");
+			//Utils.printvector(ss.alpha_suffstats, m_nK);
+            //logger.info("alpha_suffstats:"+alpha_suffstats);
             
 			double alpha = OptAlpha.opt_alpha(alpha_suffstats, ss.num_docs,
 					m_nK);
 			for (k = 0; k < m_nK; k++) {
 				m_alpha[k] = alpha;
 			}
-			logger.info("new alpha: "+alpha);
+			//logger.info("new alpha: "+alpha);
 
 		} else if ((!bInit) && param.ESTIMATE_ALPHA == 2)// different priors for														// different topics
 		{
-			logger.info("param.ESTIMATE_ALPHA is 2"); 
+			//logger.info("param.ESTIMATE_ALPHA is 2"); 
 			double alpha_sum = 0;
 			for (k = 0; k < m_nK; k++) {
 				alpha_sum += m_alpha[k];
@@ -159,10 +159,10 @@ public class MedLDA {
 						alpha_sum, ss.num_docs, m_nK);
 			}
 
-			logger.info("new alpha: ");
-			for (k = 0; k < m_nK; k++) {
-				logger.info(m_alpha[k]);
-			}
+			//logger.info("new alpha: ");
+			//for (k = 0; k < m_nK; k++) {
+			//	logger.info(m_alpha[k]);
+			//}
 		}
 
 		boolean bRes = true;
@@ -759,7 +759,7 @@ public class MedLDA {
 
 	public void corpus_init_ss(SuffStats ss, Corpus c) {
 
-		logger.info("in corpus_init_ss");
+		//logger.info("in corpus_init_ss");
 		int num_topics = m_nK;
 		int i, k, d, n;
 		Document doc;
@@ -791,7 +791,7 @@ public class MedLDA {
 	}
 
 	public void random_init_ss(SuffStats ss, Corpus c) {
-		logger.info("in random_init_ss");
+		//logger.info("in random_init_ss");
 		int num_topics = m_nK;
 		int num_terms = m_nNumTerms;
 		for (int k = 0; k < num_topics; k++) {
@@ -811,7 +811,7 @@ public class MedLDA {
 	}
 
 	public void zero_init_ss(SuffStats ss) {
-		logger.info("in zero_init_ss");
+		//logger.info("in zero_init_ss");
 		for (int k = 0; k < m_nK; k++) {
 			ss.class_total[k] = 0;
 			for (int w = 0; w < m_nNumTerms; w++) {
@@ -1078,6 +1078,7 @@ public class MedLDA {
 			logger.info("svm param.SVM_ALGTYPE is 2");
 			for (int k = 1; k < structmodel.svm_model.sv_num; k++) {
 				int[] vecLabel = structmodel.svm_model.supvec[k].lvec;
+				/*
                 String str="";
                 logger.info("k="+k);
                 for(int ak=0;ak<vecLabel.length;ak++)
@@ -1085,8 +1086,10 @@ public class MedLDA {
                 	str=str+ak+":"+vecLabel[ak]+" ";
                 }
                 logger.info(str);
+                */
+				
 				double dval = structmodel.svm_model.alpha[k] / ss.num_docs;
-				 logger.info("dval:"+dval);
+				 //logger.info("dval:"+dval);
 				for (int d = 0; d < ss.num_docs; d++) {
 					int label = vecLabel[d];
 					m_dMu[d * m_nLabelNum + label] += dval;

@@ -479,11 +479,11 @@ public class svm_struct_learn {
 			// sm.svm_model = svm_common.copy_model(svmModel);
 			sm.svm_model = svmModel;
 			sm.w = sm.svm_model.lin_weights; /* short cut to weight vector */
-			String wstr = "";
-			for (int wi = 0; wi < sm.w.length; wi++) {
-				wstr += (wi + ":" + sm.w[wi] + " ");
-			}
-			logger.info("wstr:" + wstr);
+			//String wstr = "";
+			//for (int wi = 0; wi < sm.w.length; wi++) {
+			//	wstr += (wi + ":" + sm.w[wi] + " ");
+			//}
+			//logger.info("wstr:" + wstr);
 		}
 
 		/******************medlda******************/
@@ -836,7 +836,7 @@ public class svm_struct_learn {
 					 */
 					////****medlda add ybar return value************
 					LABEL ybar=find_most_violated_constraint(ex[i], fycache[i], n, sm,sparm);
-					logger.info("ybar label is :"+ybar.class_index);
+					//logger.info("ybar label is :"+ybar.class_index);
 					//***************medlda***********************
 					vecLabel[i] = ybar.class_index - 1;
 					//********************************************
@@ -1096,7 +1096,7 @@ public class svm_struct_learn {
 				logger.info("svmModel kernel_parm is null");
 			}
 
-			logger.info("sv num there:" + svmModel.sv_num);
+			//logger.info("sv num there:" + svmModel.sv_num);
 			// sm.svm_model = svm_common.copy_model(svmModel);
 			sm.svm_model = svmModel;
 			sm.w = sm.svm_model.lin_weights; /* short cut to weight vector */
