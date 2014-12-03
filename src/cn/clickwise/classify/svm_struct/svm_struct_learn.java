@@ -950,6 +950,8 @@ public class svm_struct_learn {
 														  														  														
 				// logger.info("svm_learn_struct_joint call svm_learn_optimization in loop");
 				sl.svm_learn_optimization(cset.lhs, cset.rhs, cset.m, sizePsi,lparm, kparm, null, svmModel, alpha_g);
+				logger.info("after sl.svm_learn_optimization");
+				svm_common.printLvec(svmModel.supvec);
 				kparm.kernel_type = (short) kernel_type_org;
                 svmModel.kernel_parm.kernel_type = (short) kernel_type_org;
 				
@@ -1010,6 +1012,7 @@ public class svm_struct_learn {
 
 			}
 
+			
 			//if (svm_struct_common.struct_verbosity >= 1) {
 				logger.info("(NumConst=" + cset.m + ", SV="+ (svmModel.sv_num - 1) + ", CEps=" + ceps + ", QPEps="+ svmModel.maxdiff + ")\n");
 				System.out.println("(NumConst=" + cset.m + ", SV="+ (svmModel.sv_num - 1) + ", CEps=" + ceps + ", QPEps="+ svmModel.maxdiff + ")\n");
@@ -1025,6 +1028,8 @@ public class svm_struct_learn {
 		} while (cached_constraint != 0|| (ceps > sparm.epsilon)
 				|| svm_struct_api.finalize_iteration(ceps, cached_constraint,sample, sm, cset, alpha_g, sparm));
 
+		logger.info("end train");
+		svm_common.printLvec(svmModel.supvec);
 		/************medlda***********************/
 		if(kparm.kernel_type == svm_common.LINEAR) modellength = svm_common.model_length_n(svmModel);
 		else modellength = svm_common.model_length_s(svmModel);
@@ -1100,12 +1105,19 @@ public class svm_struct_learn {
 
 			/**********medlda***************/
 			/* record the loss-augmented prediction in support vectors. */
+			logger.info("before assiginment");
+			svm_common.printLvec(svmModel.supvec);
 			for ( i=1; i<svmModel.sv_num; i++ ) {
-				sm.svm_model.supvec[i].lvec = new int[n];
-				for ( int d=0; d<n; d++ ) {
-					sm.svm_model.supvec[i].lvec[d] = svmModel.supvec[i].lvec[d];
-				}
+				//sm.svm_model.supvec[i].lvec = new int[n];
+				//logger.info("sl vec i="+i+":"+svmModel.supvec[i].lvecString());
+				sm.svm_model.supvec[i].lvec=svmModel.supvec[i].lvec;
+				//for ( int d=0; d<n; d++ ) {
+				//	sm.svm_model.supvec[i].lvec[d] = svmModel.supvec[i].lvec[d];
+				//}
+				
 			}	
+			logger.info("after assiginment");
+			svm_common.printLvec(svmModel.supvec);
 			
 		}
 		/*

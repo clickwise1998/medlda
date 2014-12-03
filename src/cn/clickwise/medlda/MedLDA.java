@@ -241,7 +241,7 @@ public class MedLDA {
 				lhood = 0;
 				zero_init_ss(ss);
 
-				if(ci>0)
+				if(ci>1)
 				{
 					break;
 				}
@@ -468,8 +468,8 @@ public class MedLDA {
 					 * LDA
 					 */
 					double dVal = compute_mrgterm(doc, docix, n, k, param);
-					phi[n][k] = digamma_gam[k] + m_dLogProbW[k][doc.words[n]];
-							//+ dVal;
+					phi[n][k] = digamma_gam[k] + m_dLogProbW[k][doc.words[n]]
+							+ dVal;
 
 					if (k > 0)
 						phisum = Utils.log_sum(phisum, phi[n][k]);

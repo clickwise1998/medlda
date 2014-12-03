@@ -1751,5 +1751,22 @@ public class svm_common {
 		len = arr.length;
 		return len;
 	}
+	
+	public static void printLvec(DOC[] supvec){
+		String str="supvec abstract:\n";
+		if(supvec==null)
+		{
+			return;
+		}
+		for(int i=0;i<supvec.length;i++)
+		{
+			if(supvec[i]==null)
+			{
+				continue;
+			}
+		   str+=("i="+i+" "+supvec[i].lvecString()+"\n");	
+		}
+		logger.info(str);
+	}
 
 }

@@ -573,9 +573,10 @@ public class svm_learn {
 		learn_parm.svm_cost = new double[totdoc];
 		model.supvec = new DOC[totdoc + 2];
 		model.alpha = new double[totdoc + 2];
-		for (int k = 0; k < model.alpha.length; k++) {
+		//for (int k = 0; k < model.alpha.length; k++) {
 
-		}
+		//}
+		
 		model.index = new int[totdoc + 2];
 
 		model.at_upper_bound = 0;
@@ -601,9 +602,7 @@ public class svm_learn {
 
 			learn_parm.svm_c = 1.0 / (r_delta_avg * r_delta_avg);
 			if (svm_common.verbosity >= 1) {
-				System.out
-						.println("Setting default regularization parameter C="
-								+ learn_parm.svm_c);
+				System.out.println("Setting default regularization parameter C="+ learn_parm.svm_c);
 			}
 		}
 
@@ -619,16 +618,14 @@ public class svm_learn {
 			// System.out.println("the c[i] is "+c[i]);
 			unlabeled[i] = 0;
 			inconsistent[i] = 0;
-			learn_parm.svm_cost[i] = learn_parm.svm_c
-					* learn_parm.svm_costratio * docs[i].costfactor;
+			learn_parm.svm_cost[i] = learn_parm.svm_c* learn_parm.svm_costratio * docs[i].costfactor;
 			label[i] = 1;
 		}
 
 		if (learn_parm.sharedslack != 0) {
 			for (i = 0; i < totdoc; i++) {
 				if (docs[i].slackid == 0) {
-					System.err
-							.println("Error: Missing shared slacks definitions in some of the examples.");
+					System.err.println("Error: Missing shared slacks definitions in some of the examples.");
 					System.exit(0);
 				}
 			}
@@ -697,8 +694,11 @@ public class svm_learn {
 			// logger.info("doc:"+t+"  "+docs[t].fvec.toString());
 			// }
 			// logger.info("learn_parm.svm_maxqpsize 11:"+learn_parm.svm_maxqpsize+" learn_parm.svm_newvarsinqp:"+learn_parm.svm_newvarsinqp);
+			logger.info("before calculate svm model");
 			calculate_svm_model(docs, label, unlabeled, lin, alpha, a, c,
 					learn_parm, index2dnum, index2dnum, model);
+			logger.info("after calculate svm model");
+			svm_common.printLvec(model.supvec);
 			// logger.info("learn_parm.svm_maxqpsize 12:"+learn_parm.svm_maxqpsize+" learn_parm.svm_newvarsinqp:"+learn_parm.svm_newvarsinqp);
 			for (i = 0; i < totdoc; i++) {
 				a[i] = alpha[i];
@@ -724,17 +724,21 @@ public class svm_learn {
 		}
 		// // learn_parm.sharedslack=0;
 		if (learn_parm.sharedslack != 0) {
-			// logger.info("learn  sharedslack");
+			 logger.info("learn  sharedslack");
 			iterations = optimize_to_convergence_sharedslack(docs, label,
 					totdoc, totwords, learn_parm, kernel_parm, kernel_cache,
 					shrink_state, model, a, lin, c, timing_profile);
+			logger.info("after optimize_to_convergence_sharedslack");
+			svm_common.printLvec(model.supvec);
 
 		} else {
-			// logger.info("learn not sharedslack");
+			 logger.info("learn not sharedslack");
 			// logger.info("learn_parm.svm_maxqpsize2:"+learn_parm.svm_maxqpsize+" learn_parm.svm_newvarsinqp:"+learn_parm.svm_newvarsinqp);
 			iterations = optimize_to_convergence(docs, label, totdoc, totwords,
 					learn_parm, kernel_parm, kernel_cache, shrink_state, model,
 					inconsistent, unlabeled, a, lin, c, timing_profile, -1, 1);
+			logger.info("after optimize_to_convergence");
+			svm_common.printLvec(model.supvec);
 
 		}
 
@@ -883,6 +887,9 @@ public class svm_learn {
 				alpha_g[j] = alpha[j];
 			}
 		}
+		
+		logger.info("end svm learn optimization");
+		svm_common.printLvec(model.supvec);
 
 	}
 
@@ -1200,6 +1207,7 @@ public class svm_learn {
 			} else if ((a_old[i] == 0) && (a[i] > 0)) {
 				/** add to model **/
 				model.supvec[model.sv_num] = docs[i];
+				//logger.info("lvec i:"+i+" "+docs[i].lvecString());
 				model.alpha[model.sv_num] = a[i] * ((double) label[i]);
 				// logger.info("model.alpha["+model.sv_num+"]="+
 				// model.alpha[model.sv_num]);
@@ -1227,11 +1235,16 @@ public class svm_learn {
 				b_calculated = 1;
 			}
 
-			supvec_str += (ii + ":" + i + ":" + model.supvec[i] + " ");
+			/*
+			if(model.supvec[i]!=null)
+			{
+			 supvec_str += (ii + ":" + i + ":" + model.supvec[i].lvecString() + " ");
+			}
+			
 			alpha_str += (ii + ":" + i + ":" + model.alpha[i] + " ");
 			index_str += (ii + ":" + i + ":" + model.index[i] + " ");
 			svm_cost_str += (ii + ":" + i + ":" + learn_parm.svm_cost[i] + " ");
-
+            */
 		}
 
 		// logger.info("supvec_str:"+supvec_str);

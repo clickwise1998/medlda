@@ -33,5 +33,20 @@ public class DOC {
 		}
 		return ndoc;
 	}
+	
+	public String lvecString()
+	{
+		String str="";
+		if(lvec==null)
+		{
+			return "";
+		}
+		for(int i=0;i<100;i++)
+		{
+			str+=(i+":"+lvec[i]+" ");
+		}
+		
+		return str;
+	}
 
 }
