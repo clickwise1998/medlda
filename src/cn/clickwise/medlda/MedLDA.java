@@ -46,6 +46,8 @@ public class MedLDA {
 
 	private double[][] m_dLogProbW;
 
+	private double[] wprob;
+	
 	private double m_dDeltaEll;
 
 	private static final int NUM_INIT = 1;
@@ -86,13 +88,28 @@ public class MedLDA {
 			double dVal = 0;
 			for (int n = 0; n < doc.getLength(); n++) {
 				ss.class_word[k][doc.words[n]] += doc.counts[n] * phi[n][k];
-				ss.class_total[k] += doc.counts[n] * phi[n][k];
+				//ss.class_total[k] += doc.counts[n] * phi[n][k];
+				/*******wordnut**********/
+				ss.class_total[k] += doc.counts[n] * phi[n][k]*wprob[doc.words[n]];
+				
 				dVal += phi[n][k] * (double) doc.counts[n]/ (double) doc.getTotal();
 			}
 
 			// suff-stats for supervised LDA
 			ss.exp[ss.num_docs][k] = dVal;
 
+		}
+		
+		
+		for(int n=0;n<doc.words.length;n++)
+		{
+			double wval=0;
+			for(int k=0;k<m_nK;k++)
+			{
+				wval+=compute_wprob_mrgterm(doc, phi,ss.getNum_docs(), n, k,
+						param);
+			}
+			ss.wprob_suffstats[doc.words[n]]+=wval;
 		}
 
 		ss.num_docs = ss.num_docs + 1;
@@ -163,6 +180,12 @@ public class MedLDA {
 			//for (k = 0; k < m_nK; k++) {
 			//	logger.info(m_alpha[k]);
 			//}
+		}
+		
+		//update wprob parameters
+		for( w=0;w<m_nNumTerms;w++)
+		{
+			wprob[w]+=ss.wprob_suffstats[w];
 		}
 
 		boolean bRes = true;
@@ -573,8 +596,10 @@ public class MedLDA {
 			for (int m = 0; m < m_nLabelNum; m++) {
 				int muIx = d * m_nLabelNum + m;
 				int etaIx = m * m_nK + k;
-
-				dval += m_dMu[muIx] * (m_dEta[gndetaIx] - m_dEta[etaIx]);
+				//dval += m_dMu[muIx] * (m_dEta[gndetaIx] - m_dEta[etaIx]);
+				
+				/************wordnut***************/
+				dval += m_dMu[muIx] * (m_dEta[gndetaIx] - m_dEta[etaIx])*wprob[doc.words[n]];
 			}
 		} else {
 			int etaIx = doc.lossAugLabel * m_nK + k;
@@ -586,6 +611,31 @@ public class MedLDA {
 		return dval;
 	}
 
+	public double compute_wprob_mrgterm(Document doc, double[][] phi,int d, int n, int k,
+			Params param) {
+		double dval = 0;
+		int gndetaIx = doc.gndlabel * m_nK + k;
+		param.PHI_DUALOPT = 1;
+
+		if (param.PHI_DUALOPT == 1) {
+			for (int m = 0; m < m_nLabelNum; m++) {
+				int muIx = d * m_nLabelNum + m;
+				int etaIx = m * m_nK + k;
+				//dval += m_dMu[muIx] * (m_dEta[gndetaIx] - m_dEta[etaIx]);
+				
+				/************wordnut***************/
+				dval += m_dMu[muIx] * (m_dEta[gndetaIx] - m_dEta[etaIx])*phi[n][k];
+			}
+		} else {
+			int etaIx = doc.lossAugLabel * m_nK + k;
+			dval = m_dC * (m_dEta[gndetaIx] - m_dEta[etaIx]);
+		}
+
+		dval = dval * doc.counts[n] / doc.total;
+
+		return dval;
+	}
+	
 	public double compute_lhood(Document doc, double[][] phi, double[] var_gamma) {
 
 		double lhood = 0, digsum = 0, var_gamma_sum = 0, alpha_sum = 0;
@@ -716,8 +766,9 @@ public class MedLDA {
 		m_dLogProbW = new double[num_topics][num_terms];
 		m_dEta = new double[num_topics * num_labels];// Eta使用向量存储二维矩阵，行是主题，列是标记，元素
 		// [i*num_labels + j]指主题i和标记j的转换概率
-		m_dMu = new double[num_docs * num_labels];// Mu使用向量存储二维矩阵，行是文档，列是标记，元素[i*num_labels
-													// + j]
+		m_dMu = new double[num_docs * num_labels];// Mu使用向量存储二维矩阵，行是文档，列是标记，元素[i*num_labels + j]
+		wprob=new double[num_terms];
+		
 		// 指文档i和标记j之间的关系值
 		for (i = 0; i < num_topics; i++) {
 			for (j = 0; j < num_terms; j++)
@@ -728,6 +779,9 @@ public class MedLDA {
 		for (i = 0; i < num_docs; i++)
 			for (j = 0; j < num_labels; j++)
 				m_dMu[i * num_labels + j] = 0;
+		
+		for(i=0;i<num_terms;i++)
+			wprob[i]=Math.random();
 
 		m_nDim = num_docs;
 		m_dC = C;
@@ -807,6 +861,12 @@ public class MedLDA {
 		for (int k = 0; k < c.num_docs; k++) {
 			ss.y[k] = c.docs[k].gndlabel;
 		}
+		
+		ss.wprob_suffstats=new double[m_nNumTerms];
+        for(int k=0;k<m_nNumTerms;k++)
+        {
+        	ss.wprob_suffstats[k]=Math.random();
+        }
 
 	}
 
@@ -823,7 +883,11 @@ public class MedLDA {
 		for (int i = 0; i < ss.alpha_suffstats.length; i++) {
 			ss.alpha_suffstats[i] = 0;
 		}
-
+		
+        for(int k=0;k<m_nNumTerms;k++)
+        {
+        	ss.wprob_suffstats[k]=0;
+        }
 	}
 
 	public void load_model(String model_root) {
@@ -1172,6 +1236,16 @@ public class MedLDA {
 			fileptr.printf( "\n");
 			fileptr.printf( "C %5.10f\n", m_dC);
 			fileptr.close();
+			
+			/***********wordnut***************/
+			filename=model_root+".wwei";
+			fileptr=new PrintWriter(new FileWriter(filename));
+			for(int w=0;w< m_nNumTerms;w++)
+			{
+				fileptr.printf( "%d:%5.10f ",w,wprob[w]);
+			}
+			fileptr.close();
+			
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -1356,6 +1430,14 @@ public class MedLDA {
 
 	public void setM_dDeltaEll(double m_dDeltaEll) {
 		this.m_dDeltaEll = m_dDeltaEll;
+	}
+
+	public double[] getWprob() {
+		return wprob;
+	}
+
+	public void setWprob(double[] wprob) {
+		this.wprob = wprob;
 	}
 
 }

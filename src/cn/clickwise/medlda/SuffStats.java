@@ -10,9 +10,10 @@ public class SuffStats {
 	
 	//alpha的充分统计量
 	public double[] alpha_suffstats;
-	
-	
+		
 	public int num_docs;
+	
+	public double[] wprob_suffstats;
 	
 	/**
 	 * exp应该是sum{z1,...,zn}
