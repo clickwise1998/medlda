@@ -109,7 +109,8 @@ public class MedLDA {
 				wval+=compute_wprob_mrgterm(doc, phi,ss.getNum_docs(), n, k,
 						param);
 			}
-			ss.wprob_suffstats[doc.words[n]]+=wval;
+
+			  ss.wprob_suffstats[doc.words[n]]+=wval;
 		}
 
 		ss.num_docs = ss.num_docs + 1;
@@ -181,13 +182,14 @@ public class MedLDA {
 			//	logger.info(m_alpha[k]);
 			//}
 		}
-		
+	
 		//update wprob parameters
 		for( w=0;w<m_nNumTerms;w++)
 		{
-			wprob[w]+=ss.wprob_suffstats[w];
+			wprob[w]=-ss.wprob_suffstats[w];
 		}
-
+		normalizeWprob();
+		//
 		boolean bRes = true;
 		if (!bInit) {
 			svmStructSolver(ss, param, m_dMu);
@@ -195,7 +197,30 @@ public class MedLDA {
 
 		return bRes;
 	}
-
+	
+	public void normalizeWprob()
+	{
+		double sum=0;
+		
+		for(int w=0;w<m_nNumTerms;w++)
+		{
+		  if(wprob[w]>50)
+		  {
+			  wprob[w]=50;
+		  }
+		}
+		for(int w=0;w<m_nNumTerms;w++)
+		{
+		  sum+=Math.exp(wprob[w]);
+		}
+		
+		for(int w=0;w<m_nNumTerms;w++)
+		{
+	
+			wprob[w]=((Math.exp(wprob[w])*((double)m_nNumTerms))/sum);	
+		}
+	}
+     
 	public int run_em(String start, String directory, Corpus corpus,
 			Params param) {
 
@@ -302,7 +327,6 @@ public class MedLDA {
 				// output model and lhood
 				likelihood_file.printf("%10.10f\t%5.5e\n", lhood, converged);
 				likelihood_file.flush();
-
 				i++;
 
 			}
@@ -626,10 +650,7 @@ public class MedLDA {
 				/************wordnut***************/
 				dval += m_dMu[muIx] * (m_dEta[gndetaIx] - m_dEta[etaIx])*phi[n][k];
 			}
-		} else {
-			int etaIx = doc.lossAugLabel * m_nK + k;
-			dval = m_dC * (m_dEta[gndetaIx] - m_dEta[etaIx]);
-		}
+		} 
 
 		dval = dval * doc.counts[n] / doc.total;
 
