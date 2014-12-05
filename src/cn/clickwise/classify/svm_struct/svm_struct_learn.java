@@ -1156,6 +1156,7 @@ public class svm_struct_learn {
 		}
 		
 		System.gc();
+		Runtime.getRuntime().gc() ;
 		try{
 		Thread.sleep(5000);
 		}
