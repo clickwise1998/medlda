@@ -20,6 +20,7 @@ import cn.clickwise.classify.svm_struct.svm_common;
 import cn.clickwise.classify.svm_struct.svm_struct_api;
 import cn.clickwise.classify.svm_struct.svm_struct_common;
 import cn.clickwise.classify.svm_struct.svm_struct_learn;
+import cn.clickwise.classify.svm_struct.svmconfig;
 import cn.clickwise.math.random.SeedRandom;
 import cn.clickwise.str.basic.SSO;
 import cn.clickwise.time.utils.TimeOpera;
@@ -1149,9 +1150,12 @@ public class MedLDA {
 		} else if (param.SVM_ALGTYPE == 2) {
 			struct_parm.C = m_dC * ss.num_docs; // Note: in n-slack formulation,
 												// C is not divided by N.
+			svmconfig.sucessful=true;
+			
 			sl.svm_learn_struct_joint(sample, struct_parm, learn_parm,
 					kernel_parm, structmodel,
 					svm_struct_learn.ONESLACK_PRIMAL_ALG);
+			
 		}
 
 		int nVar = ss.num_docs * m_nLabelNum;
@@ -1212,6 +1216,8 @@ public class MedLDA {
 
 			m_dsvm_primalobj = structmodel.primalobj;
 			sl=null;
+			sample=null;
+			structmodel=null;
 		} catch (Exception e) {
 			e.printStackTrace();
 		}

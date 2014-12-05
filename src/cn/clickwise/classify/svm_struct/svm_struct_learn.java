@@ -1022,7 +1022,7 @@ public class svm_struct_learn {
 			//if (ceps < 0.5) {
 			//	break;
 			//}
-			
+
 			
 		} while (cached_constraint != 0|| (ceps > sparm.epsilon)
 				|| svm_struct_api.finalize_iteration(ceps, cached_constraint,sample, sm, cset, alpha_g, sparm));
@@ -1128,7 +1128,40 @@ public class svm_struct_learn {
 		
 		/**clear****/
 		//sl=null;
-		
+		lhs_n=null;
+		ccache_g=null;
+	    rhs_g = 0;
+		lhs_g = null;
+		rt_cachesum_g = 0;
+		rhs_i_g=0;
+		rt_viol_g=0;
+		rt_psi_g=0;	
+		argmax_count_g=0;
+	    fydelta_g = null;
+		alpha_g = null;
+		alphahist_g = null;
+		remove_g = null;
+		if(cset!=null)
+		{
+		for(int cl=0;cl<cset.lhs.length;cl++)
+		{
+			cset.lhs[cl]=null;
+		}
+		cset.rhs=null;
+		cset=null;
+		}
+		if(kparm!=null)
+		{
+			kparm.gram_matrix=null;
+		}
+		System.gc();
+		try{
+		Thread.sleep(5000);
+		}
+		catch(Exception e)
+		{
+			e.printStackTrace();
+		}
 	}
 
 	public void remove_inactive_constraints(CONSTSET cset, int currentiter,

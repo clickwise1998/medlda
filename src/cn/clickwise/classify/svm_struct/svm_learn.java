@@ -3268,7 +3268,8 @@ public class svm_learn {
 
 		for (; (retrain != 0) && (terminate == 0); iteration++) {
 
-			
+			svmconfig.iterations++;
+
 			 for(int ci=0;ci<totdoc;ci++)
              {
                 selcrit[ci]=0.0;
