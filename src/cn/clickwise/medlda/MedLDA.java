@@ -1211,7 +1211,7 @@ public class MedLDA {
 			}
 
 			m_dsvm_primalobj = structmodel.primalobj;
-
+			sl=null;
 		} catch (Exception e) {
 			e.printStackTrace();
 		}

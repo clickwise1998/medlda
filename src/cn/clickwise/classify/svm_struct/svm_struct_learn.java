@@ -1125,6 +1125,10 @@ public class svm_struct_learn {
 		{
 		  svm_struct_api.print_struct_learning_stats(sample, sm, cset, alpha_g,sparm);
 		}
+		
+		/**clear****/
+		//sl=null;
+		
 	}
 
 	public void remove_inactive_constraints(CONSTSET cset, int currentiter,

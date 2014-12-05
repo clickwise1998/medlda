@@ -1314,7 +1314,7 @@ public class svm_learn {
 			int[] inconsistent, int[] unlabeled, double[] a, double[] lin,
 			double[] c, TIMING timing_profile, int heldout, int retrain) {
 
-		// logger.info("in optimize_to_convergence");
+		 logger.info("in optimize_to_convergence");
 		/*
 		 * if(docs!=null) { logger.info("docs.size:"+docs.length); for(int
 		 * i=0;i<docs.length;i++) {
@@ -3149,7 +3149,7 @@ public class svm_learn {
 			KERNEL_PARM kernel_parm, KERNEL_CACHE kernel_cache,
 			SHRINK_STATE shrink_state, MODEL model, double[] a, double[] lin,
 			double[] c, TIMING timing_profile) {
-		//logger.info("in optimize_to_convergence_sharedslack");
+		logger.info("in optimize_to_convergence_sharedslack");
 		int[] chosen;
 		int[] key;
 		int i, j, jj;
