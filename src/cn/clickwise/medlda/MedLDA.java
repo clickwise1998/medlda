@@ -5,6 +5,7 @@ import java.io.FileInputStream;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.PrintWriter;
+import java.util.Random;
 import java.util.Scanner;
 import java.util.Vector;
 
@@ -19,6 +20,7 @@ import cn.clickwise.classify.svm_struct.svm_common;
 import cn.clickwise.classify.svm_struct.svm_struct_api;
 import cn.clickwise.classify.svm_struct.svm_struct_common;
 import cn.clickwise.classify.svm_struct.svm_struct_learn;
+import cn.clickwise.math.random.SeedRandom;
 import cn.clickwise.str.basic.SSO;
 import cn.clickwise.time.utils.TimeOpera;
 
@@ -802,7 +804,7 @@ public class MedLDA {
 				m_dMu[i * num_labels + j] = 0;
 		
 		for(i=0;i<num_terms;i++)
-			wprob[i]=Math.random();
+			wprob[i]=SeedRandom.getRandom();
 
 		m_nDim = num_docs;
 		m_dC = C;
@@ -841,7 +843,7 @@ public class MedLDA {
 
 		for (k = 0; k < num_topics; k++) {
 			for (i = 0; i < NUM_INIT; i++) {
-				d = (int) Math.floor(Math.random() * (c.num_docs));
+				d = (int) Math.floor(SeedRandom.getRandom() * (c.num_docs));
 				doc = c.docs[d];
 				for (n = 0; n < doc.length; n++) {
 					ss.class_word[k][doc.words[n]] += doc.counts[n];
@@ -866,12 +868,14 @@ public class MedLDA {
 	}
 
 	public void random_init_ss(SuffStats ss, Corpus c) {
+
+		
 		//logger.info("in random_init_ss");
 		int num_topics = m_nK;
 		int num_terms = m_nNumTerms;
 		for (int k = 0; k < num_topics; k++) {
 			for (int n = 0; n < num_terms; n++) {
-				ss.class_word[k][n] += (10.0 + Math.random());
+				ss.class_word[k][n] += (10.0 +SeedRandom.getRandom());
 				ss.class_total[k] += ss.class_word[k][n];
 			}
 		}
@@ -886,7 +890,7 @@ public class MedLDA {
 		ss.wprob_suffstats=new double[m_nNumTerms];
         for(int k=0;k<m_nNumTerms;k++)
         {
-        	ss.wprob_suffstats[k]=Math.random();
+        	ss.wprob_suffstats[k]=SeedRandom.getRandom();
         }
 
 	}
