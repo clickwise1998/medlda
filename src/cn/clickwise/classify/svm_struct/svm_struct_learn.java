@@ -1154,6 +1154,7 @@ public class svm_struct_learn {
 		{
 			kparm.gram_matrix=null;
 		}
+		
 		System.gc();
 		try{
 		Thread.sleep(5000);
