@@ -11,6 +11,7 @@ import java.util.regex.Pattern;
 
 import org.apache.log4j.Logger;
 
+import cn.clickwise.math.random.SeedRandom;
 import cn.clickwise.str.basic.SSO;
 import cn.clickwise.time.utils.TimeOpera;
 
@@ -1524,7 +1525,7 @@ public class svm_common {
 
 		for (i = 0; i < n; i++) {
 			randpair[i].val = i;
-			randpair[i].sort = Math.random();
+			randpair[i].sort = SeedRandom.getRandom();
 		}
 
 		SortWordArr.sort_double_array(randpair);

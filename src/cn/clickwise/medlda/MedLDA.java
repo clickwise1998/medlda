@@ -188,9 +188,9 @@ public class MedLDA {
 		//update wprob parameters
 		for( w=0;w<m_nNumTerms;w++)
 		{
-			wprob[w]=ss.wprob_suffstats[w];
+			wprob[w]+=ss.wprob_suffstats[w];
 		}
-		normalizeWprob();
+		//normalizeWprob();
 		//
 		boolean bRes = true;
 		if (!bInit) {
