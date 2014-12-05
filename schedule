@@ -8,3 +8,7 @@ to do:
 	test:inf 4 temp120_c16_f10
 	
  先掉部分单词，再考虑结构化的label问题	
+ 
+ to do:
+   先不改svm部分
+   争取解决掉优化有时间会死锁的问题
