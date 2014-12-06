@@ -1138,6 +1138,7 @@ public class svm_common {
 				sum = multadd_ss_r(oldsum, f, 1.0, f.factor, min_non_zero);
 				// logger.info("ii="+ii+"sum d:"+sum.toString());
 				ii++;
+				oldsum=null;
 			}
 		}
 		return (sum);
