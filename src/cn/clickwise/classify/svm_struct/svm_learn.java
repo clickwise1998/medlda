@@ -883,9 +883,35 @@ public class svm_learn {
 			}
 		}
 		
+		if(shrink_state!=null)
+		{
+		  shrink_state_cleanup(shrink_state);
+		}
+		label=null;
+		unlabeled=null;
+		inconsistent=null;
+		c=null;
+		a=null;
+		lin=null;
+		if(learn_parm!=null)
+		{
+		  learn_parm.svm_cost=null;
+		}
 
 	}
 
+	public void shrink_state_cleanup(SHRINK_STATE shrink_state)
+	{
+		shrink_state.active=null;
+		shrink_state.inactive_since=null;
+		
+		if(shrink_state.deactnum > 0) 
+			shrink_state.a_history[shrink_state.deactnum-1]=null;
+		shrink_state.a_history=null;
+		shrink_state.last_a=null;
+		shrink_state.last_lin=null;
+	}
+	
 	public void init_shrink_state(SHRINK_STATE shrink_state, int totdoc,
 			int maxhistory) {
 		int i;
@@ -3642,6 +3668,35 @@ public class svm_learn {
 
 		}
 
+		alphaslack=null;
+		slack=null;
+		chosen=null;
+		unlabeled=null;
+		inconsistent=null;
+		ignore=null;
+		last_suboptimal_at=null;
+		key=null;
+		selcrit=null;
+		selexam=null;
+		a_old=null;
+		aicache=null;
+		working2dnum=null;
+		active2dnum=null;
+		if(qp!=null)
+		{
+		  qp.opt_ce=null;
+		  qp.opt_ce0=null;
+		  qp.opt_g=null;
+		  qp.opt_g0=null;
+		  qp.opt_xinit=null;
+		  qp.opt_low=null;
+		  qp.opt_up=null;
+		}
+		
+		if(weights!=null)
+		{
+			weights=null;
+		}
 		learn_parm.epsilon_crit = epsilon_crit_org; /* restore org */
 		model.maxdiff = maxdiff;
 
