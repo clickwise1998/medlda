@@ -303,7 +303,7 @@ public class MedLDA {
 				lhood = 0;
 				zero_init_ss(ss);
 
-				if(ci>2)
+				if(ci>5)
 				{
 					break;
 				}
