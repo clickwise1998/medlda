@@ -193,7 +193,7 @@ public class svm_hideo {
 
 		if ((result != PRIMAL_OPTIMAL) || (roundnumber % 31 == 0)
 				|| (progress <= 0)) {
-			logger.info("result is not PRIMAL_OPTIMAL");
+			//logger.info("result is not PRIMAL_OPTIMAL");
 			smallroundcount++;
 
 			result = optimize_hildreth_despo(qp.opt_n, qp.opt_m, opt_precision,
@@ -797,12 +797,13 @@ public class svm_hideo {
 		obj_after = calculate_qp_objective(n, g, g0, primal);
 		progress = obj_before - obj_after;
 		// System.out.println("progress:"+progress);
-		verbosity = 5;
+		//verbosity = 5;
+		/*
 		if (verbosity >= 3) {
 			logger.info("before(" + obj_before + ")...after(" + obj_after
 					+ ")...result_sd(" + result + ")...");
 		}
-
+        */
 		return ((int) result);
 	}
 

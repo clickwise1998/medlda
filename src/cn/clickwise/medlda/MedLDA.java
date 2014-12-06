@@ -93,8 +93,14 @@ public class MedLDA {
 				ss.class_word[k][doc.words[n]] += doc.counts[n] * phi[n][k];
 				//ss.class_total[k] += doc.counts[n] * phi[n][k];
 				/*******wordnut**********/
-				ss.class_total[k] += doc.counts[n] * phi[n][k]*wprob[doc.words[n]];
-				
+				if(MedLDAConfig.isWordSelection==false)
+				{
+					ss.class_total[k] += doc.counts[n] * phi[n][k];
+				}
+				else
+				{
+				 ss.class_total[k] += doc.counts[n] * phi[n][k]*wprob[doc.words[n]];
+				}
 				dVal += phi[n][k] * (double) doc.counts[n]/ (double) doc.getTotal();
 			}
 
@@ -187,9 +193,12 @@ public class MedLDA {
 		}
 	
 		//update wprob parameters
-		for( w=0;w<m_nNumTerms;w++)
+		if(MedLDAConfig.isWordSelection==true)
 		{
-			wprob[w]+=ss.wprob_suffstats[w];
+		  for( w=0;w<m_nNumTerms;w++)
+		  {
+			 wprob[w]+=ss.wprob_suffstats[w];
+		  }
 		}
 		//normalizeWprob();
 		//
@@ -203,6 +212,7 @@ public class MedLDA {
 	
 	public void normalizeWprob()
 	{
+		/*
 		double sum=0;
 		
 		for(int w=0;w<m_nNumTerms;w++)
@@ -222,6 +232,7 @@ public class MedLDA {
 	
 			wprob[w]=((Math.exp(wprob[w])*((double)m_nNumTerms))/sum);	
 		}
+		*/
 	}
      
 	public int run_em(String start, String directory, Corpus corpus,
@@ -292,7 +303,7 @@ public class MedLDA {
 				lhood = 0;
 				zero_init_ss(ss);
 
-				if(ci>1)
+				if(ci>2)
 				{
 					break;
 				}
@@ -626,7 +637,14 @@ public class MedLDA {
 				//dval += m_dMu[muIx] * (m_dEta[gndetaIx] - m_dEta[etaIx]);
 				
 				/************wordnut***************/
-				dval += m_dMu[muIx] * (m_dEta[gndetaIx] - m_dEta[etaIx])*wprob[doc.words[n]];
+				if(MedLDAConfig.isWordSelection==false)
+				{
+					dval += m_dMu[muIx] * (m_dEta[gndetaIx] - m_dEta[etaIx]);
+				}
+				else{
+					dval += m_dMu[muIx] * (m_dEta[gndetaIx] - m_dEta[etaIx])*wprob[doc.words[n]];
+				}
+				
 			}
 		} else {
 			int etaIx = doc.lossAugLabel * m_nK + k;
@@ -791,8 +809,10 @@ public class MedLDA {
 		m_dEta = new double[num_topics * num_labels];// Eta使用向量存储二维矩阵，行是主题，列是标记，元素
 		// [i*num_labels + j]指主题i和标记j的转换概率
 		m_dMu = new double[num_docs * num_labels];// Mu使用向量存储二维矩阵，行是文档，列是标记，元素[i*num_labels + j]
-		wprob=new double[num_terms];
-		
+		if(MedLDAConfig.isWordSelection==true)
+		{
+		  wprob=new double[num_terms];
+		}
 		// 指文档i和标记j之间的关系值
 		for (i = 0; i < num_topics; i++) {
 			for (j = 0; j < num_terms; j++)
@@ -804,9 +824,11 @@ public class MedLDA {
 			for (j = 0; j < num_labels; j++)
 				m_dMu[i * num_labels + j] = 0;
 		
-		for(i=0;i<num_terms;i++)
-			wprob[i]=SeedRandom.getRandom();
-
+		if(MedLDAConfig.isWordSelection==true)
+		{
+		  for(i=0;i<num_terms;i++)
+			 wprob[i]=SeedRandom.getRandom();
+		}
 		m_nDim = num_docs;
 		m_dC = C;
 	}
@@ -1018,7 +1040,8 @@ public class MedLDA {
 		learn_parm.svm_maxqpsize = 10;
 		learn_parm.svm_newvarsinqp = 0;
 		learn_parm.svm_iter_to_shrink = -9999;
-		learn_parm.maxiter = 100000;
+		//learn_parm.maxiter = 100000;//origin set may be too big sometimes may be lost in local optimization so make the optimization slow  
+		learn_parm.maxiter = 10000;
 		learn_parm.kernel_cache_size = 40;
 		learn_parm.svm_c = 99999999; /* overridden by struct_parm->C */
 		learn_parm.eps = 0.001; /* overridden by struct_parm->epsilon */
@@ -1269,13 +1292,16 @@ public class MedLDA {
 			fileptr.close();
 			
 			/***********wordnut***************/
-			filename=model_root+".wwei";
-			fileptr=new PrintWriter(new FileWriter(filename));
-			for(int w=0;w< m_nNumTerms;w++)
+			if(MedLDAConfig.isWordSelection==true)
 			{
+			  filename=model_root+".wwei";
+			  fileptr=new PrintWriter(new FileWriter(filename));
+			  for(int w=0;w< m_nNumTerms;w++)
+			  {
 				fileptr.printf( "%d:%5.10f ",w,wprob[w]);
-			}
+			  }
 			fileptr.close();
+			}
 			
 		} catch (Exception e) {
 			e.printStackTrace();

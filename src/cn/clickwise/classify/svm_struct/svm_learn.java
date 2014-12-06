@@ -1934,10 +1934,10 @@ public class svm_learn {
 				//		+ learn_parm.eps + " c=" + c[j] + " lin=" + lin[j]);
 				//logger.info("activedoc=" + activedoc + " selcrit="
 				//		+ selcrit[activedoc] + " key=" + key[activedoc]);
-				if (Math.abs(selcrit[activedoc]) > (double) (0.5)) {
+				//if (Math.abs(selcrit[activedoc]) > (double) (0.5)) {//0.5 set may be bug
 					key[activedoc] = j;
 					activedoc++;
-				}
+				//}
 			}
 		}
 
@@ -1977,20 +1977,18 @@ public class svm_learn {
 					&& (!((a[j] >= (learn_parm.svm_cost[j] - learn_parm.epsilon_a)) && (s > 0)))
 					&& (chosen[j] == 0) && (label[j] != 0)
 					&& (inconsistent[j] == 0)) {
-				selcrit[activedoc] = -(double) label[j]
-						* (learn_parm.eps - (double) label[j] * c[j] + (double) label[j]
-								* lin[j]);
+				selcrit[activedoc] = -(double) label[j]* (learn_parm.eps - (double) label[j] * c[j] + (double) label[j]* lin[j]);
 
 				/*
 				 * selcrit[activedoc]=-(double)(label[j]*(-1.0+(double)label[j]*lin
 				 * [j]));
 				 */
 				//logger.info("activedoc=" + activedoc + "key=" + key[activedoc]);
-				if (Math.abs(selcrit[activedoc]) > (double)( 0.5)) {
+				//if (Math.abs(selcrit[activedoc]) > (double)( 0.5)) {//0.5 set may be bug
 					key[activedoc] = j;
 					// logger.info("key2["+activedoc+"]="+j);
 					activedoc++;
-				}
+				//}
 			}
 		}
 
@@ -3309,7 +3307,7 @@ public class svm_learn {
 			if (svm_common.verbosity >= 0) {
 				//if (iteration % 51 == 0) {
 					//System.out.println("Iteration " + iteration + ": ");
-					logger.info("Iteration " + iteration + ": ");
+				//	logger.info("Iteration " + iteration + ": ");
 				//}
 			} else if (svm_common.verbosity == 1) {
 				System.out.println(".");
@@ -3733,8 +3731,10 @@ public class svm_learn {
 			//logger.info("jj=" + jj + " i=" + i + " lin=" + lin[i] + " dist="
 			//		+ dist + " c=" + c[i] + " eps=" + learn_parm.eps
 			//		+ " target:" + target + " slack=" + slack[docs[i].slackid]);
-			if (((target - dist) > slack[docs[i].slackid])
-					&& Math.abs(target - dist) > (double) (0.5)) {
+			//if (((target - dist) > slack[docs[i].slackid])
+				//	&& Math.abs(target - dist) > (double) (0.5)) 
+			if ((target - dist) > slack[docs[i].slackid])//0.5 set may be bug 
+			{
 
 				//slack[docs[i].slackid] = WU.sub(target, dist);
 				slack[docs[i].slackid]=target-dist;

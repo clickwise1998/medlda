@@ -343,7 +343,7 @@ public class svm_struct_main {
 			print_help();
 			System.exit(1);
 		}
-		//svmconfig.model_type=1;
+		svmconfig.model_type=1;
 		SAMPLE sample; /* training sample */
 		LEARN_PARM learn_parm = new LEARN_PARM();
 		KERNEL_PARM kernel_parm = new KERNEL_PARM();
