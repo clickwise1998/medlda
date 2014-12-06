@@ -1138,6 +1138,7 @@ public class svm_common {
 				sum = multadd_ss_r(oldsum, f, 1.0, f.factor, min_non_zero);
 				// logger.info("ii="+ii+"sum d:"+sum.toString());
 				ii++;
+				oldsum=null;
 			}
 		}
 		return (sum);
@@ -1495,6 +1496,7 @@ public class svm_common {
 				sum = create_svector_shallow(concat, null, 1.0);
 			} else { /* this is more memory efficient */
 				sum = create_svector(concat, null, 1.0);
+				concat=null;
 			}
 		} else {
 			empty[0].wnum = 0;
@@ -1533,6 +1535,7 @@ public class svm_common {
 			randarray[i] = randpair[i].val;
 		}
 
+		randpair=null;
 		return (randarray);
 	}
 
@@ -1595,7 +1598,8 @@ public class svm_common {
 			add_vector_ns(sum, f, f.factor);
 
 		vec = create_svector_n_r(sum, totwords, null, 1.0, min_non_zero);
-
+        sum=null;
+        
 		return (vec);
 	}
 
@@ -1610,6 +1614,10 @@ public class svm_common {
 		if (matrix == null)
 			return (create_matrix(n, m));
 
+		for(i=n;i<matrix.n;i++)
+		{
+			matrix.element[i]=null;
+		}
 		matrix.element = realloc_matrix_row(matrix.element, n, matrix.m, m);
 
 		matrix.n = n;
@@ -1639,7 +1647,7 @@ public class svm_common {
 
 	}
 
-	public static double model_length_n(MODEL model)
+	public  double model_length_n(MODEL model)
 	/* compute length of weight vector */
 	{
 		int i, totwords = model.totwords + 1;
@@ -1656,10 +1664,24 @@ public class svm_common {
 			add_list_n_ns(weight_n, model.supvec[i].fvec, model.alpha[i]);
 		weight = create_svector_n(weight_n, totwords, null, 1.0);
 		sum = sprod_ss(weight, weight);
-
+        weight_n=null;
+        free_svector(weight);
 		return (Math.sqrt(sum));
 	}
 
+	public void free_svector(SVECTOR vec)
+	{
+	  SVECTOR next;
+	  while(vec!=null) {
+	    if(vec.words!=null)
+	      vec.words=null;
+	    if(vec.userdefined!=null)
+	      vec.userdefined=null;
+	    next=vec.next;
+	    vec=null;
+	    vec=next;
+	  }
+	}
 	public  MODEL read_model(String modelfile) {
 
 		MODEL model = new MODEL();

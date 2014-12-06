@@ -1039,7 +1039,7 @@ public class svm_struct_learn {
 
 
 		/************medlda***********************/
-		if(kparm.kernel_type == svm_common.LINEAR) modellength = svm_common.model_length_n(svmModel);
+		if(kparm.kernel_type == svm_common.LINEAR) modellength = sc.model_length_n(svmModel);
 		else modellength = sc.model_length_s(svmModel);
 		sm.primalobj = 0.5*modellength*modellength + sparm.C*viol;
 		/****************************************/
@@ -1054,7 +1054,7 @@ public class svm_struct_learn {
 			for (i = 0; i < cset.m; i++)
 				alphasum += alpha_g[i] * cset.rhs[i];
 			if (kparm.kernel_type == svm_common.LINEAR)
-				modellength = svm_common.model_length_n(svmModel);
+				modellength = sc.model_length_n(svmModel);
 			else
 				modellength = sc.model_length_s(svmModel);
 			dualitygap = (0.5 * modellength * modellength + sparm.C * viol)- (alphasum - 0.5 * modellength * modellength);
