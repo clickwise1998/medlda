@@ -41,9 +41,9 @@ public class svm_hideo {
 	public double[] buffer = null;
 	public int[] nonoptimal = null;
 
-	public static int smallroundcount = 0;
+	public  int smallroundcount = 0;
 
-	public static int roundnumber = 0;
+	public  int roundnumber = 0;
 
 	public short verbosity = 0;
 
