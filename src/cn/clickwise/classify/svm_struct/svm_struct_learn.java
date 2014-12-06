@@ -35,6 +35,16 @@ public class svm_struct_learn {
 	public int[] remove_g = null;
 
 	private static Logger logger = Logger.getLogger(svm_struct_learn.class);
+	
+	public svm_common sc=null;
+	
+	public svm_struct_api ssa=null;
+	
+	public svm_struct_learn()
+	{
+	  sc=new svm_common();	
+	  ssa=new svm_struct_api();
+	}
 
 	public void svm_learn_struct(SAMPLE sample, STRUCT_LEARN_PARM sparm,
 			LEARN_PARM lparm, KERNEL_PARM kparm, STRUCTMODEL sm, int alg_type) {
@@ -210,9 +220,9 @@ public class svm_struct_learn {
 							rt2 = svm_common.get_runtime();
 							argmax_count++;
 							if (sparm.loss_type == SLACK_RESCALING) {
-								ybar = svm_struct_api.find_most_violated_constraint_slackrescaling(ex[i].x, ex[i].y, sm, sparm);
+								ybar = ssa.find_most_violated_constraint_slackrescaling(ex[i].x, ex[i].y, sm, sparm);
 							} else {
-								ybar = svm_struct_api.find_most_violated_constraint_marginrescaling(ex[i].x, ex[i].y, sm, sparm);
+								ybar = ssa.find_most_violated_constraint_marginrescaling(ex[i].x, ex[i].y, sm, sparm);
 							}
 							rt_viol += Math.max(svm_common.get_runtime() - rt2,0);
 
@@ -263,13 +273,13 @@ public class svm_struct_learn {
 							for (j = 0; j < cset.m; j++)
 								if (cset.lhs[j].slackid == i + 1) {
 									if (sparm.slack_norm == 2)
-										slack = Math.max(slack,cset.rhs[j]- (svm_common.classify_example(svmModel,cset.lhs[j]) - sm.w[sizePsi+ i]/ (Math.sqrt(2 * svmCnorm))));
+										slack = Math.max(slack,cset.rhs[j]- (sc.classify_example(svmModel,cset.lhs[j]) - sm.w[sizePsi+ i]/ (Math.sqrt(2 * svmCnorm))));
 									else
-										slack = Math.max(slack,cset.rhs[j]- svm_common.classify_example(svmModel,cset.lhs[j]));
+										slack = Math.max(slack,cset.rhs[j]- sc.classify_example(svmModel,cset.lhs[j]));
 								}
 
 							/**** if `error' add constraint and recompute ****/
-							dist = svm_common.classify_example(svmModel, doc);
+							dist = sc.classify_example(svmModel, doc);
 							ceps = Math.max(ceps, margin - dist - slack);
 							if (slack > (margin - dist + 0.0001)) {
 								logger.debug("\nWARNING: Slack of most violated constraint is smaller than slack of working\n");
@@ -427,11 +437,11 @@ public class svm_struct_learn {
 
 			if (sparm.slack_norm == 1) {
 				for (j = 0; j < cset.m; j++)
-					slacks[cset.lhs[j].slackid] = Math.max(slacks[cset.lhs[j].slackid],cset.rhs[j]- svm_common.classify_example(svmModel,cset.lhs[j]));
+					slacks[cset.lhs[j].slackid] = Math.max(slacks[cset.lhs[j].slackid],cset.rhs[j]- sc.classify_example(svmModel,cset.lhs[j]));
 			} else if (sparm.slack_norm == 2) {
 				for (j = 0; j < cset.m; j++)
 					slacks[cset.lhs[j].slackid] = Math.max(slacks[cset.lhs[j].slackid],cset.rhs[j]
-									- (svm_common.classify_example(svmModel,cset.lhs[j]) - sm.w[sizePsi+ cset.lhs[j].slackid - 1]/ (Math.sqrt(2 * svmCnorm))));
+									- (sc.classify_example(svmModel,cset.lhs[j]) - sm.w[sizePsi+ cset.lhs[j].slackid - 1]/ (Math.sqrt(2 * svmCnorm))));
 			}
 			slacksum = 0;
 			for (i = 1; i <= n; i++)
@@ -440,7 +450,7 @@ public class svm_struct_learn {
 			alphasum = 0;
 			for (i = 0; i < cset.m; i++)
 				alphasum += alpha_g[i] * cset.rhs[i];
-			modellength = svm_common.model_length_s(svmModel);
+			modellength = sc.model_length_s(svmModel);
 			dualitygap = (0.5 * modellength * modellength + svmCnorm* (slacksum + n * ceps))
 					- (alphasum - 0.5 * modellength * modellength);
 
@@ -676,7 +686,7 @@ public class svm_struct_learn {
 			}
 			for (j = 0, slack = -1; (j < cset.m) && (slack == -1); j++) {
 				if (alpha_g[j] > alphasum / cset.m) {
-					slack = Math.max(0,cset.rhs[j]- svm_common.classify_example(svmModel,cset.lhs[j]));
+					slack = Math.max(0,cset.rhs[j]- sc.classify_example(svmModel,cset.lhs[j]));
 				}
 			}
 			slack = Math.max(0, slack);
@@ -726,11 +736,11 @@ public class svm_struct_learn {
 					 */
 					viol_est = 0;
 					progress = 0;
-					svm_common.progress_n = progress;
+					sc.progress_n = progress;
 					viol = compute_violation_of_constraint_in_cache(0);
 					for (j = 0; (j < batch_size)|| ((j < n) && (viol - slack < sparm.epsilon)); j++) {
 						if (svm_struct_common.struct_verbosity >= 1)
-							svm_common.print_percent_progress(n, 10, ".");
+							sc.print_percent_progress(n, 10, ".");
 						uptr = uptr % n;
 						if (randmapping != null)
 							i = randmapping[uptr];
@@ -821,14 +831,14 @@ public class svm_struct_learn {
 				cached_constraint = 0;
 				if (kparm.kernel_type == svm_common.LINEAR)
 					svm_common.clear_nvector(lhs_n, sm.sizePsi);
-				svm_common.progress_n = 0;
+				sc.progress_n = 0;
 				rt_total += Math.max(svm_common.get_runtime() - rt1, 0);
 
 				for (i = 0; i < n; i++) {
 					rt1 = svm_common.get_runtime();
 
 					if (svm_struct_common.struct_verbosity >= 1)
-						svm_common.print_percent_progress(n, 10, ".");
+						sc.print_percent_progress(n, 10, ".");
 				
 					/*
 					 * compute most violating fydelta=fy-fybar and rhs for
@@ -865,7 +875,7 @@ public class svm_struct_learn {
 					// logger.info("kernel type is linear and lhs="+lhs_g.toString());
 				}
 				doc = svm_common.create_example(cset.m, 0, 1, 1, lhs_g);
-				lhsXw = svm_common.classify_example(svmModel, doc);
+				lhsXw = sc.classify_example(svmModel, doc);
 
 				viol = rhs_g - lhsXw;
 
@@ -1029,8 +1039,8 @@ public class svm_struct_learn {
 
 
 		/************medlda***********************/
-		if(kparm.kernel_type == svm_common.LINEAR) modellength = svm_common.model_length_n(svmModel);
-		else modellength = svm_common.model_length_s(svmModel);
+		if(kparm.kernel_type == svm_common.LINEAR) modellength = sc.model_length_n(svmModel);
+		else modellength = sc.model_length_s(svmModel);
 		sm.primalobj = 0.5*modellength*modellength + sparm.C*viol;
 		/****************************************/
 		
@@ -1039,14 +1049,14 @@ public class svm_struct_learn {
 
 			slack = 0;
 			for (j = 0; j < cset.m; j++)
-				slack = Math.max(slack,cset.rhs[j]- svm_common.classify_example(svmModel,cset.lhs[j]));
+				slack = Math.max(slack,cset.rhs[j]- sc.classify_example(svmModel,cset.lhs[j]));
 			alphasum = 0;
 			for (i = 0; i < cset.m; i++)
 				alphasum += alpha_g[i] * cset.rhs[i];
 			if (kparm.kernel_type == svm_common.LINEAR)
-				modellength = svm_common.model_length_n(svmModel);
+				modellength = sc.model_length_n(svmModel);
 			else
-				modellength = svm_common.model_length_s(svmModel);
+				modellength = sc.model_length_s(svmModel);
 			dualitygap = (0.5 * modellength * modellength + sparm.C * viol)- (alphasum - 0.5 * modellength * modellength);
 
 			logger.info("Upper bound on duality gap: " + dualitygap + "\n");
@@ -1234,7 +1244,7 @@ public class svm_struct_learn {
 
 		for (j = 0; j < cset.m; j++) {
 			for (i = j; i < cset.m; i++) {
-				kval = svm_common.kernel(kparm, cset.lhs[j], cset.lhs[i]);
+				kval = sc.kernel(kparm, cset.lhs[j], cset.lhs[i]);
 				matrix.element[j][i] = kval;
 				matrix.element[i][j] = kval;
 			}
@@ -1414,10 +1424,10 @@ public class svm_struct_learn {
 		argmax_count_g++;
 		if (sparm.loss_type == SLACK_RESCALING) {
 			// logger.info("call method find_most_violated_constraint_slackrescaling");
-			ybar = svm_struct_api.find_most_violated_constraint_slackrescaling(ex.x, ex.y, sm, sparm);
+			ybar = ssa.find_most_violated_constraint_slackrescaling(ex.x, ex.y, sm, sparm);
 		} else {
 			// logger.info("call method find_most_violated_constraint_marginrescaling");
-			ybar = svm_struct_api.find_most_violated_constraint_marginrescaling(ex.x, ex.y,sm, sparm);
+			ybar = ssa.find_most_violated_constraint_marginrescaling(ex.x, ex.y,sm, sparm);
 		}
 		if (svm_struct_common.struct_verbosity >= 2)
 			rt_viol_g += Math.max(svm_common.get_runtime() - rt2, 0);
@@ -1462,7 +1472,8 @@ public class svm_struct_learn {
 		// logger.info("fydelta find year:" + fydelta_g.toString());
 		//rhs_i_g = lossval / n;
 		//rhs_i_g = lossval / n;
-		rhs_i_g=WU.div(lossval, n, 20);
+		//rhs_i_g=WU.div(lossval, n, 20);
+		rhs_i_g = lossval / (double)n;
 		// logger.info("rhs_i_g:" + rhs_i_g);
 		// logger.info("end find_most_violated_constraint");
 		return ybar;
@@ -1499,7 +1510,7 @@ public class svm_struct_learn {
 
 		/* compute violation of new constraint */
 		doc_fydelta = svm_common.create_example(1, 0, 1, 1, fydelta_g);
-		dist_ydelta = svm_common.classify_example(svmModel, doc_fydelta);
+		dist_ydelta = sc.classify_example(svmModel, doc_fydelta);
 
 		viol = rhs_i_g - dist_ydelta;
 		viol_gain = viol - ccache_g.constlist[exnum].viol;
@@ -1599,7 +1610,7 @@ public class svm_struct_learn {
 					maxkernelid + 50);
 
 		for (i = 0; i < cset.m; i++) {
-			kval = svm_common.kernel(kparm, cset.lhs[newpos], cset.lhs[i]);
+			kval = sc.kernel(kparm, cset.lhs[newpos], cset.lhs[i]);
 			matrix.element[newid][cset.lhs[i].kernelid] = kval;
 			matrix.element[cset.lhs[i].kernelid][newid] = kval;
 		}
@@ -1630,9 +1641,9 @@ public class svm_struct_learn {
 		// logger.info("ccache_g.n:" + ccache_g.n);
 		for (i = 0; i < ccache_g.n; i++) {
 			/*** example loop ***/
-			svm_common.progress_n = progress;
+			sc.progress_n = progress;
 			if (svm_struct_common.struct_verbosity >= 3)
-				svm_common.print_percent_progress(ccache_g.n, 10, "+");
+				sc.print_percent_progress(ccache_g.n, 10, "+");
 
 			maxviol = 0;
 			prev = null;
@@ -1641,8 +1652,7 @@ public class svm_struct_learn {
 			for (celem = ccache_g.constlist[i]; celem != null; celem = celem.next) {
 				doc_fydelta.fvec = celem.fydelta.copySVECTOR();
 				// logger.info("celem.fydelta:"+celem.fydelta.toString());
-				dist_ydelta = svm_common
-						.classify_example(svmModel, doc_fydelta);
+				dist_ydelta = sc.classify_example(svmModel, doc_fydelta);
 
 				celem.viol = celem.rhs - dist_ydelta;
 

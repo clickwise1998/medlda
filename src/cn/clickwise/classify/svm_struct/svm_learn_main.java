@@ -23,7 +23,7 @@ public class svm_learn_main {
 		svm_common.set_learning_defaults(learn_parm, kernel_parm);
 		modelfile = "svm_model";
 		restartfile = "";
-		svm_common.verbosity = 5;
+		//svm_common.verbosity = 5;
 		type = "c";
 
 		for (i = 1; (i < argc) && ((argv[i].charAt(0)) == '-'); i++) {
@@ -379,12 +379,13 @@ public class svm_learn_main {
 			System.out.println(e.getMessage());
 		}
 
-		docs = svm_common.read_documents(docfile, target);
+		svm_common sc=new svm_common();
+		docs = sc.read_documents(docfile, target);
 
-		target = svm_common.read_target;
+		target = sc.read_target;
 		System.out.println("docs length in main:" + docs.length);
-		totwords = svm_common.read_totwords;
-		totdoc = svm_common.read_totdocs;
+		totwords = sc.read_totwords;
+		totdoc = sc.read_totdocs;
 		/*
 		 * pw.println("docs length:"+docs.length); for(int
 		 * k=0;k<docs.length;k++) { pw.print(k+"  "); if(docs[k]!=null) for(int
@@ -399,7 +400,7 @@ public class svm_learn_main {
 		// }
 		if (restartfile != null) {
 			alpha_in = svm_common.read_alphas(restartfile,
-					svm_common.read_totdocs);
+					sc.read_totdocs);
 		}
 		if (kernel_parm.kernel_type == svm_common.LINEAR) {
 			kernel_cache = null;
@@ -421,7 +422,7 @@ public class svm_learn_main {
 			sl.svm_learn_optimization(docs, target, totdoc, totwords,
 					learn_parm, kernel_parm, kernel_cache, model, alpha_in);
 		}
-		svm_common.write_model(modelfile, model);
+		sc.write_model(modelfile, model);
 	}
 
 }
