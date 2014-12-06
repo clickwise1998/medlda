@@ -1181,19 +1181,13 @@ public class svm_hideo {
 		 */
 
 		for (i = 0; i < opt_n; i++) {
-			obj = WU
-					.sum(obj,WU.mul(opt_g0[i], alpha[i]));
-			obj = WU.sum(
-					obj,
-					WU.mul(
-							0.5,
-							WU.mul(
-									alpha[i],
-									WU.mul(alpha[i], opt_g[i * opt_n
-											+ i]))));
+			//obj = WU.sum(obj,WU.mul(opt_g0[i], alpha[i]));
+			obj+=(opt_g0[i]*alpha[i]);
+			//obj = WU.sum(obj,WU.mul(0.5,WU.mul(alpha[i],WU.mul(alpha[i], opt_g[i * opt_n+ i]))));
+			obj+=(0.5*alpha[i]*alpha[i]*opt_g[i*opt_n+i]);
 			for (j = 0; j < i; j++) {
-				obj =WU.sum(obj, WU.mul(alpha[j],
-						WU.mul(alpha[i], opt_g[j * opt_n + i])));
+				//obj =WU.sum(obj, WU.mul(alpha[j],WU.mul(alpha[i], opt_g[j * opt_n + i])));
+				obj+=(alpha[j]*alpha[i]*opt_g[j*opt_n+i]);
 			}
 		}
 		return (obj);

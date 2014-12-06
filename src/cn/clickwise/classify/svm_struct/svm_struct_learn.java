@@ -1472,7 +1472,8 @@ public class svm_struct_learn {
 		// logger.info("fydelta find year:" + fydelta_g.toString());
 		//rhs_i_g = lossval / n;
 		//rhs_i_g = lossval / n;
-		rhs_i_g=WU.div(lossval, n, 20);
+		//rhs_i_g=WU.div(lossval, n, 20);
+		rhs_i_g = lossval / (double)n;
 		// logger.info("rhs_i_g:" + rhs_i_g);
 		// logger.info("end find_most_violated_constraint");
 		return ybar;

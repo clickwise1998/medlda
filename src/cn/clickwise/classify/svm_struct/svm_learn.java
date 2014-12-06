@@ -3728,14 +3728,16 @@ public class svm_learn {
 			 */
 			dist = (lin[i]) * (double) label[i];
 
-			target = -WU.sub(learn_parm.eps, WU.mul((double) label[i], c[i]));
+			//target = -WU.sub(learn_parm.eps, WU.mul((double) label[i], c[i]));
+			target=-(learn_parm.eps-(double)label[i]*c[i]);
 			//logger.info("jj=" + jj + " i=" + i + " lin=" + lin[i] + " dist="
 			//		+ dist + " c=" + c[i] + " eps=" + learn_parm.eps
 			//		+ " target:" + target + " slack=" + slack[docs[i].slackid]);
 			if (((target - dist) > slack[docs[i].slackid])
 					&& Math.abs(target - dist) > (double) (0.5)) {
 
-				slack[docs[i].slackid] = WU.sub(target, dist);
+				//slack[docs[i].slackid] = WU.sub(target, dist);
+				slack[docs[i].slackid]=target-dist;
 				//logger.info("jj=" + jj + " i=" + i + " slackid="
 				//		+ docs[i].slackid + "  slack=" + slack[docs[i].slackid]);
 				// alphaslack[docs[i].slackid]+=a[i];
