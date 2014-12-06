@@ -6,3 +6,5 @@ to do:
 	train:est 120 4 10 16 64 temp random
 	
 	test:inf 4 temp120_c16_f10
+	
+ 先掉部分单词，再考虑结构化的label问题	
