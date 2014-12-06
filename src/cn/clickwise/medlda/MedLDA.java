@@ -1139,9 +1139,9 @@ public class MedLDA {
 		String buff;
 		buff = ss.dir + "/Feature.txt";
 		outputLowDimData(buff, ss);
-
+		svm_struct_api ssa=new svm_struct_api();
 		/* read the training examples */
-		SAMPLE sample = svm_struct_api.read_struct_examples(buff, struct_parm);
+		SAMPLE sample = ssa.read_struct_examples(buff, struct_parm);
 
 		svm_struct_learn sl = new svm_struct_learn();
 		if (param.SVM_ALGTYPE == 0) {

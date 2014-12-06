@@ -82,25 +82,25 @@ public class svm_common {
 	 */
 	public static final double COMPACT_ROUNDING_THRESH = 10E-15;
 
-	public static int kernel_cache_statistic = 0;
+	public  int kernel_cache_statistic = 0;
 	public static int verbosity = 0;
 
-	public static int read_totdocs;
-	public static int read_totwords;
-	public static int read_max_docs;
-	public static int read_max_words_doc;
+	public  int read_totdocs;
+	public  int read_totwords;
+	public  int read_max_docs;
+	public  int read_max_words_doc;
 
-	public static double read_doc_label;
-	public static int read_queryid;
-	public static int read_slackid;
-	public static double read_costfactor;
-	public static int read_wpos;
-	public static String read_comment;
+	public  double read_doc_label;
+	public  int read_queryid;
+	public  int read_slackid;
+	public  double read_costfactor;
+	public  int read_wpos;
+	public  String read_comment;
 
-	public static WORD[] read_words;
-	public static double[] read_target = null;
+	public  WORD[] read_words;
+	public  double[] read_target = null;
 
-	public static int progress_n;
+	public  int progress_n;
 	
 	
 	private static Logger logger = Logger.getLogger(svm_common.class);
@@ -149,7 +149,7 @@ public class svm_common {
 		return example;
 	}
 
-	public static double kernel(KERNEL_PARM kernel_parm, DOC a, DOC b) {
+	public  double kernel(KERNEL_PARM kernel_parm, DOC a, DOC b) {
 		// System.out.println("in kernel");
 		double sum = 0;
 		SVECTOR fa, fb;
@@ -179,7 +179,7 @@ public class svm_common {
 		return sum;
 	}
 
-	public static double single_kernel(KERNEL_PARM kernel_parm, SVECTOR a,
+	public  double single_kernel(KERNEL_PARM kernel_parm, SVECTOR a,
 			SVECTOR b) {
 		kernel_cache_statistic++;
 
@@ -312,7 +312,7 @@ public class svm_common {
 		return hc;
 	}
 
-	public static double model_length_s(MODEL model)
+	public  double model_length_s(MODEL model)
 	/* compute length of weight vector */
 	{
 		int i, j;
@@ -369,7 +369,7 @@ public class svm_common {
 		kernel_parm.custom = "empty";
 	}
 
-	public static DOC[] read_documents(String docfile, double[] label) {
+	public  DOC[] read_documents(String docfile, double[] label) {
 		String line, comment;
 		//PrintWriter pw = null;
 		//FileWriter fw = null;
@@ -491,7 +491,7 @@ public class svm_common {
 		return docs;
 	}
 
-	public static WORD[] parse_document(String line, int max_words_doc) {
+	public  WORD[] parse_document(String line, int max_words_doc) {
 		int wpos = 0, pos;
 		int wnum;
 		double weight;
@@ -651,7 +651,7 @@ public class svm_common {
 		return read_words;
 	}
 
-	public static void nol_ll(String input_file) {
+	public  void nol_ll(String input_file) {
 
 		// logger.info("input_file:"+input_file);
 		// logger.info("in nol ll");
@@ -782,7 +782,7 @@ public class svm_common {
 
 	/***************************** IO routines ***************************/
 
-	public static void write_model(String modelfile, MODEL model) {
+	public  void write_model(String modelfile, MODEL model) {
 		FileWriter fw = null;
 		PrintWriter pw = null;
 
@@ -1307,7 +1307,7 @@ public class svm_common {
 		return (vec);
 	}
 
-	public static double classify_example(MODEL model, DOC ex)
+	public  double classify_example(MODEL model, DOC ex)
 	/* classifies one example */
 	{
 		int i;
@@ -1543,7 +1543,7 @@ public class svm_common {
 			add_vector_ns(vec_n, f, f.factor * faktor);
 	}
 
-	public static void print_percent_progress(int maximum, int percentperdot,
+	public  void print_percent_progress(int maximum, int percentperdot,
 			String symbol)
 	/*
 	 * every time this function gets called, progress is incremented. It prints
@@ -1660,7 +1660,7 @@ public class svm_common {
 		return (Math.sqrt(sum));
 	}
 
-	public static MODEL read_model(String modelfile) {
+	public  MODEL read_model(String modelfile) {
 
 		MODEL model = new MODEL();
 		FileReader fr = null;
@@ -1680,8 +1680,8 @@ public class svm_common {
 				logger.info("Reading model...");
 			}
 
-			svm_common.nol_ll(modelfile);
-			max_words = svm_common.read_max_words_doc;
+			nol_ll(modelfile);
+			max_words = read_max_words_doc;
 			max_words += 2;
 			line = br.readLine();
 			version_buffer = SSO.afterStr(line, "SVM-multiclass Version")
@@ -1732,14 +1732,14 @@ public class svm_common {
 			for (i = 1; i < model.sv_num; i++) {
 				line = br.readLine();
 				// logger.info("i:"+i+" "+line);
-				svm_common.parse_document(line, max_words);
-				model.alpha[i] = svm_common.read_doc_label;
-				queryid = svm_common.read_queryid;
-				slackid = svm_common.read_slackid;
-				costfactor = svm_common.read_costfactor;
-				wpos = svm_common.read_wpos;
-				comment = svm_common.read_comment;
-				words = svm_common.read_words;
+				parse_document(line, max_words);
+				model.alpha[i] = read_doc_label;
+				queryid = read_queryid;
+				slackid = read_slackid;
+				costfactor = read_costfactor;
+				wpos = read_wpos;
+				comment = read_comment;
+				words = read_words;
 				model.supvec[i] = svm_common.create_example(-1, 0, 0, 0.0,
 						svm_common.create_svector(words, comment, 1.0));
 				model.supvec[i].fvec.kernel_id = queryid;
