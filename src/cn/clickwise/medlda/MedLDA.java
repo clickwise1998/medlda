@@ -300,6 +300,7 @@ public class MedLDA {
 			while (((converged < 0) || (converged > param.getEM_CONVERGED() || (i <= 2)))
 					&& (i <= param.getEM_MAX_ITER())) {
 				logger.info("**** em iteration " + (i + 1) + " ****");
+				
 				lhood = 0;
 				zero_init_ss(ss);
 
