@@ -120,7 +120,7 @@ public class MedLDA {
 				   }
 				   else if(MedLDAConfig.weighttype==1)
 				   {
-					   dVal += (phi[n][k] * (double) doc.counts[n]*Utils.potential2probs(wpotent[doc.words[n]])[1])/ (double) doc.getTotal();
+					   dVal += (phi[n][k] * (double) doc.counts[n]*wprob[doc.words[n]][1])/ (double) doc.getTotal();
 				   }	   
 				}
 			}
@@ -129,10 +129,10 @@ public class MedLDA {
 			ss.exp[ss.num_docs][k] = dVal;
 
 		}
-		
-		
-		for(int n=0;n<doc.words.length;n++)
+		if(MedLDAConfig.isWordSelection==true)
 		{
+		 for(int n=0;n<doc.words.length;n++)
+		 {
 			double wval=0;
 			for(int k=0;k<m_nK;k++)
 			{
@@ -146,11 +146,11 @@ public class MedLDA {
 			}
 			else
 			{
-				ss.wprob_suffstats[doc.words[n]][0]+=wval*Utils.potential2probs(wpotent[doc.words[n]])[0];
-				ss.wprob_suffstats[doc.words[n]][1]+=wval*(-1)*Utils.potential2probs(wpotent[doc.words[n]])[0];
+				ss.wprob_suffstats[doc.words[n]][0]+=wval*wprob[doc.words[n]][0];
+				ss.wprob_suffstats[doc.words[n]][1]+=wval*(-1)*wprob[doc.words[n]][0];
 			}
+		 }
 		}
-
 		ss.num_docs = ss.num_docs + 1;
 
 		return lhood;
@@ -234,6 +234,7 @@ public class MedLDA {
 			 else if(MedLDAConfig.weighttype==1)
 			 {
 				 wpotent[w]=Utils.optWeight(ss.wprob_suffstats[w], wpotent[w]);
+			     wprob[w]=Utils.potential2probs(wpotent[w]);
 			 }
 		  }
 		}
@@ -341,7 +342,7 @@ public class MedLDA {
 				lhood = 0;
 				zero_init_ss(ss);
 
-				if(ci>5)
+				if(ci>2)
 				{
 					break;
 				}
@@ -395,7 +396,11 @@ public class MedLDA {
 
 			filename = directory + "/final.gamma";
 			save_gamma(filename, var_gamma, corpus.num_docs, m_nK);
-
+			//wprob=new double[m_nNumTerms][2];
+			//for(int m=0;m<m_nNumTerms;m++)
+			//{
+			//	wprob[m]=Utils.potential2probs(wpotent[m]);
+			//}
 			// output the word assignments(for visualization)
 			int nNum = 0, nAcc = 0;
 			filename = directory + "/word-assignments.dat";
@@ -680,7 +685,14 @@ public class MedLDA {
 					dval += m_dMu[muIx] * (m_dEta[gndetaIx] - m_dEta[etaIx]);
 				}
 				else{
-					dval += m_dMu[muIx] * (m_dEta[gndetaIx] - m_dEta[etaIx])*wpotent[doc.words[n]][1];
+					if(MedLDAConfig.weighttype==0)
+					{
+					   dval += m_dMu[muIx] * (m_dEta[gndetaIx] - m_dEta[etaIx])*wpotent[doc.words[n]][1];
+					}
+					else
+					{
+						dval += m_dMu[muIx] * (m_dEta[gndetaIx] - m_dEta[etaIx])*wprob[doc.words[n]][1];
+					}
 				}
 				
 			}
@@ -709,11 +721,11 @@ public class MedLDA {
 				/************wordnut***************/
 				if(MedLDAConfig.weighttype==0)
 				{
-				  dval += m_dMu[muIx] * (m_dEta[gndetaIx] - m_dEta[etaIx])*wpotent[doc.words[n]][1];
+				  dval += m_dMu[muIx] * (m_dEta[gndetaIx] - m_dEta[etaIx])*wpotent[doc.words[n]][1]*phi[n][k];
 				}
 				else if(MedLDAConfig.weighttype==1)
 				{
-				  dval += m_dMu[muIx] * (m_dEta[gndetaIx] - m_dEta[etaIx])*Utils.potential2probs(wpotent[doc.words[n]])[1];
+				  dval += m_dMu[muIx] * (m_dEta[gndetaIx] - m_dEta[etaIx])*wprob[doc.words[n]][1]*phi[n][k];
 				}
 			}
 		} 
@@ -865,6 +877,7 @@ public class MedLDA {
 		if(MedLDAConfig.isWordSelection==true)
 		{
 			wpotent=new double[num_terms][2];
+			wprob=new double[num_terms][2];
 		}
 		// 指文档i和标记j之间的关系值
 		for (i = 0; i < num_topics; i++) {
@@ -1067,15 +1080,17 @@ public class MedLDA {
 				}
 			}
 			fileptr.close();
-			filename = model_root + ".wwei";
-			fileptr=new BufferedReader(new FileReader(filename));
-			
-			wprob=new double[num_terms][2];
-			String[] tokens=null;
-			int index=0;
-			double weight=0;
-			while((line=fileptr.readLine())!=null)
+			if(MedLDAConfig.isWordSelection==true)
 			{
+			 filename = model_root + ".wwei";
+			 fileptr=new BufferedReader(new FileReader(filename));
+			
+			 wprob=new double[num_terms][2];
+			 String[] tokens=null;
+			 int index=0;
+			 double weight=0;
+			 while((line=fileptr.readLine())!=null)
+			 {
 				tokens=line.split(":");
 				if(tokens.length!=2)
 				{
@@ -1084,6 +1099,7 @@ public class MedLDA {
 				index=Integer.parseInt(tokens[0]);
 				weight=Double.parseDouble(tokens[1]);
 				wprob[index][1]=weight;
+			 }
 			}
 			
 		} catch (Exception e) {
@@ -1376,7 +1392,7 @@ public class MedLDA {
 			  fileptr=new PrintWriter(new FileWriter(filename));
 			  for(int w=0;w< m_nNumTerms;w++)
 			  {
-				fileptr.printf( "%d:%5.10f\n",w,Utils.potential2probs(wpotent[w])[1]);
+				fileptr.printf( "%d:%5.10f\n",w,wprob[w][1]);
 			  }
 			fileptr.close();
 			}
