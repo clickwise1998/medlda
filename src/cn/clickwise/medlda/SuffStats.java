@@ -13,7 +13,7 @@ public class SuffStats {
 		
 	public int num_docs;
 	
-	public double[] wprob_suffstats;
+	public double[][] wprob_suffstats;
 	
 	/**
 	 * exp应该是sum{z1,...,zn}

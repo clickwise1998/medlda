@@ -7,5 +7,5 @@ package cn.clickwise.medlda;
  */
 public class MedLDAConfig {
 
-	public static boolean isWordSelection=false;
+	public static boolean isWordSelection=true;
 }
