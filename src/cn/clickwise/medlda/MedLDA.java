@@ -342,7 +342,7 @@ public class MedLDA {
 				lhood = 0;
 				zero_init_ss(ss);
 
-				if(ci>2)
+				if(ci>3)
 				{
 					break;
 				}
@@ -1059,27 +1059,7 @@ public class MedLDA {
 			{
 				m_alpha[k] = vecAlpha.get(k);
 			}
-			filename = model_root + ".beta";
-			logger.info("loading " + filename);
-			if (sc != null) {
-				sc.close();
-			}
-			// fileptr=new BufferedReader(new FileReader(filename));
-			sc = new Scanner(new FileInputStream(filename));
-			m_dB = sc.nextDouble();
-
-			for (i = 0; i < m_nK; i++) {
-				for (int k = 0; k < m_nLabelNum; k++) {
-					x = sc.nextDouble();
-					m_dEta[i + k * m_nK] = x;
-				}
-
-				for (j = 0; j < m_nNumTerms; j++) {
-					x = sc.nextDouble();
-					m_dLogProbW[i][j] = x;
-				}
-			}
-			fileptr.close();
+			
 			if(MedLDAConfig.isWordSelection==true)
 			{
 			 filename = model_root + ".wwei";
@@ -1101,6 +1081,29 @@ public class MedLDA {
 				wprob[index][1]=weight;
 			 }
 			}
+			fileptr.close();
+			
+			filename = model_root + ".beta";
+			logger.info("loading " + filename);
+			if (sc != null) {
+				sc.close();
+			}
+			// fileptr=new BufferedReader(new FileReader(filename));
+			sc = new Scanner(new FileInputStream(filename));
+			m_dB = sc.nextDouble();
+
+			for (i = 0; i < m_nK; i++) {
+				for (int k = 0; k < m_nLabelNum; k++) {
+					x = sc.nextDouble();
+					m_dEta[i + k * m_nK] = x;
+				}
+
+				for (j = 0; j < m_nNumTerms; j++) {
+					x = sc.nextDouble();
+					m_dLogProbW[i][j] = x;
+				}
+			}
+			fileptr.close();
 			
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -1392,7 +1395,13 @@ public class MedLDA {
 			  fileptr=new PrintWriter(new FileWriter(filename));
 			  for(int w=0;w< m_nNumTerms;w++)
 			  {
-				fileptr.printf( "%d:%5.10f\n",w,wprob[w][1]);
+				if(MedLDAConfig.weighttype==0)
+				{
+					fileptr.printf( "%d:%5.10f\n",w,wpotent[w][1]);
+				}
+				else{
+				    fileptr.printf( "%d:%5.10f\n",w,wprob[w][1]);
+				}
 			  }
 			fileptr.close();
 			}

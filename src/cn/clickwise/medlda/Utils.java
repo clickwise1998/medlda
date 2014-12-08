@@ -1,5 +1,7 @@
 package cn.clickwise.medlda;
 
+import java.util.ArrayList;
+
 import org.apache.log4j.Logger;
 
 public class Utils {
@@ -173,7 +175,7 @@ public class Utils {
 	{
 		double steplength=0.01;
 		double[] newpoint=new double[2];
-		for(int l=0;l<10;l++)
+		for(int l=0;l<5;l++)
 		{
 		 for(int i=0;i<newpoint.length;i++)
 		 {
@@ -183,5 +185,14 @@ public class Utils {
 		
 		}
 		return newpoint;
+	}
+	
+	public boolean[] selectState(double[][] probs)
+	{
+		boolean[] selstat=new boolean[probs.length];
+		ArrayList<String> scores=new ArrayList<String>();
+		
+		
+		return null;
 	}
 }
