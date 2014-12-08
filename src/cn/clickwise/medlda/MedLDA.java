@@ -1083,7 +1083,7 @@ public class MedLDA {
 			 }
 			}
 			fileptr.close();
-			//boolean[] selstat=Utils.selectState(wprob);
+			boolean[] selstat=Utils.selectState(wprob);
 			filename = model_root + ".beta";
 			logger.info("loading " + filename);
 			if (sc != null) {
@@ -1101,15 +1101,15 @@ public class MedLDA {
 
 				for (j = 0; j < m_nNumTerms; j++) {
 					x = sc.nextDouble();
-					//if(selstat[j]==true)
-					//{
+					if(selstat[j]==true)
+					{
 					  m_dLogProbW[i][j] = x;
-					//}
-					//else
-					//{
+					}
+					else
+					{
 					  //System.out.println("selstat "+j+" is false");
-					 // m_dLogProbW[i][j] = 0;
-					//}
+					  m_dLogProbW[i][j] = 0;
+					}
 				}
 			}
 			fileptr.close();

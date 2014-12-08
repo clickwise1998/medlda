@@ -200,7 +200,7 @@ public class Utils {
 		
 		String[] sorted=SortStrArray.sort_List(scores, 1, "dou", 2, "\001");
 		
-		int threshodIndex=(int)(sorted.length*(0.9));
+		int threshodIndex=(int)(sorted.length*(0.3));
 		double threshold=Double.parseDouble((sorted[threshodIndex].split("\001"))[1]);
 		for(int i=0;i<probs.length;i++)
 		{
