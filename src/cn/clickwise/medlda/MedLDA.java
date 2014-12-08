@@ -54,6 +54,8 @@ public class MedLDA {
 	 */
 	private double[][] wpotent;
 	
+	private double[][] wprob;
+	
 	private double m_dDeltaEll;
 
 	private static final int NUM_INIT = 1;
@@ -768,8 +770,16 @@ public class MedLDA {
 
 				double dVal = 0;
 				for (int n = 0; n < doc.length; n++) {
+					if(MedLDAConfig.isWordSelection==false)
+					{
 					dVal += phi[n][k] * (double) doc.counts[n]
 							/ (double) doc.total;
+					}
+					else if(MedLDAConfig.isWordSelection==true)
+					{
+						dVal += phi[n][k] * (double) doc.counts[n]*wprob[doc.words[n]][1]
+								/ (double) doc.total;
+					}
 				}
 
 				dScore += dVal * m_dEta[etaIx];
@@ -1056,6 +1066,26 @@ public class MedLDA {
 					m_dLogProbW[i][j] = x;
 				}
 			}
+			fileptr.close();
+			filename = model_root + ".wwei";
+			fileptr=new BufferedReader(new FileReader(filename));
+			
+			wprob=new double[num_terms][2];
+			String[] tokens=null;
+			int index=0;
+			double weight=0;
+			while((line=fileptr.readLine())!=null)
+			{
+				tokens=line.split(":");
+				if(tokens.length!=2)
+				{
+					continue;
+				}
+				index=Integer.parseInt(tokens[0]);
+				weight=Double.parseDouble(tokens[1]);
+				wprob[index][1]=weight;
+			}
+			
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
