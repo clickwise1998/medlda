@@ -230,6 +230,7 @@ public class MedLDA {
 			 {
 				 wpotent[w][0]+=ss.wprob_suffstats[w][0];
 				 wpotent[w][1]+=ss.wprob_suffstats[w][1];
+	
 			 }
 			 else if(MedLDAConfig.weighttype==1)
 			 {
