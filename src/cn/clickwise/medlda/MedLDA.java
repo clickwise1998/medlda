@@ -52,7 +52,7 @@ public class MedLDA {
 	/**
 	 * V*2的数组，第一列是 word 不被选择的权重，即Sv=0,第二列是word被选择的权重，即Sv=1
 	 */
-	private double[][] wprob;
+	private double[][] wpotent;
 	
 	private double m_dDeltaEll;
 
@@ -114,11 +114,11 @@ public class MedLDA {
 				{
 				   if(MedLDAConfig.weighttype==0)
 				   {
-					   dVal += (phi[n][k] * (double) doc.counts[n]*wprob[doc.words[n]][1]/ (double) doc.getTotal());
+					   dVal += (phi[n][k] * (double) doc.counts[n]*wpotent[doc.words[n]][1]/ (double) doc.getTotal());
 				   }
 				   else if(MedLDAConfig.weighttype==1)
 				   {
-					   dVal += (phi[n][k] * (double) doc.counts[n]*Utils.potential2probs(wprob[doc.words[n]])[1])/ (double) doc.getTotal();
+					   dVal += (phi[n][k] * (double) doc.counts[n]*Utils.potential2probs(wpotent[doc.words[n]])[1])/ (double) doc.getTotal();
 				   }	   
 				}
 			}
@@ -144,8 +144,8 @@ public class MedLDA {
 			}
 			else
 			{
-				ss.wprob_suffstats[doc.words[n]][0]+=wval*Utils.potential2probs(wprob[doc.words[n]])[0];
-				ss.wprob_suffstats[doc.words[n]][1]+=wval*(-1)*Utils.potential2probs(wprob[doc.words[n]])[0];
+				ss.wprob_suffstats[doc.words[n]][0]+=wval*Utils.potential2probs(wpotent[doc.words[n]])[0];
+				ss.wprob_suffstats[doc.words[n]][1]+=wval*(-1)*Utils.potential2probs(wpotent[doc.words[n]])[0];
 			}
 		}
 
@@ -226,12 +226,12 @@ public class MedLDA {
 		  {
 			 if(MedLDAConfig.weighttype==0)
 			 {
-			   wprob[w][0]+=ss.wprob_suffstats[w][0];
-			   wprob[w][1]+=ss.wprob_suffstats[w][1];
+				 wpotent[w][0]+=ss.wprob_suffstats[w][0];
+				 wpotent[w][1]+=ss.wprob_suffstats[w][1];
 			 }
 			 else if(MedLDAConfig.weighttype==1)
 			 {
-				 wprob[w]=Utils.optWeight(ss.wprob_suffstats[w], wprob[w]);
+				 wpotent[w]=Utils.optWeight(ss.wprob_suffstats[w], wpotent[w]);
 			 }
 		  }
 		}
@@ -678,7 +678,7 @@ public class MedLDA {
 					dval += m_dMu[muIx] * (m_dEta[gndetaIx] - m_dEta[etaIx]);
 				}
 				else{
-					dval += m_dMu[muIx] * (m_dEta[gndetaIx] - m_dEta[etaIx])*wprob[doc.words[n]][1];
+					dval += m_dMu[muIx] * (m_dEta[gndetaIx] - m_dEta[etaIx])*wpotent[doc.words[n]][1];
 				}
 				
 			}
@@ -707,11 +707,11 @@ public class MedLDA {
 				/************wordnut***************/
 				if(MedLDAConfig.weighttype==0)
 				{
-				  dval += m_dMu[muIx] * (m_dEta[gndetaIx] - m_dEta[etaIx])*wprob[doc.words[n]][1];
+				  dval += m_dMu[muIx] * (m_dEta[gndetaIx] - m_dEta[etaIx])*wpotent[doc.words[n]][1];
 				}
 				else if(MedLDAConfig.weighttype==1)
 				{
-				  dval += m_dMu[muIx] * (m_dEta[gndetaIx] - m_dEta[etaIx])*Utils.potential2probs(wprob[doc.words[n]])[1];
+				  dval += m_dMu[muIx] * (m_dEta[gndetaIx] - m_dEta[etaIx])*Utils.potential2probs(wpotent[doc.words[n]])[1];
 				}
 			}
 		} 
@@ -854,7 +854,7 @@ public class MedLDA {
 		m_dMu = new double[num_docs * num_labels];// Mu使用向量存储二维矩阵，行是文档，列是标记，元素[i*num_labels + j]
 		if(MedLDAConfig.isWordSelection==true)
 		{
-		  wprob=new double[num_terms][2];
+			wpotent=new double[num_terms][2];
 		}
 		// 指文档i和标记j之间的关系值
 		for (i = 0; i < num_topics; i++) {
@@ -871,8 +871,8 @@ public class MedLDA {
 		{
 		  for(i=0;i<num_terms;i++)
 		  {
-			 wprob[i][0]=SeedRandom.getRandom();
-			 wprob[i][1]=SeedRandom.getRandom(); 
+			  wpotent[i][0]=SeedRandom.getRandom();
+			  wpotent[i][1]=SeedRandom.getRandom(); 
 		  }
 		}
 		m_nDim = num_docs;
@@ -1346,7 +1346,7 @@ public class MedLDA {
 			  fileptr=new PrintWriter(new FileWriter(filename));
 			  for(int w=0;w< m_nNumTerms;w++)
 			  {
-				fileptr.printf( "%d:%5.10f\n",w,wprob[w][1]);
+				fileptr.printf( "%d:%5.10f\n",w,Utils.potential2probs(wpotent[w])[1]);
 			  }
 			fileptr.close();
 			}
@@ -1537,12 +1537,12 @@ public class MedLDA {
 		this.m_dDeltaEll = m_dDeltaEll;
 	}
 
-	public double[][] getWprob() {
-		return wprob;
+	public double[][] getWpotent() {
+		return wpotent;
 	}
 
-	public void setWprob(double[][] wprob) {
-		this.wprob = wprob;
+	public void setWpotent(double[][] wpotent) {
+		this.wpotent = wpotent;
 	}
 
 }

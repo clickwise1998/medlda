@@ -171,9 +171,9 @@ public class Utils {
 	
 	public static double[] optWeight(double[] gradient,double[] oldpoint)
 	{
-		double steplength=0.01;
+		double steplength=0.1;
 		double[] newpoint=new double[2];
-		for(int l=0;l<5;l++)
+		for(int l=0;l<1;l++)
 		{
 		 for(int i=0;i<newpoint.length;i++)
 		 {
