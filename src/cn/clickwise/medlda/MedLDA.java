@@ -144,7 +144,8 @@ public class MedLDA {
 			}
 			else
 			{
-				
+				ss.wprob_suffstats[doc.words[n]][0]+=wval*Utils.potential2probs(wprob[doc.words[n]])[0];
+				ss.wprob_suffstats[doc.words[n]][1]+=wval*(-1)*Utils.potential2probs(wprob[doc.words[n]])[0];
 			}
 		}
 
@@ -228,9 +229,9 @@ public class MedLDA {
 			   wprob[w][0]+=ss.wprob_suffstats[w][0];
 			   wprob[w][1]+=ss.wprob_suffstats[w][1];
 			 }
-			 else
+			 else if(MedLDAConfig.weighttype==1)
 			 {
-				 
+				 wprob[w]=Utils.optWeight(ss.wprob_suffstats[w], wprob[w]);
 			 }
 		  }
 		}
@@ -708,7 +709,7 @@ public class MedLDA {
 				{
 				  dval += m_dMu[muIx] * (m_dEta[gndetaIx] - m_dEta[etaIx])*wprob[doc.words[n]][1];
 				}
-				else if(MedLDAConfig.weighttype==0)
+				else if(MedLDAConfig.weighttype==1)
 				{
 				  dval += m_dMu[muIx] * (m_dEta[gndetaIx] - m_dEta[etaIx])*Utils.potential2probs(wprob[doc.words[n]])[1];
 				}
