@@ -158,5 +158,16 @@ public class Utils {
 		
 	}
 	
+	public static double[] potential2probs(double[] potential)
+	{
+		double[] probs=new double[2];
+		double logsum=log_sum(potential[0],potential[1]);
+		
+		probs[0]=Math.exp(potential[0]-logsum);
+		probs[1]=Math.exp(potential[1]-logsum);
+		
+		return probs;
+	}
+	
 	
 }
