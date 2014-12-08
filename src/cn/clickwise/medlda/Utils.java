@@ -4,6 +4,8 @@ import java.util.ArrayList;
 
 import org.apache.log4j.Logger;
 
+import cn.clickwise.sort.utils.SortStrArray;
+
 public class Utils {
 	
 	private static Logger logger = Logger.getLogger(Utils.class);
@@ -187,12 +189,30 @@ public class Utils {
 		return newpoint;
 	}
 	
-	public boolean[] selectState(double[][] probs)
+	public static boolean[] selectState(double[][] probs)
 	{
 		boolean[] selstat=new boolean[probs.length];
 		ArrayList<String> scores=new ArrayList<String>();
+		for(int i=0;i<probs.length;i++)
+		{
+			scores.add(i+"\001"+Math.abs(probs[i][1]));
+		}
 		
+		String[] sorted=SortStrArray.sort_List(scores, 1, "dou", 2, "\001");
 		
-		return null;
+		int threshodIndex=(int)(sorted.length*(0.5));
+		double threshold=Double.parseDouble((sorted[threshodIndex].split("\001"))[1]);
+		for(int i=0;i<probs.length;i++)
+		{
+			if(Math.abs(probs[i][1])>threshold)
+			{
+				selstat[i]=true;
+			}
+			else
+			{
+				selstat[i]=false;
+			}
+		}
+		return selstat;
 	}
 }
