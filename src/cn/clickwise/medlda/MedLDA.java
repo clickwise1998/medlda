@@ -48,6 +48,8 @@ public class MedLDA {
 	private int m_nNumTerms;
 
 	private double[][] m_dLogProbW;
+	
+	private int m_numDocs=0;
 
 	/**
 	 * V*2的数组，第一列是 word 不被选择的权重，即Sv=0,第二列是word被选择的权重，即Sv=1
@@ -136,8 +138,12 @@ public class MedLDA {
 			double wval=0;
 			for(int k=0;k<m_nK;k++)
 			{
+				/*****valid result*****
 				wval+=compute_wprob_mrgterm(doc, phi,ss.getNum_docs(), n, k,
 						param);
+			     *********************/
+				wval+=compute_wprob_mrgterm(doc, phi,ss.getNum_docs(), n, k,
+						param)/((double) doc.getTotal());
 			}
 
 			if(MedLDAConfig.weighttype==0)
@@ -242,6 +248,7 @@ public class MedLDA {
 			     wprob[w]=Utils.potential2probs(wpotent[w]);
 			 }
 		  }
+		  Utils.printGradient("example/wprob_suffstats.txt",ss.wprob_suffstats);
 		}
 		//normalizeWprob();
 		//
@@ -280,7 +287,7 @@ public class MedLDA {
      
 	public int run_em(String start, String directory, Corpus corpus,
 			Params param) {
-
+		m_numDocs=corpus.num_docs;
 		m_dDeltaEll = param.getDELTA_ELL();
 
 		int d, n;
@@ -347,7 +354,7 @@ public class MedLDA {
 				lhood = 0;
 				zero_init_ss(ss);
 
-				if(ci>2)
+				if(ci>3)
 				{
 					break;
 				}

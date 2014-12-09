@@ -1,5 +1,7 @@
 package cn.clickwise.medlda;
 
+import java.io.FileWriter;
+import java.io.PrintWriter;
 import java.util.ArrayList;
 
 import org.apache.log4j.Logger;
@@ -215,11 +217,13 @@ public class Utils {
 		//}
 		
 		/*
-		int lowthreshodIndex=(int)(sorted.length*(0.9));
+		int lowthreshodIndex=(int)(sorted.length*(0.5));
 		double lowthreshold=Double.parseDouble((sorted[lowthreshodIndex].split("\001"))[1]);
        	System.out.println("lowthreshold:"+lowthreshold);
-		*/
-		int upthreshodIndex=(int)(sorted.length*(0.3));		
+	    */
+		
+		
+		int upthreshodIndex=(int)(sorted.length*(0.2));		
 		double upthreshold=Double.parseDouble((sorted[upthreshodIndex].split("\001"))[1]);
 		System.out.println("upthreshold:"+upthreshold);
 		
@@ -252,4 +256,21 @@ public class Utils {
 		*/
 		return selstat;
 	}
+	
+	public static void printGradient(String gradient_file,double[][] wprob_suffstats)
+	{
+	  	try{
+	  		PrintWriter pw=new PrintWriter(new FileWriter(gradient_file));
+	  		for(int i=0;i<wprob_suffstats.length;i++)
+	  		{
+	  			pw.println(i+":"+wprob_suffstats[i][1]);
+	  		}
+	  		pw.close();
+	  	}
+	  	catch(Exception e)
+	  	{
+	  		e.printStackTrace();
+	  	}
+	}
+	
 }
