@@ -200,11 +200,24 @@ public class Utils {
 		
 		String[] sorted=SortStrArray.sort_List(scores, 1, "dou", 2, "\001");
 		
-		int threshodIndex=(int)(sorted.length*(0.3));
-		double threshold=Double.parseDouble((sorted[threshodIndex].split("\001"))[1]);
+		//for(int i=0;i<10;i++)
+		//{
+		//	System.out.println("i="+i+" "+sorted[i]);
+		//}
+		
+		/*
+		int lowthreshodIndex=(int)(sorted.length*(0.9));
+		double lowthreshold=Double.parseDouble((sorted[lowthreshodIndex].split("\001"))[1]);
+       	System.out.println("lowthreshold:"+lowthreshold);
+		*/
+		int upthreshodIndex=(int)(sorted.length*(0.2));		
+		double upthreshold=Double.parseDouble((sorted[upthreshodIndex].split("\001"))[1]);
+		System.out.println("upthreshold:"+upthreshold);
+		
+		
 		for(int i=0;i<probs.length;i++)
 		{
-			if(Math.abs(probs[i][1])>threshold)
+			if((Math.abs(probs[i][1])>upthreshold))
 			{
 				selstat[i]=true;
 			}
@@ -213,6 +226,21 @@ public class Utils {
 				selstat[i]=false;
 			}
 		}
+		
+		/*
+		for(int i=0;i<probs.length;i++)
+		{
+			double rand=Math.random();
+			if(rand>0.5)
+			{
+				selstat[i]=true;
+			}
+			else
+			{
+				selstat[i]=false;
+			}
+		}
+		*/
 		return selstat;
 	}
 }

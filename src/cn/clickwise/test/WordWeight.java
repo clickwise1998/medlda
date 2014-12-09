@@ -63,7 +63,7 @@ public class WordWeight {
 	   			{
 	   				continue;
 	   			}
-	   			wlist.add(word+"\001"+weight);
+	   			wlist.add(word+"\001"+Math.abs(weight));
 	   		}
 	   		String[] sorted=SortStrArray.sort_List(wlist, 1, "dou", 2, "\001");
 	   		for(int i=0;i<sorted.length;i++)
