@@ -5,6 +5,7 @@ import java.io.FileInputStream;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.PrintWriter;
+import java.util.Random;
 import java.util.Scanner;
 import java.util.Vector;
 
@@ -19,6 +20,8 @@ import cn.clickwise.classify.svm_struct.svm_common;
 import cn.clickwise.classify.svm_struct.svm_struct_api;
 import cn.clickwise.classify.svm_struct.svm_struct_common;
 import cn.clickwise.classify.svm_struct.svm_struct_learn;
+import cn.clickwise.classify.svm_struct.svmconfig;
+import cn.clickwise.math.random.SeedRandom;
 import cn.clickwise.str.basic.SSO;
 import cn.clickwise.time.utils.TimeOpera;
 
@@ -46,6 +49,13 @@ public class MedLDA {
 
 	private double[][] m_dLogProbW;
 
+	/**
+	 * V*2的数组，第一列是 word 不被选择的权重，即Sv=0,第二列是word被选择的权重，即Sv=1
+	 */
+	private double[][] wpotent;
+	
+	private double[][] wprob;
+	
 	private double m_dDeltaEll;
 
 	private static final int NUM_INIT = 1;
@@ -86,15 +96,61 @@ public class MedLDA {
 			double dVal = 0;
 			for (int n = 0; n < doc.getLength(); n++) {
 				ss.class_word[k][doc.words[n]] += doc.counts[n] * phi[n][k];
-				ss.class_total[k] += doc.counts[n] * phi[n][k];
-				dVal += phi[n][k] * (double) doc.counts[n]/ (double) doc.getTotal();
+				//ss.class_total[k] += doc.counts[n] * phi[n][k];
+				/*******wordnut*****may be wrong*****/
+				//if(MedLDAConfig.isWordSelection==false)
+				//{
+					ss.class_total[k] += doc.counts[n] * phi[n][k];
+				//}
+				//else
+				//{
+				 //ss.class_total[k] += doc.counts[n] * phi[n][k]*wprob[doc.words[n]];
+				//}
+					
+			    /*******wordnut*****may be wrong*****/
+				if(MedLDAConfig.isWordSelection==false)
+				{
+				   dVal += phi[n][k] * (double) doc.counts[n]/ (double) doc.getTotal();
+				}
+				else
+				{
+				   if(MedLDAConfig.weighttype==0)
+				   {
+					   dVal += (phi[n][k] * (double) doc.counts[n]*wpotent[doc.words[n]][1]/ (double) doc.getTotal());
+				   }
+				   else if(MedLDAConfig.weighttype==1)
+				   {
+					   dVal += (phi[n][k] * (double) doc.counts[n]*wprob[doc.words[n]][1])/ (double) doc.getTotal();
+				   }	   
+				}
 			}
 
 			// suff-stats for supervised LDA
 			ss.exp[ss.num_docs][k] = dVal;
 
 		}
+		if(MedLDAConfig.isWordSelection==true)
+		{
+		 for(int n=0;n<doc.words.length;n++)
+		 {
+			double wval=0;
+			for(int k=0;k<m_nK;k++)
+			{
+				wval+=compute_wprob_mrgterm(doc, phi,ss.getNum_docs(), n, k,
+						param);
+			}
 
+			if(MedLDAConfig.weighttype==0)
+			{
+				ss.wprob_suffstats[doc.words[n]][1]+=wval;
+			}
+			else
+			{
+				ss.wprob_suffstats[doc.words[n]][0]+=wval*wprob[doc.words[n]][0];
+				ss.wprob_suffstats[doc.words[n]][1]+=wval*(-1)*wprob[doc.words[n]][0];
+			}
+		 }
+		}
 		ss.num_docs = ss.num_docs + 1;
 
 		return lhood;
@@ -164,7 +220,27 @@ public class MedLDA {
 			//	logger.info(m_alpha[k]);
 			//}
 		}
-
+	
+		//update wprob parameters
+		if(MedLDAConfig.isWordSelection==true)
+		{
+		  for( w=0;w<m_nNumTerms;w++)
+		  {
+			 if(MedLDAConfig.weighttype==0)
+			 {
+				 wpotent[w][0]+=ss.wprob_suffstats[w][0];
+				 wpotent[w][1]+=ss.wprob_suffstats[w][1];
+	
+			 }
+			 else if(MedLDAConfig.weighttype==1)
+			 {
+				 wpotent[w]=Utils.optWeight(ss.wprob_suffstats[w], wpotent[w]);
+			     wprob[w]=Utils.potential2probs(wpotent[w]);
+			 }
+		  }
+		}
+		//normalizeWprob();
+		//
 		boolean bRes = true;
 		if (!bInit) {
 			svmStructSolver(ss, param, m_dMu);
@@ -172,7 +248,32 @@ public class MedLDA {
 
 		return bRes;
 	}
-
+	
+	public void normalizeWprob()
+	{
+		/*
+		double sum=0;
+		
+		for(int w=0;w<m_nNumTerms;w++)
+		{
+		  if(wprob[w]>50)
+		  {
+			  wprob[w]=50;
+		  }
+		}
+		for(int w=0;w<m_nNumTerms;w++)
+		{
+		  sum+=Math.exp(wprob[w]);
+		}
+		
+		for(int w=0;w<m_nNumTerms;w++)
+		{
+	
+			wprob[w]=((Math.exp(wprob[w])*((double)m_nNumTerms))/sum);	
+		}
+		*/
+	}
+     
 	public int run_em(String start, String directory, Corpus corpus,
 			Params param) {
 
@@ -238,10 +339,11 @@ public class MedLDA {
 			while (((converged < 0) || (converged > param.getEM_CONVERGED() || (i <= 2)))
 					&& (i <= param.getEM_MAX_ITER())) {
 				logger.info("**** em iteration " + (i + 1) + " ****");
+				
 				lhood = 0;
 				zero_init_ss(ss);
 
-				if(ci>1)
+				if(ci>2)
 				{
 					break;
 				}
@@ -279,7 +381,6 @@ public class MedLDA {
 				// output model and lhood
 				likelihood_file.printf("%10.10f\t%5.5e\n", lhood, converged);
 				likelihood_file.flush();
-
 				i++;
 
 			}
@@ -296,7 +397,11 @@ public class MedLDA {
 
 			filename = directory + "/final.gamma";
 			save_gamma(filename, var_gamma, corpus.num_docs, m_nK);
-
+			//wprob=new double[m_nNumTerms][2];
+			//for(int m=0;m<m_nNumTerms;m++)
+			//{
+			//	wprob[m]=Utils.potential2probs(wpotent[m]);
+			//}
 			// output the word assignments(for visualization)
 			int nNum = 0, nAcc = 0;
 			filename = directory + "/word-assignments.dat";
@@ -573,8 +678,24 @@ public class MedLDA {
 			for (int m = 0; m < m_nLabelNum; m++) {
 				int muIx = d * m_nLabelNum + m;
 				int etaIx = m * m_nK + k;
-
-				dval += m_dMu[muIx] * (m_dEta[gndetaIx] - m_dEta[etaIx]);
+				//dval += m_dMu[muIx] * (m_dEta[gndetaIx] - m_dEta[etaIx]);
+				
+				/************wordnut***************/
+				if(MedLDAConfig.isWordSelection==false)
+				{
+					dval += m_dMu[muIx] * (m_dEta[gndetaIx] - m_dEta[etaIx]);
+				}
+				else{
+					if(MedLDAConfig.weighttype==0)
+					{
+					   dval += m_dMu[muIx] * (m_dEta[gndetaIx] - m_dEta[etaIx])*wpotent[doc.words[n]][1];
+					}
+					else
+					{
+						dval += m_dMu[muIx] * (m_dEta[gndetaIx] - m_dEta[etaIx])*wprob[doc.words[n]][1];
+					}
+				}
+				
 			}
 		} else {
 			int etaIx = doc.lossAugLabel * m_nK + k;
@@ -586,6 +707,35 @@ public class MedLDA {
 		return dval;
 	}
 
+	public double compute_wprob_mrgterm(Document doc, double[][] phi,int d, int n, int k,
+			Params param) {
+		double dval = 0;
+		int gndetaIx = doc.gndlabel * m_nK + k;
+		param.PHI_DUALOPT = 1;
+
+		if (param.PHI_DUALOPT == 1) {
+			for (int m = 0; m < m_nLabelNum; m++) {
+				int muIx = d * m_nLabelNum + m;
+				int etaIx = m * m_nK + k;
+				//dval += m_dMu[muIx] * (m_dEta[gndetaIx] - m_dEta[etaIx]);
+				
+				/************wordnut***************/
+				if(MedLDAConfig.weighttype==0)
+				{
+				  dval += m_dMu[muIx] * (m_dEta[gndetaIx] - m_dEta[etaIx])*wpotent[doc.words[n]][1]*phi[n][k];
+				}
+				else if(MedLDAConfig.weighttype==1)
+				{
+				  dval += m_dMu[muIx] * (m_dEta[gndetaIx] - m_dEta[etaIx])*wprob[doc.words[n]][1]*phi[n][k];
+				}
+			}
+		} 
+
+		dval = dval * doc.counts[n] / doc.total;
+
+		return dval;
+	}
+	
 	public double compute_lhood(Document doc, double[][] phi, double[] var_gamma) {
 
 		double lhood = 0, digsum = 0, var_gamma_sum = 0, alpha_sum = 0;
@@ -633,8 +783,16 @@ public class MedLDA {
 
 				double dVal = 0;
 				for (int n = 0; n < doc.length; n++) {
+					if(MedLDAConfig.isWordSelection==false)
+					{
 					dVal += phi[n][k] * (double) doc.counts[n]
 							/ (double) doc.total;
+					}
+					else if(MedLDAConfig.isWordSelection==true)
+					{
+						dVal += phi[n][k] * (double) doc.counts[n]*wprob[doc.words[n]][1]
+								/ (double) doc.total;
+					}
 				}
 
 				dScore += dVal * m_dEta[etaIx];
@@ -716,8 +874,12 @@ public class MedLDA {
 		m_dLogProbW = new double[num_topics][num_terms];
 		m_dEta = new double[num_topics * num_labels];// Eta使用向量存储二维矩阵，行是主题，列是标记，元素
 		// [i*num_labels + j]指主题i和标记j的转换概率
-		m_dMu = new double[num_docs * num_labels];// Mu使用向量存储二维矩阵，行是文档，列是标记，元素[i*num_labels
-													// + j]
+		m_dMu = new double[num_docs * num_labels];// Mu使用向量存储二维矩阵，行是文档，列是标记，元素[i*num_labels + j]
+		if(MedLDAConfig.isWordSelection==true)
+		{
+			wpotent=new double[num_terms][2];
+			wprob=new double[num_terms][2];
+		}
 		// 指文档i和标记j之间的关系值
 		for (i = 0; i < num_topics; i++) {
 			for (j = 0; j < num_terms; j++)
@@ -728,7 +890,15 @@ public class MedLDA {
 		for (i = 0; i < num_docs; i++)
 			for (j = 0; j < num_labels; j++)
 				m_dMu[i * num_labels + j] = 0;
-
+		
+		if(MedLDAConfig.isWordSelection==true)
+		{
+		  for(i=0;i<num_terms;i++)
+		  {
+			  wpotent[i][0]=SeedRandom.getRandom();
+			  wpotent[i][1]=SeedRandom.getRandom(); 
+		  }
+		}
 		m_nDim = num_docs;
 		m_dC = C;
 	}
@@ -766,7 +936,7 @@ public class MedLDA {
 
 		for (k = 0; k < num_topics; k++) {
 			for (i = 0; i < NUM_INIT; i++) {
-				d = (int) Math.floor(Math.random() * (c.num_docs));
+				d = (int) Math.floor(SeedRandom.getRandom() * (c.num_docs));
 				doc = c.docs[d];
 				for (n = 0; n < doc.length; n++) {
 					ss.class_word[k][doc.words[n]] += doc.counts[n];
@@ -791,12 +961,14 @@ public class MedLDA {
 	}
 
 	public void random_init_ss(SuffStats ss, Corpus c) {
+
+		
 		//logger.info("in random_init_ss");
 		int num_topics = m_nK;
 		int num_terms = m_nNumTerms;
 		for (int k = 0; k < num_topics; k++) {
 			for (int n = 0; n < num_terms; n++) {
-				ss.class_word[k][n] += (10.0 + Math.random());
+				ss.class_word[k][n] += (10.0 +SeedRandom.getRandom());
 				ss.class_total[k] += ss.class_word[k][n];
 			}
 		}
@@ -807,6 +979,13 @@ public class MedLDA {
 		for (int k = 0; k < c.num_docs; k++) {
 			ss.y[k] = c.docs[k].gndlabel;
 		}
+		
+		ss.wprob_suffstats=new double[m_nNumTerms][2];
+        for(int k=0;k<m_nNumTerms;k++)
+        {
+        	ss.wprob_suffstats[k][0]=SeedRandom.getRandom();
+        	ss.wprob_suffstats[k][1]=SeedRandom.getRandom();
+        }
 
 	}
 
@@ -823,7 +1002,12 @@ public class MedLDA {
 		for (int i = 0; i < ss.alpha_suffstats.length; i++) {
 			ss.alpha_suffstats[i] = 0;
 		}
-
+		
+        for(int k=0;k<m_nNumTerms;k++)
+        {
+        	ss.wprob_suffstats[k][0]=0;
+        	ss.wprob_suffstats[k][1]=0;
+        }
 	}
 
 	public void load_model(String model_root) {
@@ -876,6 +1060,35 @@ public class MedLDA {
 			{
 				m_alpha[k] = vecAlpha.get(k);
 			}
+			
+			if(MedLDAConfig.isWordSelection==true)
+			{
+			 filename = model_root + ".wwei";
+			 fileptr=new BufferedReader(new FileReader(filename));
+			
+			 wprob=new double[num_terms][2];
+			 String[] tokens=null;
+			 int index=0;
+			 double weight=0;
+			 while((line=fileptr.readLine())!=null)
+			 {
+				tokens=line.split(":");
+				if(tokens.length!=2)
+				{
+					continue;
+				}
+				index=Integer.parseInt(tokens[0]);
+				weight=Double.parseDouble(tokens[1]);
+				wprob[index][1]=weight;
+			 }
+			 fileptr.close();
+			}
+			
+			boolean[] selstat=null;
+			if(MedLDAConfig.isWordSelection==true)
+			{
+				selstat=Utils.selectState(wprob);
+			}
 			filename = model_root + ".beta";
 			logger.info("loading " + filename);
 			if (sc != null) {
@@ -893,9 +1106,26 @@ public class MedLDA {
 
 				for (j = 0; j < m_nNumTerms; j++) {
 					x = sc.nextDouble();
-					m_dLogProbW[i][j] = x;
+					if(MedLDAConfig.isWordSelection==true)
+					{
+					  if(selstat[j]==true)
+					  {
+					    m_dLogProbW[i][j] = x;
+					  }
+					  else
+					  {
+					   //System.out.println("selstat "+j+" is false");
+					   m_dLogProbW[i][j] = 0;
+					  }
+					}
+					else
+					{
+					    m_dLogProbW[i][j] = x;
+					}
 				}
 			}
+			fileptr.close();
+			
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -928,7 +1158,8 @@ public class MedLDA {
 		learn_parm.svm_maxqpsize = 10;
 		learn_parm.svm_newvarsinqp = 0;
 		learn_parm.svm_iter_to_shrink = -9999;
-		learn_parm.maxiter = 100000;
+		//learn_parm.maxiter = 100000;//origin set may be too big sometimes may be lost in local optimization so make the optimization slow  
+		learn_parm.maxiter = 10000;
 		learn_parm.kernel_cache_size = 40;
 		learn_parm.svm_c = 99999999; /* overridden by struct_parm->C */
 		learn_parm.eps = 0.001; /* overridden by struct_parm->epsilon */
@@ -1049,9 +1280,9 @@ public class MedLDA {
 		String buff;
 		buff = ss.dir + "/Feature.txt";
 		outputLowDimData(buff, ss);
-
+		svm_struct_api ssa=new svm_struct_api();
 		/* read the training examples */
-		SAMPLE sample = svm_struct_api.read_struct_examples(buff, struct_parm);
+		SAMPLE sample = ssa.read_struct_examples(buff, struct_parm);
 
 		svm_struct_learn sl = new svm_struct_learn();
 		if (param.SVM_ALGTYPE == 0) {
@@ -1060,9 +1291,12 @@ public class MedLDA {
 		} else if (param.SVM_ALGTYPE == 2) {
 			struct_parm.C = m_dC * ss.num_docs; // Note: in n-slack formulation,
 												// C is not divided by N.
+			svmconfig.sucessful=true;
+			
 			sl.svm_learn_struct_joint(sample, struct_parm, learn_parm,
 					kernel_parm, structmodel,
 					svm_struct_learn.ONESLACK_PRIMAL_ALG);
+			
 		}
 
 		int nVar = ss.num_docs * m_nLabelNum;
@@ -1122,7 +1356,9 @@ public class MedLDA {
 			}
 
 			m_dsvm_primalobj = structmodel.primalobj;
-
+			sl=null;
+			sample=null;
+			structmodel=null;
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -1172,6 +1408,25 @@ public class MedLDA {
 			fileptr.printf( "\n");
 			fileptr.printf( "C %5.10f\n", m_dC);
 			fileptr.close();
+			
+			/***********wordnut***************/
+			if(MedLDAConfig.isWordSelection==true)
+			{
+			  filename=model_root+".wwei";
+			  fileptr=new PrintWriter(new FileWriter(filename));
+			  for(int w=0;w< m_nNumTerms;w++)
+			  {
+				if(MedLDAConfig.weighttype==0)
+				{
+					fileptr.printf( "%d:%5.10f\n",w,wpotent[w][1]);
+				}
+				else{
+				    fileptr.printf( "%d:%5.10f\n",w,wprob[w][1]);
+				}
+			  }
+			fileptr.close();
+			}
+			
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -1356,6 +1611,14 @@ public class MedLDA {
 
 	public void setM_dDeltaEll(double m_dDeltaEll) {
 		this.m_dDeltaEll = m_dDeltaEll;
+	}
+
+	public double[][] getWpotent() {
+		return wpotent;
+	}
+
+	public void setWpotent(double[][] wpotent) {
+		this.wpotent = wpotent;
 	}
 
 }

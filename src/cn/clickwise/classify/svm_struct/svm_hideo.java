@@ -41,9 +41,9 @@ public class svm_hideo {
 	public double[] buffer = null;
 	public int[] nonoptimal = null;
 
-	public static int smallroundcount = 0;
+	public  int smallroundcount = 0;
 
-	public static int roundnumber = 0;
+	public  int roundnumber = 0;
 
 	public short verbosity = 0;
 
@@ -193,7 +193,7 @@ public class svm_hideo {
 
 		if ((result != PRIMAL_OPTIMAL) || (roundnumber % 31 == 0)
 				|| (progress <= 0)) {
-			logger.info("result is not PRIMAL_OPTIMAL");
+			//logger.info("result is not PRIMAL_OPTIMAL");
 			smallroundcount++;
 
 			result = optimize_hildreth_despo(qp.opt_n, qp.opt_m, opt_precision,
@@ -797,12 +797,13 @@ public class svm_hideo {
 		obj_after = calculate_qp_objective(n, g, g0, primal);
 		progress = obj_before - obj_after;
 		// System.out.println("progress:"+progress);
-		verbosity = 5;
+		//verbosity = 5;
+		/*
 		if (verbosity >= 3) {
 			logger.info("before(" + obj_before + ")...after(" + obj_after
 					+ ")...result_sd(" + result + ")...");
 		}
-
+        */
 		return ((int) result);
 	}
 
@@ -1181,19 +1182,13 @@ public class svm_hideo {
 		 */
 
 		for (i = 0; i < opt_n; i++) {
-			obj = WU
-					.sum(obj,WU.mul(opt_g0[i], alpha[i]));
-			obj = WU.sum(
-					obj,
-					WU.mul(
-							0.5,
-							WU.mul(
-									alpha[i],
-									WU.mul(alpha[i], opt_g[i * opt_n
-											+ i]))));
+			//obj = WU.sum(obj,WU.mul(opt_g0[i], alpha[i]));
+			obj+=(opt_g0[i]*alpha[i]);
+			//obj = WU.sum(obj,WU.mul(0.5,WU.mul(alpha[i],WU.mul(alpha[i], opt_g[i * opt_n+ i]))));
+			obj+=(0.5*alpha[i]*alpha[i]*opt_g[i*opt_n+i]);
 			for (j = 0; j < i; j++) {
-				obj =WU.sum(obj, WU.mul(alpha[j],
-						WU.mul(alpha[i], opt_g[j * opt_n + i])));
+				//obj =WU.sum(obj, WU.mul(alpha[j],WU.mul(alpha[i], opt_g[j * opt_n + i])));
+				obj+=(alpha[j]*alpha[i]*opt_g[j*opt_n+i]);
 			}
 		}
 		return (obj);

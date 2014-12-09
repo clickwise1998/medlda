@@ -343,7 +343,7 @@ public class svm_struct_main {
 			print_help();
 			System.exit(1);
 		}
-		
+		svmconfig.model_type=1;
 		SAMPLE sample; /* training sample */
 		LEARN_PARM learn_parm = new LEARN_PARM();
 		KERNEL_PARM kernel_parm = new KERNEL_PARM();
@@ -362,9 +362,9 @@ public class svm_struct_main {
 			System.out.println("Reading training examples...");
 			logger.info("Reading training examples...");
 		}
-
+		svm_struct_api ssa=new svm_struct_api();
 		/* read the training examples */
-		sample = svm_struct_api.read_struct_examples(trainfile, struct_parm);
+		sample = ssa.read_struct_examples(trainfile, struct_parm);
 		if (struct_verbosity >= 1) {
 			logger.info("done\n");
 		}

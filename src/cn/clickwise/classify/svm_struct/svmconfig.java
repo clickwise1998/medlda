@@ -7,4 +7,8 @@ public class svmconfig {
 	 */
 	public static int model_type=0;
 	
+	public static int iterations=0;
+	
+	public static boolean sucessful=false;
+	
 }

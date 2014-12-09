@@ -1,6 +1,10 @@
 package cn.clickwise.medlda;
 
+import java.util.ArrayList;
+
 import org.apache.log4j.Logger;
+
+import cn.clickwise.sort.utils.SortStrArray;
 
 public class Utils {
 	
@@ -158,5 +162,85 @@ public class Utils {
 		
 	}
 	
+	public static double[] potential2probs(double[] potential)
+	{
+		double[] probs=new double[2];
+		double logsum=log_sum(potential[0],potential[1]);
+		
+		probs[0]=Math.exp(potential[0]-logsum);
+		probs[1]=Math.exp(potential[1]-logsum);
+		
+		return probs;
+	}
 	
+	public static double[] optWeight(double[] gradient,double[] oldpoint)
+	{
+		double steplength=0.01;
+		double[] newpoint=new double[2];
+		for(int l=0;l<5;l++)
+		{
+		 for(int i=0;i<newpoint.length;i++)
+		 {
+			newpoint[i]=oldpoint[i]+steplength*gradient[i];
+			oldpoint[i]=newpoint[i];
+		 }
+		
+		}
+		return newpoint;
+	}
+	
+	public static boolean[] selectState(double[][] probs)
+	{
+		boolean[] selstat=new boolean[probs.length];
+		ArrayList<String> scores=new ArrayList<String>();
+		for(int i=0;i<probs.length;i++)
+		{
+			scores.add(i+"\001"+Math.abs(probs[i][1]));
+		}
+		
+		String[] sorted=SortStrArray.sort_List(scores, 1, "dou", 2, "\001");
+		
+		//for(int i=0;i<10;i++)
+		//{
+		//	System.out.println("i="+i+" "+sorted[i]);
+		//}
+		
+		/*
+		int lowthreshodIndex=(int)(sorted.length*(0.9));
+		double lowthreshold=Double.parseDouble((sorted[lowthreshodIndex].split("\001"))[1]);
+       	System.out.println("lowthreshold:"+lowthreshold);
+		*/
+		int upthreshodIndex=(int)(sorted.length*(0.3));		
+		double upthreshold=Double.parseDouble((sorted[upthreshodIndex].split("\001"))[1]);
+		System.out.println("upthreshold:"+upthreshold);
+		
+		
+		for(int i=0;i<probs.length;i++)
+		{
+			if((Math.abs(probs[i][1])>upthreshold))
+			{
+				selstat[i]=true;
+			}
+			else
+			{
+				selstat[i]=false;
+			}
+		}
+		
+		/*
+		for(int i=0;i<probs.length;i++)
+		{
+			double rand=Math.random();
+			if(rand>0.5)
+			{
+				selstat[i]=true;
+			}
+			else
+			{
+				selstat[i]=false;
+			}
+		}
+		*/
+		return selstat;
+	}
 }

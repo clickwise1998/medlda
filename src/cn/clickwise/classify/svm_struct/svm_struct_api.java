@@ -14,6 +14,12 @@ public class svm_struct_api {
 
 	private static Logger logger = Logger.getLogger(svm_struct_api.class);
 
+	public svm_common sc=null;
+	public svm_struct_api()
+	{
+		sc=new svm_common();
+	}
+	
 	public static void init_struct_model(SAMPLE sample, STRUCTMODEL sm,
 			STRUCT_LEARN_PARM sparm, LEARN_PARM lparm, KERNEL_PARM kparm) {
 		int i, totwords = 0;
@@ -131,7 +137,7 @@ public class svm_struct_api {
 		return false;
 	}
 
-	public static LABEL find_most_violated_constraint_slackrescaling(PATTERN x,
+	public  LABEL find_most_violated_constraint_slackrescaling(PATTERN x,
 			LABEL y, STRUCTMODEL sm, STRUCT_LEARN_PARM sparm) {
 		/*
 		 * Finds the label ybar for pattern x that that is responsible for the
@@ -159,7 +165,7 @@ public class svm_struct_api {
 		 */
 		doc = (x.doc);
 		doc.fvec = psi(x, y, sm, sparm);
-		score_y = svm_common.classify_example(sm.svm_model, doc);
+		score_y = sc.classify_example(sm.svm_model, doc);
 
 		ybar.scores = null;
 		ybar.num_classes = sparm.num_classes;
@@ -171,7 +177,7 @@ public class svm_struct_api {
 			// logger.info("before psi");
 			doc.fvec = psi(x, ybar, sm, sparm);
 			// logger.info("after psi");
-			score_ybar = svm_common.classify_example(sm.svm_model, doc);
+			score_ybar = sc.classify_example(sm.svm_model, doc);
 			// logger.info("after classify_example");
 			score = loss(y, ybar, sparm) * (1.0 - score_y + score_ybar);
 			if ((bestscore < score) || (first != 0)) {
@@ -190,7 +196,7 @@ public class svm_struct_api {
 		return (ybar);
 	}
 
-	public static LABEL find_most_violated_constraint_marginrescaling(
+	public LABEL find_most_violated_constraint_marginrescaling(
 			PATTERN x, LABEL y, STRUCTMODEL sm, STRUCT_LEARN_PARM sparm) {
 
 		/*
@@ -233,7 +239,7 @@ public class svm_struct_api {
 			// logger.info("before psi");
 			doc.fvec = psi(x, ybar, sm, sparm);
 			//logger.info("doc fvec:"+doc.fvec.toString());
-			score = svm_common.classify_example(sm.svm_model, doc);
+			score = sc.classify_example(sm.svm_model, doc);
 			// logger.info("ybar.class_index:"+ybar.class_index+"  score:"+score);
 			score += loss(y, ybar, sparm);
 			if ((bestscore < score) || (first != 0)) {
@@ -439,7 +445,7 @@ public class svm_struct_api {
 		}
 	}
 
-	public static SAMPLE read_struct_examples(String file,
+	public  SAMPLE read_struct_examples(String file,
 			STRUCT_LEARN_PARM sparm) {
 		/*
 		 * Reads training examples and returns them in sample. The number of
@@ -453,14 +459,14 @@ public class svm_struct_api {
 		int totwords, i, num_classes = 0;
 
 		/* Using the read_documents function from SVM-light */
-		docs = svm_common.read_documents(file, target);
+		docs = sc.read_documents(file, target);
 	
 		// logger.info("in read struct examples: docs.length:"+docs.length);
-		target = svm_common.read_target;
+		target = sc.read_target;
 		logger.info("target:"+target);
-		totwords = svm_common.read_totwords;
+		totwords = sc.read_totwords;
 		logger.info("totwords:"+totwords);
-		n = svm_common.read_totdocs;
+		n = sc.read_totdocs;
          logger.info("n:"+n);
         //logger.info("totwords:"+totwords);
 		for(int k=0;k<docs.length;k++)
@@ -884,7 +890,7 @@ public class svm_struct_api {
 	 * 1 to index sm->sizePsi. If the function cannot find a label, it shall
 	 * return an empty label as recognized by the function empty_label(y).
 	 */
-	public static LABEL classify_struct_example(PATTERN x, STRUCTMODEL sm,
+	public LABEL classify_struct_example(PATTERN x, STRUCTMODEL sm,
 			STRUCT_LEARN_PARM sparm) {
 		LABEL y = new LABEL();
 		DOC doc;
@@ -911,7 +917,7 @@ public class svm_struct_api {
 			y.class_index = class_index;
 			doc.fvec = psi(x, y, sm, sparm);
 	
-			score = svm_common.classify_example(sm.svm_model, doc);	
+			score = sc.classify_example(sm.svm_model, doc);	
 			y.scores[class_index] = score;
 			if ((bestscore < score) || first) {
 				bestscore = score;

@@ -27,13 +27,13 @@ public class svm_classify {
 		double dist, doc_label, costfactor;
 		String line, comment;
 		MODEL model;
-
+		svm_common sc=new svm_common();
 		read_input_parameters(args.length + 1, args);
-		svm_common.nol_ll(docfile);
-		max_docs = svm_common.read_max_docs;
-		max_words_doc = svm_common.read_max_words_doc;
+		sc.nol_ll(docfile);
+		max_docs = sc.read_max_docs;
+		max_words_doc = sc.read_max_words_doc;
 		max_words_doc += 2;
-		model = svm_common.read_model(modelfile);
+		model = sc.read_model(modelfile);
 
 		if (model.kernel_parm.kernel_type == 0) { /* linear kernel */
 			/* compute weight vector */
@@ -44,13 +44,13 @@ public class svm_classify {
 
 		for (int i = 0; i < test_samples.length; i++) {
 			line = test_samples[i];
-			svm_common.parse_document(line, max_words_doc);
-			doc_label = svm_common.read_doc_label;
-			queryid = svm_common.read_queryid;
-			slackid = svm_common.read_slackid;
-			costfactor = svm_common.read_costfactor;
-			comment = svm_common.read_comment;
-			words = svm_common.read_words;
+			sc.parse_document(line, max_words_doc);
+			doc_label = sc.read_doc_label;
+			queryid = sc.read_queryid;
+			slackid = sc.read_slackid;
+			costfactor = sc.read_costfactor;
+			comment = sc.read_comment;
+			words = sc.read_words;
 			doc = svm_common.create_example(-1, 0, 0, 0.0,
 					svm_common.create_svector(words, comment, 1.0));
 			if (model.kernel_parm.kernel_type == svm_common.LINEAR) { 
@@ -58,7 +58,7 @@ public class svm_classify {
 				dist = svm_common.classify_example_linear(model, doc);
 			} else { /* non-linear kernel */
 				logger.info("kernel type is nonlinear");
-				dist = svm_common.classify_example(model, doc);
+				dist = sc.classify_example(model, doc);
 			}
 
 			if (dist > 0) {
