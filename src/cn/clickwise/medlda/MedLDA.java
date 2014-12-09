@@ -1081,9 +1081,14 @@ public class MedLDA {
 				weight=Double.parseDouble(tokens[1]);
 				wprob[index][1]=weight;
 			 }
+			 fileptr.close();
 			}
-			fileptr.close();
-			boolean[] selstat=Utils.selectState(wprob);
+			
+			boolean[] selstat=null;
+			if(MedLDAConfig.isWordSelection==true)
+			{
+				selstat=Utils.selectState(wprob);
+			}
 			filename = model_root + ".beta";
 			logger.info("loading " + filename);
 			if (sc != null) {
@@ -1101,14 +1106,21 @@ public class MedLDA {
 
 				for (j = 0; j < m_nNumTerms; j++) {
 					x = sc.nextDouble();
-					if(selstat[j]==true)
+					if(MedLDAConfig.isWordSelection==true)
 					{
-					  m_dLogProbW[i][j] = x;
+					  if(selstat[j]==true)
+					  {
+					    m_dLogProbW[i][j] = x;
+					  }
+					  else
+					  {
+					   //System.out.println("selstat "+j+" is false");
+					   m_dLogProbW[i][j] = 0;
+					  }
 					}
 					else
 					{
-					  //System.out.println("selstat "+j+" is false");
-					  m_dLogProbW[i][j] = 0;
+					    m_dLogProbW[i][j] = x;
 					}
 				}
 			}
