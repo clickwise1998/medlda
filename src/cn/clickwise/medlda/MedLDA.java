@@ -796,7 +796,7 @@ public class MedLDA {
 				for (int n = 0; n < doc.length; n++) {
 					if(MedLDAConfig.isWordSelection==false)
 					{
-					dVal += phi[n][k] * (double) doc.counts[n]
+					    dVal += phi[n][k] * (double) doc.counts[n]
 							/ (double) doc.total;
 					}
 					else if(MedLDAConfig.isWordSelection==true)
