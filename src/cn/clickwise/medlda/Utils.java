@@ -217,7 +217,7 @@ public class Utils {
 		//}
 		
 		
-		int lowthreshodIndex=(int)(sorted.length*(0.95));
+		int lowthreshodIndex=(int)(sorted.length*(0.5));
 		double lowthreshold=Double.parseDouble((sorted[lowthreshodIndex].split("\001"))[1]);
        	System.out.println("lowthreshold:"+lowthreshold);
 	    
