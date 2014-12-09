@@ -223,7 +223,7 @@ public class Utils {
 	    */
 		
 		
-		int upthreshodIndex=(int)(sorted.length*(0.2));		
+		int upthreshodIndex=(int)(sorted.length*(0.05));		
 		double upthreshold=Double.parseDouble((sorted[upthreshodIndex].split("\001"))[1]);
 		System.out.println("upthreshold:"+upthreshold);
 		
