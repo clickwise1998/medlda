@@ -27,7 +27,8 @@ public class svm_struct_classify {
 		STRUCT_TEST_STATS teststats=null;
 		SAMPLE testsample;
 		LABEL y=new LABEL();
-		  
+		
+		svm_struct_api ssa=new svm_struct_api();
 		svm_struct_api.svm_struct_classify_api_init(args.length+1,args);
 
 		read_input_parameters(args.length+1,args,sparm,
@@ -70,7 +71,7 @@ public class svm_struct_classify {
 			System.out.println("Reading test examples ...");
 		}
 		
-		testsample=svm_struct_api.read_struct_examples(testfile, sparm);
+		testsample=ssa.read_struct_examples(testfile, sparm);
 		
 		if(svm_struct_common.struct_verbosity>=1)
 		{
@@ -91,7 +92,7 @@ public class svm_struct_classify {
 			
 			t1=svm_common.get_runtime();
 			logger.info("doc ["+i+"] "+testsample.examples[i].x.doc.fvec.toString());
-			y=svm_struct_api.classify_struct_example(testsample.examples[i].x, model, sparm);
+			y=ssa.classify_struct_example(testsample.examples[i].x, model, sparm);
 			if(y==null)
 			{
 				continue;

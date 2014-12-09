@@ -28,8 +28,9 @@ public class svm_learn {
 	//public double maxviol = 0;
 	public double[] alpha_g;
 
+	public svm_common sc=null;
 	public svm_learn() {
-
+		sc=new svm_common();
 	}
 
 	public void svm_learn_classification(DOC[] docs, double[] classc,
@@ -883,9 +884,35 @@ public class svm_learn {
 			}
 		}
 		
+		if(shrink_state!=null)
+		{
+		  shrink_state_cleanup(shrink_state);
+		}
+		label=null;
+		unlabeled=null;
+		inconsistent=null;
+		c=null;
+		a=null;
+		lin=null;
+		if(learn_parm!=null)
+		{
+		  learn_parm.svm_cost=null;
+		}
 
 	}
 
+	public void shrink_state_cleanup(SHRINK_STATE shrink_state)
+	{
+		shrink_state.active=null;
+		shrink_state.inactive_since=null;
+		
+		if(shrink_state.deactnum > 0) 
+			shrink_state.a_history[shrink_state.deactnum-1]=null;
+		shrink_state.a_history=null;
+		shrink_state.last_a=null;
+		shrink_state.last_lin=null;
+	}
+	
 	public void init_shrink_state(SHRINK_STATE shrink_state, int totdoc,
 			int maxhistory) {
 		int i;
@@ -988,11 +1015,11 @@ public class svm_learn {
 		avgxlen = 0;
 
 		for (i = 0; i < totdoc; i++) {
-			avgxlen += Math.sqrt(svm_common.kernel(kernel_parm, docs[i],
+			avgxlen += Math.sqrt(sc.kernel(kernel_parm, docs[i],
 					docs[i])
 					- 2
-					* svm_common.kernel(kernel_parm, docs[i], nulldoc)
-					+ svm_common.kernel(kernel_parm, nulldoc, nulldoc));
+					* sc.kernel(kernel_parm, docs[i], nulldoc)
+					+ sc.kernel(kernel_parm, nulldoc, nulldoc));
 		}
 
 		return (avgxlen / totdoc);
@@ -1023,7 +1050,7 @@ public class svm_learn {
 						cache[j] = kernel_cache.buffer[kernel_cache.activenum
 								* kernel_cache.index[k] + l];
 					} else {
-						cache[j] = svm_common.kernel(kernel_parm, ex, docs[k]);
+						cache[j] = sc.kernel(kernel_parm, ex, docs[k]);
 					}
 
 				}
@@ -1137,12 +1164,12 @@ public class svm_learn {
 					buffer[j] = kernel_cache.buffer[start
 							+ kernel_cache.totdoc2active[j]];
 				} else {
-					buffer[j] = svm_common.kernel(kernel_parm, ex, docs[j]);
+					buffer[j] = sc.kernel(kernel_parm, ex, docs[j]);
 				}
 			}
 		} else {
 			for (i = 0; (j = active2dnum[i]) >= 0; i++) {
-				buffer[j] = svm_common.kernel(kernel_parm, ex, docs[j]);
+				buffer[j] = sc.kernel(kernel_parm, ex, docs[j]);
 			}
 		}
 
@@ -1314,7 +1341,7 @@ public class svm_learn {
 			int[] inconsistent, int[] unlabeled, double[] a, double[] lin,
 			double[] c, TIMING timing_profile, int heldout, int retrain) {
 
-		// logger.info("in optimize_to_convergence");
+		 logger.info("in optimize_to_convergence");
 		/*
 		 * if(docs!=null) { logger.info("docs.size:"+docs.length); for(int
 		 * i=0;i<docs.length;i++) {
@@ -1907,10 +1934,10 @@ public class svm_learn {
 				//		+ learn_parm.eps + " c=" + c[j] + " lin=" + lin[j]);
 				//logger.info("activedoc=" + activedoc + " selcrit="
 				//		+ selcrit[activedoc] + " key=" + key[activedoc]);
-				if (Math.abs(selcrit[activedoc]) > (double) (0.5)) {
+				//if (Math.abs(selcrit[activedoc]) > (double) (0.5)) {//0.5 set may be bug
 					key[activedoc] = j;
 					activedoc++;
-				}
+				//}
 			}
 		}
 
@@ -1950,20 +1977,18 @@ public class svm_learn {
 					&& (!((a[j] >= (learn_parm.svm_cost[j] - learn_parm.epsilon_a)) && (s > 0)))
 					&& (chosen[j] == 0) && (label[j] != 0)
 					&& (inconsistent[j] == 0)) {
-				selcrit[activedoc] = -(double) label[j]
-						* (learn_parm.eps - (double) label[j] * c[j] + (double) label[j]
-								* lin[j]);
+				selcrit[activedoc] = -(double) label[j]* (learn_parm.eps - (double) label[j] * c[j] + (double) label[j]* lin[j]);
 
 				/*
 				 * selcrit[activedoc]=-(double)(label[j]*(-1.0+(double)label[j]*lin
 				 * [j]));
 				 */
 				//logger.info("activedoc=" + activedoc + "key=" + key[activedoc]);
-				if (Math.abs(selcrit[activedoc]) > (double)( 0.5)) {
+				//if (Math.abs(selcrit[activedoc]) > (double)( 0.5)) {//0.5 set may be bug
 					key[activedoc] = j;
 					// logger.info("key2["+activedoc+"]="+j);
 					activedoc++;
-				}
+				//}
 			}
 		}
 
@@ -2240,14 +2265,14 @@ public class svm_learn {
 			qp.opt_low[i] = 0;
 			qp.opt_up[i] = learn_parm.svm_cost[ki];
 			// System.out.println("docs[ki]:"+ki);
-			kernel_temp = svm_common.kernel(kernel_parm, docs[ki], docs[ki]);
+			kernel_temp = sc.kernel(kernel_parm, docs[ki], docs[ki]);
 			// //logger.info("kernel_temp:" + kernel_temp);
 			qp.opt_g0[i] -= (kernel_temp * a[ki] * (double) label[ki]);
 			qp.opt_g[varnum * i + i] = kernel_temp;
 
 			for (j = i + 1; j < varnum; j++) {
 				kj = key[j];
-				kernel_temp = svm_common
+				kernel_temp = sc
 						.kernel(kernel_parm, docs[ki], docs[kj]);
 
 				qp.opt_g0[i] -= (kernel_temp * a[kj] * (double) label[kj]);
@@ -3149,7 +3174,7 @@ public class svm_learn {
 			KERNEL_PARM kernel_parm, KERNEL_CACHE kernel_cache,
 			SHRINK_STATE shrink_state, MODEL model, double[] a, double[] lin,
 			double[] c, TIMING timing_profile) {
-		//logger.info("in optimize_to_convergence_sharedslack");
+		logger.info("in optimize_to_convergence_sharedslack");
 		int[] chosen;
 		int[] key;
 		int i, j, jj;
@@ -3268,7 +3293,8 @@ public class svm_learn {
 
 		for (; (retrain != 0) && (terminate == 0); iteration++) {
 
-			
+			svmconfig.iterations++;
+
 			 for(int ci=0;ci<totdoc;ci++)
              {
                 selcrit[ci]=0.0;
@@ -3281,7 +3307,7 @@ public class svm_learn {
 			if (svm_common.verbosity >= 0) {
 				//if (iteration % 51 == 0) {
 					//System.out.println("Iteration " + iteration + ": ");
-					logger.info("Iteration " + iteration + ": ");
+				//	logger.info("Iteration " + iteration + ": ");
 				//}
 			} else if (svm_common.verbosity == 1) {
 				System.out.println(".");
@@ -3641,6 +3667,35 @@ public class svm_learn {
 
 		}
 
+		alphaslack=null;
+		slack=null;
+		chosen=null;
+		unlabeled=null;
+		inconsistent=null;
+		ignore=null;
+		last_suboptimal_at=null;
+		key=null;
+		selcrit=null;
+		selexam=null;
+		a_old=null;
+		aicache=null;
+		working2dnum=null;
+		active2dnum=null;
+		if(qp!=null)
+		{
+		  qp.opt_ce=null;
+		  qp.opt_ce0=null;
+		  qp.opt_g=null;
+		  qp.opt_g0=null;
+		  qp.opt_xinit=null;
+		  qp.opt_low=null;
+		  qp.opt_up=null;
+		}
+		
+		if(weights!=null)
+		{
+			weights=null;
+		}
 		learn_parm.epsilon_crit = epsilon_crit_org; /* restore org */
 		model.maxdiff = maxdiff;
 
@@ -3671,14 +3726,18 @@ public class svm_learn {
 			 */
 			dist = (lin[i]) * (double) label[i];
 
-			target = -WU.sub(learn_parm.eps, WU.mul((double) label[i], c[i]));
+			//target = -WU.sub(learn_parm.eps, WU.mul((double) label[i], c[i]));
+			target=-(learn_parm.eps-(double)label[i]*c[i]);
 			//logger.info("jj=" + jj + " i=" + i + " lin=" + lin[i] + " dist="
 			//		+ dist + " c=" + c[i] + " eps=" + learn_parm.eps
 			//		+ " target:" + target + " slack=" + slack[docs[i].slackid]);
-			if (((target - dist) > slack[docs[i].slackid])
-					&& Math.abs(target - dist) > (double) (0.5)) {
+			//if (((target - dist) > slack[docs[i].slackid])
+				//	&& Math.abs(target - dist) > (double) (0.5)) 
+			if ((target - dist) > slack[docs[i].slackid])//0.5 set may be bug 
+			{
 
-				slack[docs[i].slackid] = WU.sub(target, dist);
+				//slack[docs[i].slackid] = WU.sub(target, dist);
+				slack[docs[i].slackid]=target-dist;
 				//logger.info("jj=" + jj + " i=" + i + " slackid="
 				//		+ docs[i].slackid + "  slack=" + slack[docs[i].slackid]);
 				// alphaslack[docs[i].slackid]+=a[i];
@@ -3822,11 +3881,11 @@ public class svm_learn {
 				svm_common.create_svector(nullword, "", 1.0));
 
 		for (j = 1; j < model.sv_num; j++) {
-			xlen = Math.sqrt(svm_common.kernel(kernel_parm, model.supvec[j],
+			xlen = Math.sqrt(sc.kernel(kernel_parm, model.supvec[j],
 					model.supvec[j])
 					- 2
-					* svm_common.kernel(kernel_parm, model.supvec[j], nulldoc)
-					+ svm_common.kernel(kernel_parm, nulldoc, nulldoc));
+					* sc.kernel(kernel_parm, model.supvec[j], nulldoc)
+					+ sc.kernel(kernel_parm, nulldoc, nulldoc));
 			if (xlen > maxxlen) {
 				maxxlen = xlen;
 			}
@@ -3842,7 +3901,7 @@ public class svm_learn {
 
 		maxxlen = 0;
 		for (i = 0; i < totdoc; i++) {
-			xlen = Math.sqrt(svm_common.kernel(kernel_parm, docs[i], docs[i]));
+			xlen = Math.sqrt(sc.kernel(kernel_parm, docs[i], docs[i]));
 			if (xlen > maxxlen) {
 				maxxlen = xlen;
 			}
@@ -3907,9 +3966,9 @@ public class svm_learn {
 			 * (k+":"+docs[i].fvec.words[k].wnum+":"+docs[i].fvec.words[k
 			 * ].weight+" "); } System.out.println(); pw.flush();
 			 */
-			xlen = Math.sqrt(svm_common.kernel(kernel_parm, docs[i], docs[i])
-					- 2 * svm_common.kernel(kernel_parm, docs[i], nulldoc)
-					+ svm_common.kernel(kernel_parm, nulldoc, nulldoc));
+			xlen = Math.sqrt(sc.kernel(kernel_parm, docs[i], docs[i])
+					- 2 * sc.kernel(kernel_parm, docs[i], nulldoc)
+					+ sc.kernel(kernel_parm, nulldoc, nulldoc));
 			if (xlen > maxxlen) {
 				maxxlen = xlen;
 			}
@@ -3927,7 +3986,7 @@ public class svm_learn {
 		/* follows chapter 5.6.4 in [Vapnik/95] */
 
 		if (w < 0) {
-			w = svm_common.model_length_s(model);
+			w = sc.model_length_s(model);
 		}
 		if (R < 0) {
 			R = estimate_sphere(model);
@@ -4002,7 +4061,7 @@ public class svm_learn {
 					}
 					if ((learn_parm.xa_depth == 0)
 							|| ((a[i]
-									* svm_common.kernel(kernel_parm, docs[i],
+									* sc.kernel(kernel_parm, docs[i],
 											docs[i]) + a[i] * 2.0 * sim + xi) >= 1.0)) {
 						looerror++;
 						if (label[i] > 0) {
@@ -4046,7 +4105,7 @@ public class svm_learn {
 		trow = new double[svnum];
 
 		for (k = 0; k < svnum; k++) {
-			trow[k] = svm_common.kernel(kernel_parm, docs[docnum],
+			trow[k] = sc.kernel(kernel_parm, docs[docnum],
 					docs[sv2dnum[k]]);
 		}
 
@@ -4074,7 +4133,7 @@ public class svm_learn {
 
 				if (skip == 0) {
 					val = init_val_sq;
-					val += svm_common.kernel(kernel_parm, docs[sv2dnum[i]],
+					val += sc.kernel(kernel_parm, docs[sv2dnum[i]],
 							docs[sv2dnum[i]]);
 					for (j = 0; j < d; j++) {
 						val += 2.0 * cache[i + j * svnum];
@@ -4095,7 +4154,7 @@ public class svm_learn {
 			}
 			if (allskip == 0) {
 				for (k = 0; k < svnum; k++) {
-					cache[d * svnum + k] = svm_common.kernel(kernel_parm,
+					cache[d * svnum + k] = sc.kernel(kernel_parm,
 							docs[sv2dnum[best_ex[d]]], docs[sv2dnum[k]]);
 				}
 			}
@@ -4211,8 +4270,8 @@ public class svm_learn {
 		if (svm_common.verbosity >= 2) {
 			System.out.println(" Cache-size in rows = "
 					+ kernel_cache.max_elems);
-			System.out.println(" Kernel evals so far: "
-					+ svm_common.kernel_cache_statistic);
+			//System.out.println(" Kernel evals so far: "
+				//	+ svm_common.kernel_cache_statistic);
 		}
 
 		kernel_cache.elems = 0; /* initialize cache */
