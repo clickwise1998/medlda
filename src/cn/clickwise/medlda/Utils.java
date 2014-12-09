@@ -189,6 +189,15 @@ public class Utils {
 		return newpoint;
 	}
 	
+	public static double optWeight(double gradient,double oldpoint)
+	{
+		double steplength=1;
+		double newpoint=0;
+
+		newpoint=oldpoint+steplength*gradient;
+		return newpoint;
+	}
+	
 	public static boolean[] selectState(double[][] probs)
 	{
 		boolean[] selstat=new boolean[probs.length];

@@ -228,9 +228,13 @@ public class MedLDA {
 		  {
 			 if(MedLDAConfig.weighttype==0)
 			 {
+				 /******valid result
 				 wpotent[w][0]+=ss.wprob_suffstats[w][0];
 				 wpotent[w][1]+=ss.wprob_suffstats[w][1];
-	
+	             ************/
+				 wpotent[w][0]=Utils.optWeight(ss.wprob_suffstats[w][0], wpotent[w][0]);
+				 wpotent[w][1]=Utils.optWeight(ss.wprob_suffstats[w][1], wpotent[w][1]);
+				 
 			 }
 			 else if(MedLDAConfig.weighttype==1)
 			 {
