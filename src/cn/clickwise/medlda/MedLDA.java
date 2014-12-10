@@ -235,8 +235,8 @@ public class MedLDA {
 			 if(MedLDAConfig.weighttype==0)
 			 {
 				 // incorporate priors
-				 ss.wprob_suffstats[w][0]=ss.wprob_suffstats[w][0]+ss.wprob_suffstats[w][0];
-				 ss.wprob_suffstats[w][1]=ss.wprob_suffstats[w][0]+ss.wprob_suffstats[w][1];
+				 //ss.wprob_suffstats[w][0]=ss.wprob_suffstats[w][0]+ss.wprob_suffstats[w][0];
+				 //ss.wprob_suffstats[w][1]=ss.wprob_suffstats[w][0]+ss.wprob_suffstats[w][1];
 				 
 				 /******valid result
 				 wpotent[w][0]+=ss.wprob_suffstats[w][0];
@@ -358,7 +358,7 @@ public class MedLDA {
 				lhood = 0;
 				zero_init_ss(ss);
 
-				if(ci>2)
+				if(ci>5)
 				{
 					break;
 				}
@@ -1514,7 +1514,8 @@ public class MedLDA {
 	public void outputLowDimData(String filename, SuffStats ss) {
 		if(MedLDAConfig.isWordSelection==true)
 		{
-		  normalizeExp(ss);
+		  //normalizeExp(ss);
+		   normalizeExpAvg(ss);
 		}
 		try {
 			PrintWriter fileptr = new PrintWriter(new FileWriter(filename));
@@ -1538,25 +1539,47 @@ public class MedLDA {
 	
 	public void normalizeExp(SuffStats ss)
 	{
-		double max=0;
-		for (int d = 0; d < ss.num_docs; d++) {
-			for (int k = 0; k < m_nK; k++) {
-				if(Math.abs(ss.exp[d][k])>max)
-				{
-					max=Math.abs(ss.exp[d][k]);
-				}
-			}
-		}
+		double sum=0;
 		
 		for (int d = 0; d < ss.num_docs; d++) {
+			sum=0;
 			for (int k = 0; k < m_nK; k++) {
-
-				ss.exp[d][k]=ss.exp[d][k]/(max);
-				
+				sum+=Math.abs(ss.exp[d][k]);	
 			}
+			if(sum==0)
+			{
+				sum=1;
+			}
+			for (int k = 0; k < m_nK; k++) {
+				ss.exp[d][k]=ss.exp[d][k]/(sum);	
+			}	
 		}
 	}
-
+	
+	public void normalizeExpAvg(SuffStats ss)
+	{
+		double sum=0;
+		int nonzero=0;
+		for (int d = 0; d < ss.num_docs; d++) {
+			for (int k = 0; k < m_nK; k++) {
+				if(ss.exp[d][k]!=0)
+				{
+					nonzero++;
+					sum+=Math.abs(ss.exp[d][k]);	
+				}		
+			}	
+		}
+		
+		sum=sum/nonzero+1;
+		
+		for (int d = 0; d < ss.num_docs; d++) {
+		
+			for (int k = 0; k < m_nK; k++) {
+				ss.exp[d][k]=ss.exp[d][k]/sum;	
+			}	
+		}
+	}
+	
 	public double[] getM_alpha() {
 		return m_alpha;
 	}
