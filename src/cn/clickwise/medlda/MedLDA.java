@@ -234,6 +234,10 @@ public class MedLDA {
 		  {
 			 if(MedLDAConfig.weighttype==0)
 			 {
+				 // incorporate priors
+				 ss.wprob_suffstats[w][0]=ss.wprob_suffstats[w][0]+ss.wprob_suffstats[w][0];
+				 ss.wprob_suffstats[w][1]=ss.wprob_suffstats[w][0]+ss.wprob_suffstats[w][1];
+				 
 				 /******valid result
 				 wpotent[w][0]+=ss.wprob_suffstats[w][0];
 				 wpotent[w][1]+=ss.wprob_suffstats[w][1];
