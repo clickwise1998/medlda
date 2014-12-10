@@ -21,6 +21,7 @@ public class Utils {
 		} else {
 			v = log_a+Math.log(1 + Math.exp(log_b-log_a));
 		}
+		
 		return(v);
 	}
 	
@@ -216,21 +217,21 @@ public class Utils {
 		//	System.out.println("i="+i+" "+sorted[i]);
 		//}
 		
-		
+		/*
 		int lowthreshodIndex=(int)(sorted.length*(0.5));
 		double lowthreshold=Double.parseDouble((sorted[lowthreshodIndex].split("\001"))[1]);
        	System.out.println("lowthreshold:"+lowthreshold);
-	    
+	    */
 		
-		/*
-		int upthreshodIndex=(int)(sorted.length*(0.05));		
+		
+		int upthreshodIndex=(int)(sorted.length*(0.5));		
 		double upthreshold=Double.parseDouble((sorted[upthreshodIndex].split("\001"))[1]);
 		System.out.println("upthreshold:"+upthreshold);
-		*/
+		
 		
 		for(int i=0;i<probs.length;i++)
 		{
-			if((Math.abs(probs[i][1])<lowthreshold))
+			if((Math.abs(probs[i][1])>upthreshold))
 			{
 				selstat[i]=true;
 			}
