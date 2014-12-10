@@ -358,7 +358,7 @@ public class MedLDA {
 				lhood = 0;
 				zero_init_ss(ss);
 
-				if(ci>10)
+				if(ci>2)
 				{
 					break;
 				}
@@ -737,7 +737,9 @@ public class MedLDA {
 				/************wordnut***************/
 				if(MedLDAConfig.weighttype==0)
 				{
-				  dval += m_dMu[muIx] * (m_dEta[gndetaIx] - m_dEta[etaIx])*wpotent[doc.words[n]][1]*phi[n][k];
+				 /*********valid result*******/
+				 // dval += m_dMu[muIx] * (m_dEta[gndetaIx] - m_dEta[etaIx])*wpotent[doc.words[n]][1]*phi[n][k];
+					dval += m_dMu[muIx] * (m_dEta[gndetaIx] - m_dEta[etaIx])*phi[n][k];
 				}
 				else if(MedLDAConfig.weighttype==1)
 				{
