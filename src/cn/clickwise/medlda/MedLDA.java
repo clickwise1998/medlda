@@ -358,7 +358,7 @@ public class MedLDA {
 				lhood = 0;
 				zero_init_ss(ss);
 
-				if(ci>5)
+				if(ci>2)
 				{
 					break;
 				}
@@ -371,9 +371,9 @@ public class MedLDA {
 							phi[n][k] = 1.0 / (double) param.getNTOPICS();
 						}
 					}
-						if (d % 1000 == 0) {
-							logger.info("Document " + d);
-						}
+					if (d % 1000 == 0) {
+						logger.info("Document " + d);
+					}
 					lhood += doc_e_step(corpus.docs[d], var_gamma[d],
 									phi, ss, param);
 						
