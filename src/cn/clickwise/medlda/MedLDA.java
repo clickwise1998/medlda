@@ -358,7 +358,7 @@ public class MedLDA {
 				lhood = 0;
 				zero_init_ss(ss);
 
-				if(ci>2)
+				if(ci>5)
 				{
 					break;
 				}
@@ -1512,6 +1512,10 @@ public class MedLDA {
 	}
 
 	public void outputLowDimData(String filename, SuffStats ss) {
+		if(MedLDAConfig.isWordSelection==true)
+		{
+		  normalizeExp(ss);
+		}
 		try {
 			PrintWriter fileptr = new PrintWriter(new FileWriter(filename));
 
@@ -1529,6 +1533,27 @@ public class MedLDA {
 
 		} catch (Exception e) {
 			e.printStackTrace();
+		}
+	}
+	
+	public void normalizeExp(SuffStats ss)
+	{
+		double max=0;
+		for (int d = 0; d < ss.num_docs; d++) {
+			for (int k = 0; k < m_nK; k++) {
+				if(Math.abs(ss.exp[d][k])>max)
+				{
+					max=Math.abs(ss.exp[d][k]);
+				}
+			}
+		}
+		
+		for (int d = 0; d < ss.num_docs; d++) {
+			for (int k = 0; k < m_nK; k++) {
+
+				ss.exp[d][k]=ss.exp[d][k]/(max);
+				
+			}
 		}
 	}
 
