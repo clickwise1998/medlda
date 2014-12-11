@@ -16,13 +16,23 @@ public class SortFile {
     	try{
     		BufferedReader br=new BufferedReader(new FileReader(input));
     		String line="";
+    		String[] tokens=null;
+    		String index="";
+    		double weight=0;
     		while((line=br.readLine())!=null)
     		{
     			if(SSO.tioe(line))
     			{
     				continue;
     			}
-    			list.add(line);
+    			tokens=line.split(":");
+    			if(tokens.length!=2)
+    			{
+    				continue;
+    			}
+    			index=tokens[0];
+    			weight=Double.parseDouble(tokens[1]);
+    			list.add(index+":"+Math.abs(weight));
     		}
     		br.close();
     		
