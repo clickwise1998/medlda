@@ -218,13 +218,13 @@ public class Utils {
 		//}
 		
 		/*
-		int lowthreshodIndex=(int)(sorted.length*(0.5));
+		int lowthreshodIndex=(int)(sorted.length*(0.7));
 		double lowthreshold=Double.parseDouble((sorted[lowthreshodIndex].split("\001"))[1]);
        	System.out.println("lowthreshold:"+lowthreshold);
 	    */
 		
 		
-		int upthreshodIndex=(int)(sorted.length*(0.5));		
+		int upthreshodIndex=(int)(sorted.length*(0.3));		
 		double upthreshold=Double.parseDouble((sorted[upthreshodIndex].split("\001"))[1]);
 		System.out.println("upthreshold:"+upthreshold);
 		
