@@ -19,5 +19,5 @@ cv_paramnum 10
 53.0
 57.0
 61.0
-train_file: example/mltrain.txt
-test_file: example/mltest.txt
+train_file: example/mstrain11.txt
+test_file: example/mstest11.txt
