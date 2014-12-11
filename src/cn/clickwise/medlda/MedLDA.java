@@ -234,7 +234,7 @@ public class MedLDA {
 		  {
 			 if(MedLDAConfig.weighttype==0)
 			 {
-				 // incorporate priors(k * w / sigmaSq;) 里面的w应该是 wpotent[w][1]
+				 // incorporate priors(-k * w / sigmaSq;) 里面的w应该是 wpotent[w][1]
 				 //ss.wprob_suffstats[w][0]=ss.wprob_suffstats[w][0]+wpotent[w][0];
 				// ss.wprob_suffstats[w][1]=ss.wprob_suffstats[w][0]+wpotent[w][1];
 				 
@@ -358,7 +358,7 @@ public class MedLDA {
 				lhood = 0;
 				zero_init_ss(ss);
 
-				if(ci>3)
+				if(ci>5)
 				{
 					break;
 				}
