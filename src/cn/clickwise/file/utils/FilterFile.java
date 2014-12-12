@@ -39,10 +39,7 @@ public class FilterFile {
 		File output_file=new File("temp/seg_test/five_dict_uniq_clean.txt");
 		
 		FilterFile.fileter(input_file, output_file, "的");
-		
-		
-		
-		
+					
 	}
 
 }
