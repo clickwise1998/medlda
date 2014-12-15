@@ -1122,7 +1122,7 @@ public class MedLDA {
 				}
 
 				for (j = 0; j < m_nNumTerms; j++) {
-					x = sc.nextDouble();
+					x = sc.nextDouble();	
 					if(MedLDAConfig.isWordSelection==true)
 					{
 					  if(selstat[j]==true)
@@ -1137,6 +1137,17 @@ public class MedLDA {
 					}
 					else
 					{
+						/*
+						if((Math.random())>0.1)
+						{
+					        m_dLogProbW[i][j] = x;
+						}
+						else
+						{
+						    m_dLogProbW[i][j] = 0;
+						}
+						*/
+						//*************normal result******
 					    m_dLogProbW[i][j] = x;
 					}
 				}
