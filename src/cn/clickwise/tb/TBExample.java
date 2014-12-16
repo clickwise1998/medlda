@@ -28,10 +28,10 @@ public class TBExample {
 				  }
 				  cate=fields[0];
 				  title=fields[1];
-				  if((eff_cate_count.get(cate)!=null)&&(eff_cate_count.get(cate)>1000))
-				  {
-					  continue;
-				  }
+				 // if((eff_cate_count.get(cate)!=null)&&(eff_cate_count.get(cate)>0))
+				 // {
+				//	  continue;
+				 // }
 				  if(!(eff_cate_count.containsKey(cate)))
 				  {
 					  eff_cate_count.put(cate, 1);
@@ -59,6 +59,6 @@ public class TBExample {
 	public static void main(String[] args)
 	{
 		TBExample tbe=new TBExample();
-		tbe.filter("D:/projects/medlda_win_workplace/medlda/tb/tb_goods_short_mod_rearch.txt", "D:/projects/medlda_win_workplace/medlda/tb/tb_goods_short_exmple1000.txt");
+		tbe.filter("D:/projects/medlda_win_workplace/medlda/tb/tb_goods_short_mod_rearch1216.txt", "D:/projects/medlda_win_workplace/medlda/tb/tb_goods_short_exmple_all_1216.txt");
 	}
 }
