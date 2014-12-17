@@ -138,6 +138,8 @@ public class TBArchitecture {
 		}
 		
 		******/
+		
+		/*******bat2********
 		if((cate.equals("珠宝手表|其他配饰|偏光太阳镜"))||(cate.equals("珠宝手表|其他配饰|太阳眼镜")))
 		{
 			mcate="珠宝手表|其他配饰|功能眼镜";
@@ -242,6 +244,189 @@ public class TBArchitecture {
 		{
 			mcate=cate;
 		}
+		********/
+		if(cate.equals("家居建材|家纺布艺|毛巾被/毛巾毯"))
+		{
+			mcate="床上用品/靠垫/毛巾/布艺|床褥/床垫/床单/毛毯";
+		}
+		else if(cate.equals("床上用品/靠垫/毛巾/布艺|被子/蚕丝被/纤维被"))
+		{
+			mcate="家居建材|家纺布艺|被子/蚕丝被/纤维被";
+		}
+		else if((cate.equals("家居建材|家纺布艺|布艺定制窗帘"))||(cate.equals("家居建材|家纺布艺|布艺成品窗帘")))
+		{
+			mcate="家居建材|家纺布艺|布艺窗帘";
+		}
+		else if((cate.equals("床上用品/靠垫/毛巾/布艺|毛巾"))||(cate.equals("床上用品/靠垫/毛巾/布艺|浴巾")))
+		{
+			mcate="家居建材|家纺布艺|毛巾/浴巾";
+		}
+		else if(cate.equals("家居建材|家居饰品|相片墙/画片"))
+		{
+			mcate="家居建材|家居饰品|相框/相架/画框";
+		}
+		else if(cate.equals("家居建材|家装主材|花洒单头/莲蓬头"))
+		{
+			mcate="家居建材|家装主材|淋浴花洒套装";
+		}
+		else if((cate.equals("家电办公|大家电|燃气热水器"))||(cate.equals("家电办公|大家电|电热水器")))
+		{
+			mcate="家居建材|家装主材|热水器";
+		}
+		else if((cate.equals("家电办公|影音电器|HIFI音箱"))||(cate.equals("家电办公|影音电器|扩音器")))
+		{
+			mcate="家电办公|影音电器|组合/迷你/插卡音响";
+		}
+		else if(cate.equals("家电办公|影音电器|移动/便携DVD"))
+		{
+			mcate="家电办公|影音电器|蓝光/DVD影碟机";
+		}
+		else if(cate.equals("家电办公|厨房电器|净水器"))
+		{
+			mcate="家电办公|生活电器|净水器";
+		}
+		else if((cate.equals("家电办公|生活电器|吊扇"))||(cate.equals("家电办公|生活电器|电风扇"))||(cate.equals("日用百货|居家日用|扇子/迷你风扇")))
+		{
+			mcate="家电办公|生活电器|风扇";
+		}
+		else if(cate.equals("数码|电脑周边|组装机"))
+		{
+			mcate="数码|电脑周边|一体机";
+		}
+		else if((cate.equals("数码|笔记本|Acer/宏碁"))||(cate.equals("数码|平板电脑|Acer/宏碁")))
+		{
+			mcate="数码|笔记本平板电脑|Acer/宏碁";
+		}
+		else if((cate.equals("数码|数码配件|笔记本电脑配件"))||(cate.equals("数码|数码配件|平板电脑配件")))
+		{
+			mcate="数码|数码配件|笔记本平板电脑配件";
+		}
+		else if(cate.equals("文化玩乐|书籍杂志|社会科学"))
+		{
+			mcate="文化玩乐|书籍杂志|考试/教材/论文";
+		}
+		else if((cate.equals("文化玩乐|爱好收藏|外国邮票"))||(cate.equals("文化玩乐|爱好收藏|外国邮票")))
+		{
+			mcate="文化玩乐|爱好收藏|中外邮票";
+		}
+		else if(cate.equals("文化玩乐|个性定制|照片冲印"))
+		{
+			mcate="文化玩乐|网络服务|照片冲印/图片处理";
+		}
+		else if(cate.equals("日用百货|成人用品|情趣套装/睡衣"))
+		{
+			mcate="日用百货|成人用品|情趣内衣";
+		}
+		else if((cate.equals("家居建材|住宅家具|搁板/置物架"))||(cate.equals("日用百货|收纳整理|整理架/置物架"))||(cate.equals("日用百货|收纳整理|浴室角架/置物架"))||(cate.equals("日用百货|餐饮用具|晾碗架/置物架")))
+		{
+			mcate="日用百货|收纳整理|整理架/置物架";
+		}
+		else if(cate.equals("文化玩乐|网络服务|礼品袋/塑料袋"))
+		{
+			mcate="日用百货|收纳整理|收纳袋";
+		}
+		else if((cate.equals("护肤彩妆|美发护发|洗发水"))||(cate.equals("护肤彩妆|美发护发|染发膏")))
+		{
+			mcate="日用百货|洗护清洁|洗发水";
+		}
+		else if(cate.equals("日用百货|居家日用|香薰器具"))
+		{
+			mcate="日用百货|洗护清洁|香薰用品";
+		}
+		else if(cate.equals("日用百货|餐饮用具|炒锅"))
+		{
+			mcate="日用百货|餐饮用具|烹饪锅具";
+		}
+		else if((cate.equals("本地生活|休闲娱乐|温泉/洗浴"))||(cate.equals("本地生活|休闲娱乐|游泳")))
+		{
+			mcate="本地生活|休闲娱乐|温泉/洗浴/游泳";
+		}
+		else if((cate.equals("美食特产|水果蔬菜|芒果"))||(cate.equals("美食特产|水果蔬菜|车厘子"))||(cate.equals("美食特产|水果蔬菜|桃"))||(cate.equals("美食特产|水果蔬菜|石榴")))
+		{
+			mcate="本地生活|生活超市|新鲜水果";
+		}
+		else if((cate.equals("美食特产|水果蔬菜|鸡蛋"))||(cate.equals("美食特产|水果蔬菜|鸭蛋")))
+		{
+			mcate="本地生活|生活超市|蛋类";
+		}
+		else if(cate.equals("美食特产|水果蔬菜|青蟹"))
+		{
+			mcate="本地生活|生活超市|水产鲜肉";
+		}
+		else if((cate.equals("本地生活|面包蛋糕|饮料/酒水提货券"))||(cate.equals("本地生活|餐饮美食|美食折扣券"))||(cate.equals("本地生活|面包蛋糕|商场购物卡"))||(cate.equals("本地生活|面包蛋糕|超市卡")))
+		{
+			mcate="本地生活|卡券消费|网上平台优惠劵";
+		}
+		else if((cate.equals("美食特产|水果蔬菜|火腿"))||(cate.equals("美食特产|水果蔬菜|腊/腌肉"))||(cate.equals("美食特产|粮油米面|香/腊肠")))
+		{
+			mcate="美食特产|粮油米面|即食肠类";
+		}
+		else if(cate.equals("美食特产|营养品|枸杞及其制品"))
+		{
+			mcate="美食特产|有机食品|有机滋补品";
+		}
+		else if(cate.equals("美食特产|营养品|山药"))
+		{
+			mcate="美食特产|水果蔬菜|山药";
+		}
+		else if((cate.equals("美食特产|营养品|植物精华/提取物"))||(cate.equals("美食特产|营养品|维生素/矿物质"))||(cate.equals("美食特产|营养品|蛋白质/氨基酸")))
+		{
+			mcate="美食特产|营养品|功能复合型膳食营养补充剂";
+		}
+		else if(cate.equals("美食特产|营养品|蜂蜜/蜂产品"))
+		{
+			mcate="美食特产|有机食品|有机酒水饮料";
+		}
+		else if(cate.equals("美食特产|酒水|洋酒"))
+		{
+			mcate="本地生活|生活超市|酒水饮料";
+		}
+		else if(cate.equals("运动户外|运动服|男装"))
+		{
+			if((title.indexOf("迷彩")>-1)||(title.indexOf("夹克")>-1))
+			{
+				return "";
+			}
+		}
+		else if(cate.equals("运动户外|运动服|女装"))
+		{
+			if(title.indexOf("夹克")>-1)
+			{
+				return "";
+			}
+		}
+		else if(cate.equals("运动户外|运动服|运动茄克"))
+		{
+			if((title.indexOf("夹克")==-1)&&(title.indexOf("皮衣")==-1))
+			{
+				return "";
+			}
+		}
+		else if(cate.equals("运动户外|运动/瑜伽/健身/球迷用品|山地车"))
+		{
+			mcate="运动户外|运动/瑜伽/健身/球迷用品|自行车/单车";
+		}
+		else if((cate.equals("运动户外|运动/瑜伽/健身/球迷用品|踏步机/中小型健身器材"))||(cate.equals("运动户外|运动/瑜伽/健身/球迷用品|跑步机/大型健身器械")))
+		{
+			mcate="运动户外|运动/瑜伽/健身/球迷用品|健身器械";
+		}
+		else if((cate.equals("鞋类箱包|功能箱包|卡片包"))||(cate.equals("鞋类箱包|功能箱包|钥匙包"))||(cate.equals("鞋类箱包|功能箱包|腰包")))
+		{
+			mcate="运动户外|运动包|腰包/手包/配件包";
+		}
+		else if(cate.equals("运动户外|运动服|运动单/双肩背包"))
+		{
+			mcate="鞋类箱包|功能箱包|旅行包";
+		}
+		else if((cate.equals("鞋类箱包|春秋女鞋|帆布鞋"))||(cate.equals("鞋类箱包|春秋女鞋|松糕鞋"))||(cate.equals("鞋类箱包|春秋男鞋|板鞋")))
+		{
+			mcate="运动户外|运动鞋|板鞋/休闲鞋/滑板鞋";
+		}
+		else{
+			mcate=cate;
+		}
+		
+		
 		title=title.trim();
 		dest=mcate+"\001"+title;
 		return dest;
