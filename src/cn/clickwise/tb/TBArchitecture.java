@@ -67,6 +67,7 @@ public class TBArchitecture {
 		title=fields[1];
 		
 		String mcate="";
+		
 		/******bat1****
 		if(cate.equals("护肤彩妆|彩妆香水|唇膏/口红"))
 		{
@@ -245,6 +246,8 @@ public class TBArchitecture {
 			mcate=cate;
 		}
 		********/
+		
+		/*********
 		if(SSO.tioe(cate))
 		{
 			return "";
@@ -345,7 +348,7 @@ public class TBArchitecture {
 		{
 			mcate="本地生活|休闲娱乐|温泉/洗浴/游泳";
 		}
-		else if((cate.equals("美食特产|水果蔬菜|芒果"))||(cate.equals("美食特产|水果蔬菜|车厘子"))||(cate.equals("美食特产|水果蔬菜|桃"))||(cate.equals("美食特产|水果蔬菜|石榴")))
+		else if((cate.equals("美食特产|水果蔬菜|芒果"))||(cate.equals("美食特产|水果蔬菜|车厘子"))||(cate.equals("美食特产|水果蔬菜|桃"))||(cate.equals("美食特产|水果蔬菜|石榴"))||(cate.equals("美食特产|水果蔬菜|车厘子/樱桃")))
 		{
 			mcate="本地生活|生活超市|新鲜水果";
 		}
@@ -391,6 +394,7 @@ public class TBArchitecture {
 			{
 				return "";
 			}
+			mcate=cate;
 		}
 		else if(cate.equals("运动户外|运动服|女装"))
 		{
@@ -398,6 +402,7 @@ public class TBArchitecture {
 			{
 				return "";
 			}
+			mcate=cate;
 		}
 		else if(cate.equals("运动户外|运动服|运动茄克"))
 		{
@@ -405,6 +410,7 @@ public class TBArchitecture {
 			{
 				return "";
 			}
+			mcate=cate;
 		}
 		else if(cate.equals("运动户外|运动/瑜伽/健身/球迷用品|山地车"))
 		{
@@ -429,6 +435,41 @@ public class TBArchitecture {
 		else{
 			mcate=cate;
 		}
+		******/
+		
+		if(cate.equals("美食特产|水果蔬菜|车厘子/樱桃"))
+		{
+		  	mcate="本地生活|生活超市|新鲜水果";
+		}
+		else if((cate.equals("珠宝手表|珠宝钻石|铂金/PT"))||(cate.equals("珠宝手表|珠宝钻石|钻石")))
+		{
+			mcate="珠宝手表|珠宝钻石|铂金/钻石";
+		}
+		else if(cate.equals("珠宝手表|流行饰品|DIY饰品配件"))
+		{
+			if((title.indexOf("手工")==-1)&&(title.toLowerCase().indexOf("diy")==-1))
+			{
+				return "";
+			}
+			mcate=cate;
+		}
+		else if(cate.equals("珠宝手表|其他配饰|ZIPPO/芝宝"))
+		{
+			mcate="珠宝手表|其他配饰|品牌打火机/其它打火机";
+		}
+		else if((cate.equals("汽车摩托|摩托车|骑式车"))||(cate.equals("汽车摩托|摩托车|迷你摩托车"))||(cate.equals("汽车摩托|摩托车|越野摩托车"))||(cate.equals("汽车摩托|摩托车|踏板车"))||(cate.equals("汽车摩托|摩托车|电动摩托车"))||(cate.equals("汽车摩托|摩托车|沙滩车")))
+		{
+			mcate="汽车摩托|摩托车|各类摩托车";
+		}
+		else if(cate.equals("汽车摩托|摩托车|摩托车维修工具"))
+		{
+			mcate="汽车摩托|摩托车|摩托车维修零配件";
+		}
+		else
+		{
+			mcate=cate;
+		}
+		
 		mcate=mcate.trim();
 		
 		title=title.trim();
@@ -438,8 +479,8 @@ public class TBArchitecture {
 	
 	public static void main(String[] args)
 	{
-		String input="tb/tb_goods_short_exmple_all_1216.txt";
-		String output="tb/tb_goods_short_mod_rearch1217.txt";
+		String input="tb/tb_goods_short_mod_rearch1217_sort.txt";
+		String output="tb/tb_goods_short_mod_rearch1217_2.txt";
 		
 		TBArchitecture tbarch=new TBArchitecture();
 		tbarch.reArch(input, output);
