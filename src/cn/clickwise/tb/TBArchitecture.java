@@ -245,6 +245,10 @@ public class TBArchitecture {
 			mcate=cate;
 		}
 		********/
+		if(SSO.tioe(cate))
+		{
+			return "";
+		}
 		if(cate.equals("家居建材|家纺布艺|毛巾被/毛巾毯"))
 		{
 			mcate="床上用品/靠垫/毛巾/布艺|床褥/床垫/床单/毛毯";
@@ -425,7 +429,7 @@ public class TBArchitecture {
 		else{
 			mcate=cate;
 		}
-		
+		mcate=mcate.trim();
 		
 		title=title.trim();
 		dest=mcate+"\001"+title;
@@ -434,8 +438,8 @@ public class TBArchitecture {
 	
 	public static void main(String[] args)
 	{
-		String input="tb/tb_goods_short_exmple1000.txt";
-		String output="tb/tb_goods_short_mod_rearch1216.txt";
+		String input="tb/tb_goods_short_exmple_all_1216.txt";
+		String output="tb/tb_goods_short_mod_rearch1217.txt";
 		
 		TBArchitecture tbarch=new TBArchitecture();
 		tbarch.reArch(input, output);
