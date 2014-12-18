@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.1415926-2.3-1.40.12 (MiKTeX 2.9) (preloaded format=pdflatex 2014.7.5)  15 DEC 2014 21:39
+This is pdfTeX, Version 3.1415926-2.3-1.40.12 (MiKTeX 2.9) (preloaded format=pdflatex 2014.7.5)  16 DEC 2014 22:13
 entering extended mode
 **D:/projects/clickwise1998_win_workplace/medlda/docs/stylefiles/example_paper.
 tex
@@ -411,14 +411,14 @@ Underfull \vbox (badness 10000) has occurred while \output is active []
 ers.pdf>]
 (D:\projects\clickwise1998_win_workplace\medlda\docs\stylefiles\example_paper.b
 bl)
-Package atveryend Info: Empty hook `BeforeClearDocument' on input line 531.
+Package atveryend Info: Empty hook `BeforeClearDocument' on input line 530.
  [5]
-Package atveryend Info: Empty hook `AfterLastShipout' on input line 531.
+Package atveryend Info: Empty hook `AfterLastShipout' on input line 530.
 
 (D:\projects\clickwise1998_win_workplace\medlda\docs\stylefiles\example_paper.a
 ux)
-Package atveryend Info: Executing hook `AtVeryEndDocument' on input line 531.
-Package atveryend Info: Executing hook `AtEndAfterFileList' on input line 531.
+Package atveryend Info: Executing hook `AtVeryEndDocument' on input line 530.
+Package atveryend Info: Executing hook `AtEndAfterFileList' on input line 530.
 Package rerunfilecheck Info: File `example_paper.out' has not changed.
 (rerunfilecheck)             Checksum: D41D8CD98F00B204E9800998ECF8427E;0.
  ) 
