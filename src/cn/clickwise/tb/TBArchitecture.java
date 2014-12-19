@@ -247,7 +247,7 @@ public class TBArchitecture {
 		}
 		********/
 		
-		/*********
+		/*********bat3*****
 		if(SSO.tioe(cate))
 		{
 			return "";
@@ -437,6 +437,7 @@ public class TBArchitecture {
 		}
 		******/
 		
+		/**********bat4
 		if(cate.equals("美食特产|水果蔬菜|车厘子/樱桃"))
 		{
 		  	mcate="本地生活|生活超市|新鲜水果";
@@ -469,6 +470,19 @@ public class TBArchitecture {
 		{
 			mcate=cate;
 		}
+		***************/
+		if(cate.equals("床上用品/靠垫/毛巾/布艺|枕套/枕巾/枕头/枕芯"))
+		{
+			mcate="家居建材|家纺布艺|枕套/枕巾/枕头/枕芯";
+		}
+		else if(cate.equals("床上用品/靠垫/毛巾/布艺|床褥/床垫/床单/毛毯"))
+		{
+			mcate="家居建材|家纺布艺|床褥/床垫/床单/毛毯";
+		}
+		else
+		{
+			mcate=cate;
+		}
 		
 		mcate=mcate.trim();
 		
@@ -479,8 +493,8 @@ public class TBArchitecture {
 	
 	public static void main(String[] args)
 	{
-		String input="tb/tb_goods_short_mod_rearch1217_sort.txt";
-		String output="tb/tb_goods_short_mod_rearch1217_2.txt";
+		String input="tb/tb_goods_short_mod_rearch1217_2.txt";
+		String output="tb/tb_goods_short_mod_rearch1217_3.txt";
 		
 		TBArchitecture tbarch=new TBArchitecture();
 		tbarch.reArch(input, output);
