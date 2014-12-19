@@ -3,6 +3,7 @@ package cn.clickwise.medldatb;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Scanner;
 
 import cn.clickwise.str.basic.SSO;
@@ -201,6 +202,12 @@ public class SimpleCorpus extends Corpus{
 			docs[ix2] = p;
 		}
 		
+	}
+
+	@Override
+	public void readLabelDicts(String genlabeldict,Params param) {
+		// TODO Auto-generated method stub
+	
 	}
 
 }

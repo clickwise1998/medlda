@@ -1476,7 +1476,7 @@ public class MedLDATB {
 				    fileptr.printf( "%d:%5.10f\n",w,wprob[w][1]);
 				}
 			  }
-			fileptr.close();
+			  fileptr.close();
 			}
 			
 		} catch (Exception e) {

@@ -3,6 +3,7 @@ package cn.clickwise.medldatb;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Scanner;
 
 import cn.clickwise.str.basic.SSO;
@@ -211,6 +212,81 @@ public class TBCorpus extends Corpus{
 			docs[ix2] = p;
 		}
 		
+	}
+
+	@Override
+	public void readLabelDicts(String genlabeldict,Params param) {
+		try{
+			BufferedReader br=new BufferedReader(new FileReader(genlabeldict));
+			param.labelDicts=new HashMap<Integer,HashMap<Integer,HashMap<Integer,String>>>();
+			
+			String line="";
+			String[] fields=null;
+		    int fcate;
+			int scate;
+			int tcate;
+			String labelStr;
+			String valueStr;
+			String[] cates;
+			
+			while((line=br.readLine())!=null)
+			{
+				if(SSO.tioe(line))
+				{
+					continue;
+				}
+				
+				line=line.trim();
+				
+				fields=line.split("\001");
+				if(fields.length!=3)
+				{
+					continue;
+				}
+			
+				labelStr=fields[0].trim();
+				valueStr=fields[1].trim()+"\001"+fields[2].trim();
+			
+				if(SSO.tioe(labelStr))
+				{
+					continue;
+				}
+				
+				cates=labelStr.split("\\|");
+				if(cates.length!=3)
+				{
+					continue;
+				}
+				
+				fcate=Integer.parseInt(cates[0]);
+				scate=Integer.parseInt(cates[1]);
+				tcate=Integer.parseInt(cates[2]);
+				
+				if (!(param.labelDicts.containsKey(fcate))) {
+					param.labelDicts.put(fcate,new HashMap<Integer, HashMap<Integer, String>>());
+				}
+				else
+				{
+				  if (!(param.labelDicts.get(fcate).containsKey(scate))) {
+					  param.labelDicts.get(fcate).put(scate, new HashMap<Integer, String>());
+				  }
+				  else
+				  {
+				    if (!(param.labelDicts.get(fcate).get(scate).containsKey(tcate))) {
+				    	
+				    	param.labelDicts.get(fcate).get(scate).put(tcate,valueStr);
+					   
+				    }
+				  }
+				}
+			}
+			
+		}
+		catch(Exception e)
+		{
+			e.printStackTrace();
+		}
+
 	}
 
 

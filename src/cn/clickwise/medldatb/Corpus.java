@@ -1,5 +1,7 @@
 package cn.clickwise.medldatb;
 
+import java.util.HashMap;
+
 public abstract class Corpus {
 
 	Document[] docs;
@@ -20,4 +22,5 @@ public abstract class Corpus {
 	
 	public abstract void shuffle();
 	
+	public abstract void readLabelDicts(String genlabeldict,Params param);
 }

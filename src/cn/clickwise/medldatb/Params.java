@@ -2,6 +2,7 @@ package cn.clickwise.medldatb;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
+import java.util.HashMap;
 
 import cn.clickwise.str.basic.SSO;
 
@@ -51,6 +52,10 @@ public class Params {
 	
 	/***for tb****/
 	public int subTreeNum;
+	
+	public SubTree[] subTrees;
+	
+	public HashMap<Integer,HashMap<Integer,HashMap<Integer,String>>> labelDicts;
 	
 	/************/
 	 
