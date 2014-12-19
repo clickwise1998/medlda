@@ -1088,8 +1088,6 @@ public class MedLDATB {
 				vecAlpha.add(alpha);
 			}
 
-		
-
 			line = fileptr.readLine();
 			C = Double.parseDouble(SSO.afterStr(line, "C ").trim());
 			fileptr.close();
@@ -1364,6 +1362,7 @@ public class MedLDATB {
 			logger.info("svm param.SVM_ALGTYPE is 2");
 			for (int k = 1; k < structmodel.svm_model.sv_num; k++) {
 				int[] vecLabel = structmodel.svm_model.supvec[k].lvec;
+				
 				/*
                 String str="";
                 logger.info("k="+k);
