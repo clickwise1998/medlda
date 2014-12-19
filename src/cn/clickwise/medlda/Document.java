@@ -8,6 +8,14 @@ public class Document {
 	
 	public int lossAugLabel;
 	
+	/****label for tb****/
+	
+	public TBLabel tbgndlabel;
+	
+	public TBLabel tbpredlabel;
+	
+	/********************/
+	
 	public double lhood;
 	
 	public int[] words;

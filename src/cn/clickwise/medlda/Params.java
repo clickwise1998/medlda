@@ -49,6 +49,11 @@ public class Params {
 	
 	public String test_filename;
 	
+	/***for tb****/
+	public int subTreeNum;
+	
+	/************/
+	 
 	public void read_settings(String filename)
 	{
 		BufferedReader fileptr=null;
