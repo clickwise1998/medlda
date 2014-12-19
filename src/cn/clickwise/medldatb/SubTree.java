@@ -23,12 +23,16 @@ public class SubTree {
      */
 	private int level;
 	
-	public SubTree(int fTreeIndex,int sTreeIndex,int tTreeIndex,int level)
+	/***子节点的个数****/
+	private int size;
+	
+	public SubTree(int fTreeIndex,int sTreeIndex,int tTreeIndex,int level,int size)
 	{
 	  this.fTreeIndex=fTreeIndex;
 	  this.sTreeIndex=sTreeIndex;
 	  this.tTreeIndex=tTreeIndex;
 	  this.level=level;
+	  this.size=size;
 	}
 	
 	public int getfTreeIndex() {
@@ -69,6 +73,14 @@ public class SubTree {
 
 	public void setTreeIndex(int treeIndex) {
 		this.treeIndex = treeIndex;
+	}
+
+	public int getSize() {
+		return size;
+	}
+
+	public void setSize(int size) {
+		this.size = size;
 	}
 	
 }

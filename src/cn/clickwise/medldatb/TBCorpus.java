@@ -4,6 +4,7 @@ import java.io.BufferedReader;
 import java.io.FileReader;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Map;
 import java.util.Scanner;
 
 import cn.clickwise.str.basic.SSO;
@@ -272,13 +273,38 @@ public class TBCorpus extends Corpus{
 				  }
 				  else
 				  {
-				    if (!(param.labelDicts.get(fcate).get(scate).containsKey(tcate))) {
-				    	
-				    	param.labelDicts.get(fcate).get(scate).put(tcate,valueStr);
-					   
-				    }
+				     if (!(param.labelDicts.get(fcate).get(scate).containsKey(tcate))) {				    	
+				    	param.labelDicts.get(fcate).get(scate).put(tcate,valueStr);					   
+				     }
 				  }
-				}
+				}	
+			}
+			
+			br.close();
+			
+			/******计算子树的数目*******/
+			int sn=1;
+			for (Map.Entry<Integer, HashMap<Integer, HashMap<Integer, String>>> e1 : param.labelDicts.entrySet()) {
+				sn++;
+				for(Map.Entry<Integer, HashMap<Integer, String>> e2: e1.getValue().entrySet())
+				{
+		           sn++;
+				}	
+			}
+			
+			param.subTreeNum=sn;	
+			param.subTrees=new SubTree[param.subTreeNum];
+			param.subTrees[0]=new SubTree(0,0,0,0,param.labelDicts.size());
+			
+			int cindex=0;
+			for (Map.Entry<Integer, HashMap<Integer, HashMap<Integer, String>>> e1 : param.labelDicts.entrySet()) {
+				param.subTrees[e1.getKey()]=new SubTree(0,e1.getKey(),0,1,param.labelDicts.size());
+				for(Map.Entry<Integer, HashMap<Integer, String>> e2: e1.getValue().entrySet())
+				{		 
+					cindex=lowerCumulate(param.labelDicts.size()+1,e1.getKey(),e2.getKey(),param.labelDicts);
+					System.err.println("cindex:"+cindex+" e1:"+e1.getKey()+" e2:"+e2.getKey());
+					param.subTrees[cindex]=new SubTree(0,e1.getKey(),e2.getKey(),2,param.labelDicts.size());
+				}	
 			}
 			
 		}
@@ -287,6 +313,20 @@ public class TBCorpus extends Corpus{
 			e.printStackTrace();
 		}
 
+	}
+	
+	public int lowerCumulate(int preCumulate,int findex,int sindex,HashMap<Integer,HashMap<Integer,HashMap<Integer,String>>> labels)
+	{
+		int cumulate=0;
+		cumulate+=preCumulate;
+		for(int i=1;i<findex;i++)
+		{
+			cumulate+=labels.get(i).size();
+		}
+		
+		cumulate+=sindex;
+		
+		return cumulate;
 	}
 
 
