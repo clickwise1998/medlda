@@ -1,10 +1,13 @@
-package cn.clickwise.medlda;
+package cn.clickwise.medldatb;
 
+import java.io.File;
+
+import cn.clickwise.classify.svm_struct.svm_common;
 import cn.clickwise.classify.svm_struct.svmconfig;
 import cn.clickwise.file.utils.FileCreateUtil;
 
-public class MainTB {
-
+public class Main {
+	
 	public static CorpusFactory corpusFactory;
 	
 	public static  void main(String[] args)
@@ -48,13 +51,13 @@ public class MainTB {
 					param.INITIAL_C = innerCV(modelDir, c, param);
 					System.err.printf("\n\nBest C: %f\n", param.INITIAL_C);
 				}
-				MedLDATB model=new MedLDATB();
+				MedLDA model=new MedLDA();
 				model.run_em(args[6], dir, c, param);
 
 				// testing.
 				Corpus tstC =corpusFactory.getCorpus();
 				tstC.read_data(param.test_filename, param.NLABELS);
-				MedLDATB evlModel=new MedLDATB();
+				MedLDA evlModel=new MedLDA();
 				double dAcc = evlModel.infer(dir, tstC, param,"");
 				System.err.printf("Accuracy: %.3f\n", dAcc);
 				model=null;
@@ -86,7 +89,7 @@ public class MainTB {
 					param.INITIAL_C = innerCV(modelDir, c, param);
 					System.err.printf("\n\nBest C: %f\n", param.INITIAL_C);
 				}
-				MedLDATB model=new MedLDATB();
+				MedLDA model=new MedLDA();
 				model.run_em(args[7], dir, c, param);
 				model=null;
 			}
@@ -96,7 +99,7 @@ public class MainTB {
 				param.NLABELS = Integer.parseInt(args[1]);
 				param.INNER_CV=false;
 				c.read_data(param.test_filename, param.NLABELS);
-				MedLDATB model=new MedLDATB();
+				MedLDA model=new MedLDA();
 				double dAcc = model.infer(args[2], c, param,"");
 				System.err.printf("Accuracy: %.3f\n", dAcc);
 				model=null;
@@ -128,11 +131,11 @@ public class MainTB {
 				Corpus trDoc = c.get_traindata(param.INNER_FOLDNUM, i);
 				Corpus tstDoc = c.get_testdata(param.INNER_FOLDNUM, i);
 
-				MedLDATB model=new MedLDATB();
+				MedLDA model=new MedLDA();
 				model.run_em("random", modelDir, trDoc, param);
 
 				// predict on test corpus
-				MedLDATB evlModel=new MedLDATB();
+				MedLDA evlModel=new MedLDA();
 				double dAcc = evlModel.infer(modelDir, tstDoc, param,"");
 				dAvgAccuracy += dAcc / param.INNER_FOLDNUM;
 

@@ -1,4 +1,4 @@
-package cn.clickwise.medlda;
+package cn.clickwise.medldatb;
 
 /**
  * MedLDA 模型运行配置
@@ -13,5 +13,8 @@ public class MedLDAConfig {
 	//1 softmax
 	public static int weighttype=0;
 	
+	//0 host
+	//1 tb
+	public static int sampleType=0;
 	
 }

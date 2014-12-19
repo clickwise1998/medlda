@@ -1,10 +1,11 @@
-package cn.clickwise.medlda;
+package cn.clickwise.medldatb;
 
 import java.io.BufferedReader;
 import java.io.FileInputStream;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.PrintWriter;
+import java.util.Random;
 import java.util.Scanner;
 import java.util.Vector;
 
@@ -24,45 +25,25 @@ import cn.clickwise.math.random.SeedRandom;
 import cn.clickwise.str.basic.SSO;
 import cn.clickwise.time.utils.TimeOpera;
 
-public class MedLDATB {
-	
+public class MedLDA {
+
 	private double[] m_alpha;
 
-	/**
-	 * 升级一维，即标记子树的索引
-	 */
-	private double[][] m_dMu;
+	private double[] m_dMu;
 
-	/**
-	 * 升级一维，即标记子树的索引
-	 */
-	private double[][] m_dEta;
-
+	private double[] m_dEta;
 
 	private double m_dC;
 
-	/**
-	 * 升级一维，即标记子树的索引
-	 */
-	private double[] m_dB;
+	private double m_dB;
 
 	private int m_nDim;
 
-	/**
-	 * 升级一维，即标记子树的索引
-	 */
-	private double[] m_dsvm_primalobj;
+	private double m_dsvm_primalobj;
 
 	private int m_nK;
 
-	/**
-	 * 升级一维，即标记子树的索引
-	 */
-	private int[] m_nLabelNum;
-	
-    /******for tb*******/
-	private int m_nSubTreeNum;
-	/*******************/
+	private int m_nLabelNum;
 
 	private int m_nNumTerms;
 
@@ -81,7 +62,7 @@ public class MedLDATB {
 
 	private static final int NUM_INIT = 1;
 
-	private static Logger logger = Logger.getLogger(MedLDATB.class);
+	private static Logger logger = Logger.getLogger(MedLDA.class);
 
 	/**
 	 * perform inference on a Document and update sufficient statistics
@@ -277,7 +258,6 @@ public class MedLDATB {
 		//
 		boolean bRes = true;
 		if (!bInit) {
-			/********执行subTreeNum个优化**********/
 			svmStructSolver(ss, param, m_dMu);
 		}
 
@@ -311,7 +291,6 @@ public class MedLDATB {
      
 	public int run_em(String start, String directory, Corpus corpus,
 			Params param) {
-		
 		m_numDocs=corpus.num_docs;
 		m_dDeltaEll = param.getDELTA_ELL();
 
@@ -541,8 +520,7 @@ public class MedLDATB {
 			}
 
 			filename = "MedLDA_(" + m_nK + "topic)_test.txt";
-			
-			outputData2(filename, corpus, exp, m_nK);
+			outputData2(filename, corpus, exp, m_nK, m_nLabelNum);
 
 			filename = model_dir + "/evl-gamma.dat";
 			save_gamma(filename, var_gamma, corpus.num_docs, m_nK);
@@ -1329,9 +1307,7 @@ public class MedLDATB {
 		// output the features
 		String buff;
 		buff = ss.dir + "/Feature.txt";
-		
 		outputLowDimData(buff, ss);
-		
 		svm_struct_api ssa=new svm_struct_api();
 		/* read the training examples */
 		SAMPLE sample = ssa.read_struct_examples(buff, struct_parm);
@@ -1523,19 +1499,18 @@ public class MedLDATB {
 	}
 
 	public void outputData2(String filename, Corpus corpus, double[][] exp,
-			int ntopic) {
+			int ntopic, int nLabels) {
 		
 		PrintWriter fileptr = null;
 		try{
 			fileptr=new PrintWriter(new FileWriter(filename));
 		for ( int i=0; i<corpus.num_docs; i++ ) {
 			int label = corpus.docs[i].gndlabel;
-			/*
 			if ( nLabels == 2 ) {
 				if ( corpus.docs[i].gndlabel == -1 ) label = 1;
 				if ( corpus.docs[i].gndlabel == 1 ) label = 0;
 			}
-           */
+
 			fileptr.printf( "%d %d", ntopic, label);
 			for ( int k=0; k<ntopic; k++ ) 
 				fileptr.printf( " %d:%.10f", k, exp[i][k]);
@@ -1626,19 +1601,19 @@ public class MedLDATB {
 		this.m_alpha = m_alpha;
 	}
 
-	public double[][] getM_dMu() {
+	public double[] getM_dMu() {
 		return m_dMu;
 	}
 
-	public void setM_dMu(double[][] m_dMu) {
+	public void setM_dMu(double[] m_dMu) {
 		this.m_dMu = m_dMu;
 	}
 
-	public double[][] getM_dEta() {
+	public double[] getM_dEta() {
 		return m_dEta;
 	}
 
-	public void setM_dEta(double[][] m_dEta) {
+	public void setM_dEta(double[] m_dEta) {
 		this.m_dEta = m_dEta;
 	}
 
@@ -1650,11 +1625,11 @@ public class MedLDATB {
 		this.m_dC = m_dC;
 	}
 
-	public double[] getM_dB() {
+	public double getM_dB() {
 		return m_dB;
 	}
 
-	public void setM_dB(double[] m_dB) {
+	public void setM_dB(double m_dB) {
 		this.m_dB = m_dB;
 	}
 
@@ -1666,11 +1641,11 @@ public class MedLDATB {
 		this.m_nDim = m_nDim;
 	}
 
-	public double[] getM_dsvm_primalobj() {
+	public double getM_dsvm_primalobj() {
 		return m_dsvm_primalobj;
 	}
 
-	public void setM_dsvm_primalobj(double[] m_dsvm_primalobj) {
+	public void setM_dsvm_primalobj(double m_dsvm_primalobj) {
 		this.m_dsvm_primalobj = m_dsvm_primalobj;
 	}
 
@@ -1682,11 +1657,11 @@ public class MedLDATB {
 		this.m_nK = m_nK;
 	}
 
-	public int[] getM_nLabelNum() {
+	public int getM_nLabelNum() {
 		return m_nLabelNum;
 	}
 
-	public void setM_nLabelNum(int[] m_nLabelNum) {
+	public void setM_nLabelNum(int m_nLabelNum) {
 		this.m_nLabelNum = m_nLabelNum;
 	}
 
@@ -1721,4 +1696,5 @@ public class MedLDATB {
 	public void setWpotent(double[][] wpotent) {
 		this.wpotent = wpotent;
 	}
+
 }

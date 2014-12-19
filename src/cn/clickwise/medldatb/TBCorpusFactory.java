@@ -1,4 +1,4 @@
-package cn.clickwise.medlda;
+package cn.clickwise.medldatb;
 
 public class TBCorpusFactory extends CorpusFactory{
 	@Override

@@ -1,4 +1,4 @@
-package cn.clickwise.medlda;
+package cn.clickwise.medldatb;
 
 /**
  * 一个子树，一个父节点，多个子节点的一层树
@@ -6,17 +6,29 @@ package cn.clickwise.medlda;
  */
 public class SubTree {
 
+	/***第一层的索引 always zero*****/
 	private int fTreeIndex;
 	
+	/***第二层的索引********/
 	private int sTreeIndex;
 	
+	/***第三层的索引********/
 	private int tTreeIndex;
+	
+	/***该树的索引******/
+	private int treeIndex;
 
-	public SubTree(int fTreeIndex,int sTreeIndex,int tTreeIndex)
+    /**
+     * 该树所在的层次 0 1 2 
+     */
+	private int level;
+	
+	public SubTree(int fTreeIndex,int sTreeIndex,int tTreeIndex,int level)
 	{
 	  this.fTreeIndex=fTreeIndex;
 	  this.sTreeIndex=sTreeIndex;
 	  this.tTreeIndex=tTreeIndex;
+	  this.level=level;
 	}
 	
 	public int getfTreeIndex() {
@@ -41,6 +53,22 @@ public class SubTree {
 
 	public void settTreeIndex(int tTreeIndex) {
 		this.tTreeIndex = tTreeIndex;
+	}
+
+	public int getLevel() {
+		return level;
+	}
+
+	public void setLevel(int level) {
+		this.level = level;
+	}
+
+	public int getTreeIndex() {
+		return treeIndex;
+	}
+
+	public void setTreeIndex(int treeIndex) {
+		this.treeIndex = treeIndex;
 	}
 	
 }

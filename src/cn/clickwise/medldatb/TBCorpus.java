@@ -1,4 +1,4 @@
-package cn.clickwise.medlda;
+package cn.clickwise.medldatb;
 
 import java.io.BufferedReader;
 import java.io.FileReader;

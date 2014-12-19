@@ -1,4 +1,4 @@
-package cn.clickwise.medlda;
+package cn.clickwise.medldatb;
 
 public class Document {
 
@@ -8,6 +8,13 @@ public class Document {
 	
 	public int lossAugLabel;
 	
+	/****label for tb****/
+	
+	public TBLabel tbgndlabel;
+	
+	public TBLabel tbpredlabel;
+	
+	/********************/
 	
 	public double lhood;
 	
