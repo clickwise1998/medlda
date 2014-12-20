@@ -510,6 +510,13 @@ public class svm_learn {
 
 	}
 
+	/* The following solves a freely defined and given set of
+	   inequalities. The optimization problem is of the following form:
+
+	   min 0.5 w*w + C sum_i C_i \xi_i
+	   s.t. x_i * w > rhs_i - \xi_i
+
+	   This corresponds to the -z o option. */
 	public void svm_learn_optimization(DOC[] docs, double[] rhs, int totdoc,
 			int totwords, LEARN_PARM learn_parm, KERNEL_PARM kernel_parm,
 			KERNEL_CACHE kernel_cache, MODEL model, double[] alpha) {
