@@ -1,5 +1,116 @@
 \documentclass{article}
+\pagestyle{myheadings} \markright{Exercises}
+%\pagenumbering{Roman}
+%\usepackage{parskip}
+%\renewcommand{\baselinestretch}{1.2}
+%\usepackage{layout}
 \begin{document}
 Today (\today) the rate of exchange between the British pound and American dollar is \pounds 1=\$1.58,
 an increase of 1\% over yesterday.
+
+\section{Electronic Submission}
+Submission to ICML 2015 will be entirely electronic, via a web site
+(not email).  Information about the submission process and \LaTeX\ templates
+are available on the conference web site at:
+\begin{center}
+\textbf{\texttt{http://icml.cc/2015/}}
+\end{center}
+Send questions about submission and electronic templates to
+\texttt{program@icml.cc}.
+%\layout
+The guidelines below will be enforced for initial submissions and
+camera-ready copies.  Here is a brief summary:
+\begin{itemize}
+\item Submissions must be in PDF.
+\item The maximum paper length is \textbf{8 pages excluding references, and 10 pages
+  including references} (pages 9 and 10 must contain only references).
+\item Do \textbf{not include author information or acknowledgments} in your initial
+submission.
+\item Your paper should be in \textbf{10 point Times font}.
+\item Make sure your PDF file only uses Type-1 fonts.
+\item Place figure captions {\em under} the figure (and omit titles from inside
+the graphic file itself).  Place table captions {\em over} the table.
+\item References must include page numbers whenever possible and be as complete
+as possible.  Place multiple citations in chronological order.
+\item Do not alter the style template; in particular, do not compress the paper
+format by reducing the vertical spaces.
+\end{itemize}
+
+\subsection{Submitting Papers}
+
+{\bf Paper Deadline:} The deadline for paper submission to ICML 2015
+is at \textbf{23:59 Universal Time (3:59 Pacific Daylight Time) on February 6, 2015}.
+If your full submission does not reach us by this time, it will
+not be considered for publication. There is no separate abstract submission.
+
+{\bf Anonymous Submission:} To facilitate blind review, no identifying
+author information should appear on the title page or in the paper
+itself.  Section~\ref{author info} will explain the details of how to
+format this.
+
+{\bf Simultaneous Submission:} ICML will not accept any paper which,
+at the time of submission, is under review for another conference or
+has already been published. This policy also applies to papers that
+overlap substantially in technical content with conference papers
+under review or previously published. ICML submissions must not be
+submitted to other conferences during ICML's review period. Authors
+may submit to ICML substantially different versions of journal papers
+that are currently under review by the journal, but not yet accepted
+at the time of submission. Informal publications, such as technical
+reports or papers in workshop proceedings which do not appear in
+print, do not fall under these restrictions.
+
+\medskip
+
+To ensure our ability to print submissions, authors must provide their
+man\-u\-scripts in \textbf{PDF} format.  Furthermore, please make sure
+that files contain only Type-1 fonts (e.g.,~using the program {\tt
+  pdffonts} in linux or using File/Doc\-ument\-Proper\-ties/Fonts in
+Acrobat).  Other fonts (like Type-3) might come from graphics files
+imported into the document.
+
+Authors using \textbf{Word} must convert their document to PDF.  Most
+of the latest versions of Word have the facility to do this
+automatically.  Submissions will not be accepted in Word format or any
+format other than PDF. Really. We're not joking. Don't send Word.
+
+Those who use \textbf{\LaTeX} to format their accepted papers need to pay close
+attention to the typefaces used.  Specifically, when producing the PDF by first
+converting the dvi output of \LaTeX\ to Postscript the default behavior is to
+use non-scalable Type-3 PostScript bitmap fonts to represent the standard
+\LaTeX\ fonts. The resulting document is difficult to read in electronic form;
+the type appears fuzzy. To avoid this problem, dvips must be instructed to use
+an alternative font map.  This can be achieved with the following two commands:
+
+{\footnotesize
+\begin{verbatim}
+dvips -Ppdf -tletter -G0 -o paper.ps paper.dvi
+ps2pdf paper.ps
+\end{verbatim}}
+Note that it is a zero following the ``-G''.  This tells dvips to use
+the config.pdf file (and this file refers to a better font mapping).
+
+A better alternative is to use the \textbf{pdflatex} program instead of
+straight \LaTeX. This program avoids the Type-3 font problem, however you must
+ensure that all of the fonts are embedded (use {\tt pdffonts}). If they are
+not, you need to configure pdflatex to use a font map file that specifies that
+the fonts be embedded. Also you should ensure that images are not downsampled
+or otherwise compressed in a lossy way.
+
+Note that the 2015 style files use the {\tt hyperref} package to
+make clickable links in documents.  If this causes problems for you,
+add {\tt nohyperref} as one of the options to the {\tt icml2015}
+usepackage statement.
+
+\subsection{Author Information for Submission}
+\label{author info}
+
+To facilitate blind review, author information must not appear.  If
+you are using \LaTeX\/ and the \texttt{icml2015.sty} file, you may use
+\verb+\icmlauthor{...}+ to specify authors.  The author information
+will simply not be printed until {\tt accepted} is an argument to the
+style file. Submissions that include the author information will not
+be reviewed.
+
+
 \end{document}
