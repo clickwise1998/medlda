@@ -1,0 +1,5 @@
+\documentclass{article}
+\begin{document}
+Today (\today) the rate of exchange between the British pound and American dollar is \pounds 1=\$1.58,
+an increase of 1\% over yesterday.
+\end{document}
