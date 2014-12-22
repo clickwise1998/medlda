@@ -46,8 +46,10 @@ public class svm_struct_tb extends svm_struct_api {
 		sparm.first_size = 1;
 		sparm.second_size = 1;
 		sparm.third_size = 1;
-		
+		logger.info("sample.nh:"+sample.n);
+		logger.info("sample.examples.len:"+sample.examples.length);
 		for (i = 0; i < sample.n; i++)
+		{
 			/* find highest class label */
 			if (sparm.first_size < ((sample.examples[i].y.first_class) + 0.1))
 			{
@@ -63,6 +65,7 @@ public class svm_struct_tb extends svm_struct_api {
 		    {
 			    sparm.third_size = (int) (sample.examples[i].y.third_class + 0.1);
 		    }
+		}
 		
 		for (i = 0; i < sample.n; i++) /* find highest feature number */
 		{
@@ -158,8 +161,8 @@ public class svm_struct_tb extends svm_struct_api {
 		
 		// logger.info("ybar_num_classes:"+ybar.num_classes);
 		// String winfo="";
-		for (ci = 0; ci <= posslabels.length; ci++) {
-			// logger.info("ci="+ci);
+		for (ci = 0; ci < posslabels.length; ci++) {
+			 logger.info("ci="+ci);
 			ybar.first_class= posslabels[ci].first_class;
 			ybar.second_class= posslabels[ci].second_class;
 			ybar.third_class= posslabels[ci].third_class;
@@ -251,9 +254,9 @@ public class svm_struct_tb extends svm_struct_api {
 		// logger.info("in read struct examples: docs.length:"+docs.length);
 		target =read_target;
 		logger.info("target:"+target);
-		totwords = sc.read_totwords;
+		totwords = read_totwords;
 		logger.info("totwords:"+totwords);
-		n = sc.read_totdocs;
+		n = read_totdocs;
          logger.info("n:"+n);
         //logger.info("totwords:"+totwords);
 		for(int k=0;k<docs.length;k++)
@@ -264,6 +267,7 @@ public class svm_struct_tb extends svm_struct_api {
 			}
 			//logger.info("test["+k+"]="+docs[k].fvec.toString());
 		}
+		logger.info("nh:"+n);
 		examples = new EXAMPLE[n];
 		for (int k = 0; k < n; k++) {
 			examples[k] = new EXAMPLE();
@@ -655,6 +659,10 @@ public class svm_struct_tb extends svm_struct_api {
 		// }
 		WORD[] words;
 		label = new LABEL[read_max_docs]; /* target values */
+		for(int i=0;i<label.length;i++)
+		{
+			label[i]=new LABEL();
+		}
 		// System.out.println("docs length:"+docs.length);
 		words = new WORD[read_max_words_doc + 10];
 		for (int j = 0; j < words.length; j++) {
@@ -670,6 +678,7 @@ public class svm_struct_tb extends svm_struct_api {
 		try {
 			while ((line = br.readLine()) != null) {
 				line = line.trim();
+				System.out.println(line);
 				if (line.charAt(0) == '#')
 					continue; /* line contains comments */
 				// System.out.println(line);
@@ -722,6 +731,7 @@ public class svm_struct_tb extends svm_struct_api {
 			System.out.println("OK. (" + dnum + " examples read)\n");
 		}
 		read_totdocs = dnum;
+		logger.info("dnum:"+dnum);
 		read_target = label;
 		return docs;
 	}
@@ -866,7 +876,7 @@ public class svm_struct_tb extends svm_struct_api {
 			line=line.trim();
 			pls.add(line);
 		}
-		
+		logger.info("pls.size:"+pls.size());
 		posslabels=new LABEL[pls.size()];
 		
 		LABEL tlabel=new LABEL();

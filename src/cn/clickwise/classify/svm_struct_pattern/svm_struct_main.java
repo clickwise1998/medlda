@@ -366,6 +366,7 @@ public class svm_struct_main {
 		svm_struct_api ssa=svm_struct_api_factory.getSvmStructApi();
 		/* read the training examples */
 		sample = ssa.read_struct_examples(trainfile, struct_parm);
+		System.out.println("sample.size:"+sample.examples.length);
 		if (struct_verbosity >= 1) {
 			logger.info("done\n");
 		}

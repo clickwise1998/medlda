@@ -548,6 +548,7 @@ public class svm_struct_learn {
 		DOC doc;
 
 		int n = sample.n;
+		System.out.println("sample.n:"+sample.n);
 		EXAMPLE[] ex = sample.examples;
 		double rt_total = 0;
 		double rt_opt = 0;
