@@ -5,6 +5,7 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.PrintWriter;
+import java.util.ArrayList;
 import java.util.regex.Pattern;
 
 import cn.clickwise.str.basic.SSO;
@@ -852,6 +853,57 @@ public class svm_struct_tb extends svm_struct_api {
 	}
 	public void readPossLabels()
 	{
+		try{
+		BufferedReader br=new BufferedReader(new FileReader("genlabeldict_mul.txt"));
+		ArrayList<String> pls=new ArrayList<String>();
+		String line="";
+		while((line=br.readLine())!=null)
+		{
+			if(SSO.tioe(line))
+			{
+				continue;
+			}
+			line=line.trim();
+			pls.add(line);
+		}
 		
+		posslabels=new LABEL[pls.size()];
+		
+		LABEL tlabel=new LABEL();
+		String[] fields=null;
+		String labelStr="";
+		String[] labels=null;
+		for(int i=0;i<pls.size();i++)
+		{
+			line=pls.get(i);
+			fields=line.split("\001");
+			if(fields.length!=2)
+			{
+				continue;
+			}
+			
+			labelStr=fields[0];
+			if(SSO.tioe(labelStr))
+			{
+				continue;
+			}
+			labelStr=labelStr.trim();
+			labels=labelStr.split("\\|");
+			if(labels.length!=3)
+			{
+				continue;
+			}
+			tlabel=new LABEL();
+			tlabel.first_class=Integer.parseInt(labels[0]);
+			tlabel.second_class=Integer.parseInt(labels[1]);
+			tlabel.third_class=Integer.parseInt(labels[2]);
+			posslabels[i]=tlabel;
+		}
+		
+		}
+		catch(Exception e)
+		{
+			e.printStackTrace();
+		}
 	}
 }

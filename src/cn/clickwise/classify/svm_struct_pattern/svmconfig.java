@@ -6,7 +6,7 @@ public class svmconfig {
 	 * 1 medlda
 	 * 2 svm struct tb
 	 */
-	public static int model_type=0;
+	public static int model_type=2;
 	
 	public static int iterations=0;
 	
