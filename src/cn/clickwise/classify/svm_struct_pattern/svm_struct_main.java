@@ -362,7 +362,7 @@ public class svm_struct_main {
 			System.out.println("Reading training examples...");
 			logger.info("Reading training examples...");
 		}
-		svm_struct_api ssa=new svm_struct_api();
+		svm_struct_api ssa=svm_struct_api_factory.getSvmStructApi();
 		/* read the training examples */
 		sample = ssa.read_struct_examples(trainfile, struct_parm);
 		if (struct_verbosity >= 1) {
@@ -413,7 +413,7 @@ public class svm_struct_main {
 		if (struct_verbosity >= 1) {
 			logger.info("Writing learned model...");
 		}
-		svm_struct_api.write_struct_model(modelfile, structmodel, struct_parm);
+		ssa.write_struct_model(modelfile, structmodel, struct_parm);
 		if (struct_verbosity >= 1) {
 			logger.info("done\n");
 		}

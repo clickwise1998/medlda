@@ -45,4 +45,13 @@ public class STRUCT_LEARN_PARM {
 	/**for medlda***/
 	public double delta_ell;
 	
+	/***for tb********/
+	public int first_size;
+	
+	public int second_size;
+	
+	public int third_size;
+	
+	/****************/
+	
 }

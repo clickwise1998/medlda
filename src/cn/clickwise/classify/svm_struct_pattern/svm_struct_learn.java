@@ -43,7 +43,7 @@ public class svm_struct_learn {
 	public svm_struct_learn()
 	{
 	  sc=new svm_common();	
-	  ssa=new svm_struct_api();
+	  ssa=svm_struct_api_factory.getSvmStructApi();
 	}
 
 	public void svm_learn_struct(SAMPLE sample, STRUCT_LEARN_PARM sparm,
@@ -87,7 +87,7 @@ public class svm_struct_learn {
 		double rt1, rt2;
 		rt1 = svm_common.get_runtime();
 
-		svm_struct_api.init_struct_model(sample, sm, sparm, lparm, kparm);
+		ssa.init_struct_model(sample, sm, sparm, lparm, kparm);
 		sizePsi = sm.sizePsi + 1;
 		logger.info("the sizePsi2 is " + sizePsi);
 		if (alg_type == svm_struct_common.NSLACK_SHRINK_ALG) {
@@ -151,7 +151,7 @@ public class svm_struct_learn {
 		if (svm_common.USE_FYCACHE != 0) {
 			fycache = new SVECTOR[n];
 			for (i = 0; i < n; i++) {
-				fy = svm_struct_api.psi(ex[i].x, ex[i].y, sm, sparm);																	
+				fy = ssa.psi(ex[i].x, ex[i].y, sm, sparm);																	
 				if (kparm.kernel_type == svm_common.LINEAR) {
 					diff = svm_common.add_list_ss(fy);
 					fy = diff;
@@ -241,14 +241,14 @@ public class svm_struct_learn {
 							if (fycache != null) {
 								fy = svm_common.copy_svector(fycache[i]);
 							} else {
-								fy = svm_struct_api.psi(ex[i].x, ex[i].y, sm,sparm);
+								fy = ssa.psi(ex[i].x, ex[i].y, sm,sparm);
 							}
 
-							fybar = svm_struct_api.psi(ex[i].x, ybar, sm, sparm);
+							fybar = ssa.psi(ex[i].x, ybar, sm, sparm);
 							rt_psi += Math.max(svm_common.get_runtime() - rt2,0);
 
 							/**** scale feature vector and margin by loss ****/
-							lossval = svm_struct_api.loss(ex[i].y, ybar, sparm);
+							lossval = ssa.loss(ex[i].y, ybar, sparm);
 							if (sparm.slack_norm == 2)
 								lossval = Math.sqrt(lossval);
 							if (sparm.loss_type == SLACK_RESCALING)
@@ -576,7 +576,7 @@ public class svm_struct_learn {
 		rt1 = svm_common.get_runtime();
 		if (sparm.batch_size < 100)
 			batch_size = (int) ((sparm.batch_size * n) / 100.0);
-		svm_struct_api.init_struct_model(sample, sm, sparm, lparm, kparm);
+		ssa.init_struct_model(sample, sm, sparm, lparm, kparm);
 		sizePsi = sm.sizePsi + 1; /* sm must contain size of psi on return */
 		// logger.info("the sizePsi is "+sizePsi+" \n");
 
@@ -627,7 +627,7 @@ public class svm_struct_learn {
 		for (i = 0; i < n; i++) {
 			if (svm_common.USE_FYCACHE != 0) {
 				// logger.info("USE THE FYCACHE \n");
-				fy = svm_struct_api.psi(ex[i].x, ex[i].y, sm, sparm);
+				fy = ssa.psi(ex[i].x, ex[i].y, sm, sparm);
 				if (kparm.kernel_type == svm_common.LINEAR) {
 					diff = svm_common.add_list_sort_ss_r(fy,svm_struct_common.COMPACT_ROUNDING_THRESH);
 					fy = diff;
@@ -645,7 +645,7 @@ public class svm_struct_learn {
 
 			/* NOTE: */
 			for (i = 0; i < n; i++)
-				if (svm_struct_api.loss(ex[i].y, ex[i].y, sparm) != 0) {
+				if (ssa.loss(ex[i].y, ex[i].y, sparm) != 0) {
 					// logger.info("ERROR: Loss function returns non-zero value loss(y_"+i+",y_"+i+")\n");
 					// logger.info("       W4 algorithm assumes that loss(y_i,y_i)=0 for all i.\n");
 				}
@@ -1280,7 +1280,7 @@ public class svm_struct_learn {
 			ccache_g.constlist[i] = new CCACHEELEM();
 			ccache_g.constlist[i].fydelta = svm_common.create_svector_n(null,
 					0, null, 1);
-			ccache_g.constlist[i].rhs = svm_struct_api.loss(ex[i].y, ex[i].y,
+			ccache_g.constlist[i].rhs = ssa.loss(ex[i].y, ex[i].y,
 					sparm) / n;
 			ccache_g.constlist[i].viol = 0;
 			ccache_g.constlist[i].next = null;
@@ -1450,13 +1450,13 @@ public class svm_struct_learn {
 		if (fycached != null)
 			fy = svm_common.copy_svector(fycached);
 		else
-			fy = svm_struct_api.psi(ex.x, ex.y, sm, sparm);
+			fy = ssa.psi(ex.x, ex.y, sm, sparm);
 		// logger.info("ybar label info:"+ybar.class_index);
-		fybar = svm_struct_api.psi(ex.x, ybar, sm, sparm);
+		fybar = ssa.psi(ex.x, ybar, sm, sparm);
 		// logger.info("fydelta find yeah:"+fybar.toString());
 		if (svm_struct_common.struct_verbosity >= 2)
 			rt_psi_g += Math.max(svm_common.get_runtime() - rt2, 0);
-		lossval = svm_struct_api.loss(ex.y, ybar, sparm);
+		lossval = ssa.loss(ex.y, ybar, sparm);
 
 		/**** scale feature vector and margin by loss ****/
 		if (sparm.loss_type == SLACK_RESCALING)

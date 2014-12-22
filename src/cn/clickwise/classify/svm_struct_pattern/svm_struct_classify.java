@@ -29,7 +29,7 @@ public class svm_struct_classify {
 		SAMPLE testsample;
 		LABEL y=new LABEL();
 		
-		svm_struct_api ssa=new svm_struct_api();
+		svm_struct_api ssa=svm_struct_api_factory.getSvmStructApi();
 		svm_struct_api.svm_struct_classify_api_init(args.length+1,args);
 
 		read_input_parameters(args.length+1,args,sparm,
@@ -44,7 +44,7 @@ public class svm_struct_classify {
 		logger.info("modelfile:"+modelfile);
 		logger.info("predictionsfile:"+predictionsfile);
 		
-		model=svm_struct_api.read_struct_model(modelfile, sparm);
+		model=ssa.read_struct_model(modelfile, sparm);
 		if(svm_struct_common.struct_verbosity>=1)
 		{
 			logger.info("done");
@@ -102,7 +102,7 @@ public class svm_struct_classify {
 			runtime+=(svm_common.get_runtime()-t1);
 			svm_struct_api.write_label(predfl, y);
 			
-			l=svm_struct_api.loss(testsample.examples[i].y, y, sparm);
+			l=ssa.loss(testsample.examples[i].y, y, sparm);
 			
 			avgloss+=l;
 			if(l==0)
