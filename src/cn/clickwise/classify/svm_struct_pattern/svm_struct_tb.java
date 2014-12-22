@@ -789,13 +789,13 @@ public class svm_struct_tb extends svm_struct_api {
 				read_words[wpos].wnum = Integer.parseInt(pstr);
 				
 				/***********medlda+1*************/
-				if(svmconfig.model_type==0)
-				{
+				//if(svmconfig.model_type==0)
+				//{
 					read_words[wpos].wnum= read_words[wpos].wnum;
-				}
-				else{
-					read_words[wpos].wnum= read_words[wpos].wnum+1;
-				}
+				//}
+				//else{
+				//	read_words[wpos].wnum= read_words[wpos].wnum+1;
+				//}
 				
 				/********************************/
 				
