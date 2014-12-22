@@ -98,7 +98,7 @@ public class svm_struct_classify {
 			{
 				continue;
 			}
-			logger.info("y:"+y.class_index+"  testsample.examples["+i+"].y:"+testsample.examples[i].y.class_index);
+			logger.info("y:"+y.first_class+"_"+y.second_class+"_"+y.third_class+"  testsample.examples["+i+"].y:"+testsample.examples[i].y.first_class+"_"+testsample.examples[i].y.second_class+"_"+testsample.examples[i].y.third_class);
 			runtime+=(svm_common.get_runtime()-t1);
 			svm_struct_api.write_label(predfl, y);
 			
