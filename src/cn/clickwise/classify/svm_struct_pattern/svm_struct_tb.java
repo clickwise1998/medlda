@@ -3,6 +3,8 @@ package cn.clickwise.classify.svm_struct_pattern;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.PrintWriter;
 import java.util.regex.Pattern;
 
 import cn.clickwise.str.basic.SSO;
@@ -26,8 +28,12 @@ public class svm_struct_tb extends svm_struct_api {
 
 	public  WORD[] read_words;
 	public  LABEL[] read_target = null;
-	public LABEL[] posslabes=null;
-	
+	public LABEL[] posslabels=null;
+	public svm_struct_tb()
+	{
+		super();
+		readPossLabels();
+	}
 	@Override
 	public void init_struct_model(SAMPLE sample, STRUCTMODEL sm,
 			STRUCT_LEARN_PARM sparm, LEARN_PARM lparm, KERNEL_PARM kparm) {
@@ -91,8 +97,30 @@ public class svm_struct_tb extends svm_struct_api {
 	@Override
 	public SVECTOR psi(PATTERN x, LABEL y, STRUCTMODEL sm,
 			STRUCT_LEARN_PARM sparm) {
-		// TODO Auto-generated method stub
-		return null;
+		SVECTOR fvec=new SVECTOR();
+		/*
+		 * String wwinfo=""; for(int k=0;k<x.doc.fvec.words.length;k++) {
+		 * wwinfo=
+		 * wwinfo+x.doc.fvec.words[k].wnum+":"+x.doc.fvec.words[k].weight+" "; }
+		 * logger.info("wwwwinfo:"+wwinfo);
+		 */
+		fvec.words=new WORD[x.doc.fvec.words.length*3];
+
+		for(int i=0;i<x.doc.fvec.words.length;i++)
+		{
+		  fvec.words[i]=x.doc.fvec.words[i].copy_word();
+		  fvec.words[i+x.doc.fvec.words.length]=x.doc.fvec.words[i].copy_word();
+		  fvec.words[i+x.doc.fvec.words.length*2]=x.doc.fvec.words[i].copy_word();
+		  
+		  fvec.words[i].wnum+=(y.first_class-1)*sparm.num_features;
+		  fvec.words[i+x.doc.fvec.words.length].wnum+=((y.second_class-1)*sparm.num_features+y.first_size*sparm.num_features);
+		  fvec.words[i+x.doc.fvec.words.length*2].wnum+=((y.third_class-1)*sparm.num_features+y.first_size*sparm.num_features+y.second_size*sparm.num_features);
+		}
+		String userdefined = "";
+		SVECTOR vec = svm_common.create_svector_shallow(fvec.words, userdefined, x.doc.fvec.factor);
+		// logger.info("fvec psi:"+fvec.toString());
+		//vec.kernel_id = y.class_index;
+		return vec;
 	}
 
 	@Override
@@ -129,11 +157,11 @@ public class svm_struct_tb extends svm_struct_api {
 		
 		// logger.info("ybar_num_classes:"+ybar.num_classes);
 		// String winfo="";
-		for (ci = 1; ci <= posslabes.length; ci++) {
+		for (ci = 0; ci <= posslabels.length; ci++) {
 			// logger.info("ci="+ci);
-			ybar.first_class= posslabes[ci].first_class;
-			ybar.second_class= posslabes[ci].second_class;
-			ybar.third_class= posslabes[ci].third_class;
+			ybar.first_class= posslabels[ci].first_class;
+			ybar.second_class= posslabels[ci].second_class;
+			ybar.third_class= posslabels[ci].third_class;
 			
 			// logger.info("before psi");
 			doc.fvec = psi(x, ybar, sm, sparm);
@@ -143,9 +171,9 @@ public class svm_struct_tb extends svm_struct_api {
 			score += loss(y, ybar, sparm);
 			if ((bestscore < score) || (first != 0)) {
 				bestscore = score;
-				bestfirst = posslabes[ci].first_class;
-				bestsecond=posslabes[ci].second_class;
-				bestthird=posslabes[ci].third_class;
+				bestfirst = posslabels[ci].first_class;
+				bestsecond=posslabels[ci].second_class;
+				bestthird=posslabels[ci].third_class;
 				first = 0;
 			}
 		}
@@ -167,8 +195,40 @@ public class svm_struct_tb extends svm_struct_api {
 
 	@Override
 	public double loss(LABEL y, LABEL ybar, STRUCT_LEARN_PARM sparm) {
-		// TODO Auto-generated method stub
-		return 0;
+		
+		 if(sparm.loss_function == 0) { /* type 0 loss: 0/1 loss */
+
+             if((y.first_class==ybar.first_class)&&(y.second_class==ybar.second_class)&&(y.third_class==ybar.third_class))
+             {
+                     return(0);
+             }
+             else
+             {
+                     return(100);
+             }
+         }
+		 
+         if(sparm.loss_function == 1) { /* type 1 loss: squared difference */
+
+             if((y.first_class==ybar.first_class)&&(y.second_class==ybar.second_class)&&(y.third_class==ybar.third_class))
+             {
+                     return(0);
+             }
+             else
+             {
+                     return(100);
+             }
+         }
+         else {
+             /* Put your code for different loss functions here. But then
+                find_most_violated_constraint_???(x, y, sm) has to return the
+                highest scoring label with the largest loss. */
+             System.out.println("Unkown loss function");
+             System.exit(1);
+         }
+         
+         return 100;
+
 	}
 
 	@Override
@@ -256,21 +316,301 @@ public class svm_struct_tb extends svm_struct_api {
 	@Override
 	public void write_struct_model(String file, STRUCTMODEL sm,
 			STRUCT_LEARN_PARM sparm) {
-		// TODO Auto-generated method stub
+		try {
+			/* Writes structural model sm to file file. */
+			FileWriter fw = new FileWriter(new File(file));
+			PrintWriter modelfl = new PrintWriter(fw);
+			int j, i, sv_num;
+			MODEL model = sm.svm_model.copyMODEL();
+			SVECTOR v;
+
+			modelfl.print("SVM-multiclass Version "
+					+ svm_struct_common.INST_VERSION + "\n");
+			//modelfl.print(sparm.num_classes + "# number of classes\n");
+			modelfl.print(sparm.first_size + "# number of first classes\n");
+			modelfl.print(sparm.second_size + "# number of second classes\n");
+			modelfl.print(sparm.third_size + "# number of third classes\n");
+			modelfl.print(sparm.num_features + "# number of base features\n");
+			modelfl.print(sparm.loss_function + " # loss function\n");
+			modelfl.print(model.kernel_parm.kernel_type + " # kernel type\n");
+			modelfl.print(model.kernel_parm.poly_degree
+					+ " # kernel parameter -d \n");
+			modelfl.print(model.kernel_parm.rbf_gamma
+					+ " # kernel parameter -g \n");
+			modelfl.print(model.kernel_parm.coef_lin
+					+ " # kernel parameter -s \n");
+			modelfl.print(model.kernel_parm.coef_const
+					+ " # kernel parameter -r \n");
+			modelfl.print(model.kernel_parm.custom
+					+ " # kernel parameter -u \n");
+			modelfl.print(model.totwords + " # highest feature index \n");
+			modelfl.print(model.totdoc + " # number of training documents \n");
+            logger.info("sv_num here: "+model.sv_num);
+			sv_num = 1;
+			for (i = 1; i < model.sv_num; i++) {
+				for (v = model.supvec[i].fvec; v != null; v = v.next)
+					sv_num++;
+			}
+			modelfl.print(sv_num + " # number of support vectors plus 1 \n");
+			modelfl.print(model.b
+					+ " # threshold b, each following line is a SV (starting with alpha*y)\n");
+			logger.info("model.sv_num"+model.sv_num);
+			for (i = 1; i < model.sv_num; i++) {
+				for (v = model.supvec[i].fvec; v != null; v = v.next) {
+					logger.info("model.alpha:"+model.alpha[i]);
+					logger.info("v.factor:"+v.factor);
+					modelfl.print((model.alpha[i] * v.factor) + " ");
+					modelfl.print("qid:" + v.kernel_id + " ");
+                  //  logger.info("i="+i+" v.length:"+v.words.length);
+					for (j = 0; j < v.words.length; j++) {
+						modelfl.print((v.words[j]).wnum + ":"
+								+ (double) (v.words[j]).weight + " ");
+					}
+					if (v.userdefined != null)
+						modelfl.print("#" + v.userdefined + "\n");
+					else
+						modelfl.print("#\n");
+					/*
+					 * NOTE: this could be made more efficient by summing the
+					 * alpha's of identical vectors before writing them to the
+					 * file.
+					 */
+				}
+			}
+			modelfl.close();
+
+		} catch (Exception e) {
+		}
 		
 	}
 
 	@Override
 	public STRUCTMODEL read_struct_model(String file, STRUCT_LEARN_PARM sparm) {
-		// TODO Auto-generated method stub
-		return null;
+		/*
+		 * Reads structural model sm from file file. This function is used only
+		 * in the prediction module, not in the learning module.
+		 */
+		File modelfl;
+		STRUCTMODEL sm = new STRUCTMODEL();
+		int i, queryid, slackid;
+		double costfactor;
+		int max_sv, max_words, ll, wpos;
+		String line, comment;
+		WORD[] words;
+		String version_buffer;
+		MODEL model;
+		svm_common sc=new svm_common();
+		
+		sc.nol_ll(file); /* scan size of model file */
+		max_sv = sc.read_max_docs;
+		max_words = sc.read_max_words_doc;
+		//logger.info("max_sv:"+max_sv);
+		//logger.info("max_words:"+max_words);
+		max_words += 2;
+
+		words = new WORD[max_words + 10];
+		line = "";
+		model = new MODEL();
+		model.kernel_parm=new KERNEL_PARM();
+		modelfl = new File(file);
+		FileReader fr = null;
+		BufferedReader br = null;
+		try {
+			fr = new FileReader(modelfl);
+			br = new BufferedReader(fr);
+			line = br.readLine();
+			//logger.info("line:"+line);
+			version_buffer = SSO.afterStr(line, "SVM-multiclass Version")
+					.trim();
+
+			if (!(version_buffer.equals(svm_struct_common.INST_VERSION))) {
+				System.err
+						.println("Version of model-file does not match version of svm_struct_classify!");
+
+			}
+			line = br.readLine();
+			//logger.info("line:"+line);
+			sparm.first_size = Integer.parseInt(SSO.beforeStr(line, "#")
+					.trim());
+            logger.info("sparm.first_size:"+sparm.first_size);
+			line = br.readLine();
+			//logger.info("line:"+line);
+			sparm.second_size = Integer.parseInt(SSO.beforeStr(line, "#")
+					.trim());
+            logger.info("sparm.second_size:"+sparm.second_size);
+			line = br.readLine();
+			//logger.info("line:"+line);
+			sparm.third_size = Integer.parseInt(SSO.beforeStr(line, "#")
+					.trim());
+            logger.info("sparm.third_size:"+sparm.third_size);
+            
+			line = br.readLine();
+			//logger.info("line:"+line);
+			sparm.num_features = Integer.parseInt(SSO.beforeStr(line, "#")
+					.trim());
+            logger.info("sparm.num_features:"+sparm.num_features);
+			line = br.readLine();
+			//logger.info("line:"+line);
+			//System.out.println("line:"+line);
+			sparm.loss_function = Integer.parseInt(SSO.beforeStr(line, "#")
+					.trim());
+            logger.info("sparm.loss_function:"+sparm.loss_function);
+			
+			line = br.readLine();
+			//logger.info("line:"+line);
+			//System.out.println("line:"+line);
+			model.kernel_parm.kernel_type = Short.parseShort(SSO.beforeStr(
+					line, "#").trim());
+            logger.info("model.kernel_parm.kernel_type:"+model.kernel_parm.kernel_type);
+			
+			line = br.readLine();
+			//logger.info("line:"+line);
+			//System.out.println("line:"+line);
+			model.kernel_parm.poly_degree = Integer.parseInt(SSO.beforeStr(
+					line, "#").trim());
+            logger.info("model.kernel_parm.poly_degree:"+model.kernel_parm.poly_degree);
+			
+			line = br.readLine();
+			//logger.info("line:"+line);
+			model.kernel_parm.rbf_gamma = Double.parseDouble(SSO.beforeStr(
+					line, "#").trim());
+            logger.info("model.kernel_parm.rbf_gammma:"+model.kernel_parm.rbf_gamma);
+			
+			
+			line = br.readLine();
+			//logger.info("line:"+line);
+			model.kernel_parm.coef_lin = Double.parseDouble(SSO.beforeStr(line,
+					"#").trim());
+            logger.info("model.kernel_parm.coef_lin:"+model.kernel_parm.coef_lin);
+            
+			line = br.readLine();
+			//logger.info("line:"+line);
+			model.kernel_parm.coef_const = Double.parseDouble(SSO.beforeStr(
+					line, "#").trim());
+			logger.info("model.kernel_parm.coef_const:"+model.kernel_parm.coef_const);
+			
+
+			line = br.readLine();
+			//logger.info("line:"+line);
+			model.kernel_parm.custom = SSO.beforeStr(line, "#");
+            logger.info("model.kernel_parm.custom:"+model.kernel_parm.custom);
+			
+			line = br.readLine();
+			//logger.info("line:"+line);
+			model.totwords = Integer.parseInt(SSO.beforeStr(line, "#").trim());
+            logger.info("model.totwords:"+model.totwords);
+			
+			
+			line = br.readLine();
+			//logger.info("line:"+line);
+			model.totdoc = Integer.parseInt(SSO.beforeStr(line, "#").trim());
+            logger.info("model.totdoc:"+model.totdoc);
+			
+			line = br.readLine();
+			//logger.info("line:"+line);
+			model.sv_num = Integer.parseInt(SSO.beforeStr(line, "#").trim());
+            logger.info("model.sv_num:"+model.sv_num);
+			
+			
+			line = br.readLine();
+			//logger.info("line:"+line);
+			model.b = Double.parseDouble(SSO.beforeStr(line, "#").trim());
+            logger.info("model.b:"+model.b);
+			
+			
+			model.supvec = new DOC[model.sv_num];
+			model.alpha = new double[model.sv_num];
+			model.index = null;
+			model.lin_weights = null;
+			
+			for (i = 1; i < model.sv_num; i++) {
+				line = br.readLine();
+				//logger.info("i="+i+" line:"+line);
+				sc.parse_document(line, max_words);
+				model.alpha[i] = sc.read_doc_label;
+				queryid = sc.read_queryid;
+				slackid = sc.read_slackid;
+				costfactor = sc.read_costfactor;
+				wpos = sc.read_wpos;
+				comment = sc.read_comment;
+                words=sc.read_words;
+                System.out.println("words:"+words.length);
+                System.out.println("queryid:"+queryid);
+				model.supvec[i] = sc.create_example(-1, 0, 0, 0.0,
+						sc.create_svector(words, comment, 1.0));
+				model.supvec[i].fvec.kernel_id = queryid;
+				//logger.info("read supvec["+i+"]:"+model.supvec[i].fvec.toString());
+			}
+			fr.close();
+			br.close();
+
+			if (svm_common.verbosity >= 1) {
+				System.out.println(" (" + (model.sv_num - 1)
+						+ " support vectors read) ");
+			}
+			//logger.info("kernel type here:"+model.kernel_parm.kernel_type);
+			sm.svm_model = model;
+			sm.sizePsi = model.totwords;
+			sm.w = null;
+		} catch (Exception e) {
+			e.printStackTrace();
+			System.out.println(e.getMessage());
+		}
+		System.out.println("reading done");
+		return (sm);
 	}
 
 	@Override
 	public LABEL classify_struct_example(PATTERN x, STRUCTMODEL sm,
 			STRUCT_LEARN_PARM sparm) {
-		// TODO Auto-generated method stub
-		return null;
+		LABEL y = new LABEL();
+		DOC doc;
+		int first_class, bestfirst = -1;
+		int second_class, bestsecond = -1;
+		int third_class, bestthird = -1;
+		int  j;
+		boolean first = true;
+		double score=0.0, bestscore = -1;
+		WORD[] words;
+
+		int ci=0;
+		doc = x.doc.copyDoc();
+		y.scores = new double[posslabels.length ];
+		y.num_classes = sparm.num_classes;
+		words = doc.fvec.words;
+
+		
+		for (j = 0; j <words.length; j++) {
+			if (words[j].wnum > sparm.num_features) {
+				//System.out.println(doc.fvec.words[j].wnum+" is set to 0");
+				return null;
+				//words[j].wnum = 0;
+			}
+		}
+	
+		for (ci = 0; ci <= posslabels.length; ci++) {
+			y.first_class = posslabels[ci].first_class;
+			y.second_class = posslabels[ci].second_class;
+			y.third_class = posslabels[ci].third_class;
+			
+			doc.fvec = psi(x, y, sm, sparm);
+	
+			score = sc.classify_example(sm.svm_model, doc);	
+			y.scores[ci] = score;
+			if ((bestscore < score) || first) {
+				bestscore = score;
+				bestfirst = y.first_class;
+				bestsecond = y.second_class;
+				bestthird = y.third_class;
+				first = false;
+			}
+		}
+      
+		y.first_class = bestfirst;
+		y.second_class = bestsecond;
+		y.third_class = bestthird;
+		
+		return y;
 	}
 
 	public  DOC[] read_documents(String docfile, LABEL[] label) {
@@ -509,5 +849,9 @@ public class svm_struct_tb extends svm_struct_api {
 			System.out.println(e.getMessage());
 		}
 
+	}
+	public void readPossLabels()
+	{
+		
 	}
 }

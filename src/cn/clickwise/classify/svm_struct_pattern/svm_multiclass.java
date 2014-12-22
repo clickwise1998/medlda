@@ -260,22 +260,13 @@ public class svm_multiclass extends svm_struct_api{
 	 */
 	public SVECTOR psi(PATTERN x, LABEL y, STRUCTMODEL sm,
 			STRUCT_LEARN_PARM sparm) {
-		SVECTOR fvec=new SVECTOR();
+		SVECTOR fvec;
 		/*
 		 * String wwinfo=""; for(int k=0;k<x.doc.fvec.words.length;k++) {
 		 * wwinfo=
 		 * wwinfo+x.doc.fvec.words[k].wnum+":"+x.doc.fvec.words[k].weight+" "; }
 		 * logger.info("wwwwinfo:"+wwinfo);
 		 */
-		fvec.words=new WORD[x.doc.fvec.words.length*(sparm.first_size+sparm.second_size+sparm.third_size)];
-		for(int i=0;i<x.doc.fvec.words.length;i++)
-		{
-		  fvec.words[i].wnum+=(y.first_class-1)*sparm.num_features;
-		  fvec.words[i+]
-		}
-		
-		
-		
 		fvec = svm_common.shift_s(x.doc.fvec, (y.class_index - 1)
 				* sparm.num_features);
 		// logger.info("fvec psi:"+fvec.toString());
