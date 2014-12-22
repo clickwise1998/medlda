@@ -1,1 +1,3 @@
 真正抽象svm_struct_api
+svm_multiclass 
+40062 train Average loss on test set:22.819784
