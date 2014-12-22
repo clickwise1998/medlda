@@ -280,7 +280,6 @@ public class MedLDATB {
 			/********执行subTreeNum个优化**********/
 			
 			svmStructSolver(ss, param, m_dMu);
-			
 		}
 
 		return bRes;
