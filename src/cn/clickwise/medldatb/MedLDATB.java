@@ -1394,6 +1394,7 @@ public class MedLDATB {
 					//fileptr.println();
 				}
 			}
+			
 			fileptr.println();
 			fileptr.close();
 

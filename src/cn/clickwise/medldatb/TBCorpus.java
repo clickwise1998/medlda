@@ -306,8 +306,7 @@ public class TBCorpus extends Corpus{
 					param.subTrees[cindex]=new SubTree(0,e1.getKey(),e2.getKey(),2,param.labelDicts.size());
 				}	
 			}
-			
-			
+					
 		}
 		catch(Exception e)
 		{
