@@ -11,7 +11,7 @@ import cn.clickwise.sort.utils.SortStrArray;
 
 public class WordWeight {
 
-
+        //this is a test line
 	private HashMap<Integer,String> wordIndex;
 	
 	public WordWeight()
