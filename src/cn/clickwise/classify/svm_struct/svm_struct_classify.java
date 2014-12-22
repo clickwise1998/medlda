@@ -17,6 +17,7 @@ public class svm_struct_classify {
 	
 	public static void main(String[] args) throws Exception
 	{
+		//svmconfig.model_type=1;
 		int correct=0,incorrect=0,no_accuracy=0;
 		int i;
 		double t1,runtime=0;
