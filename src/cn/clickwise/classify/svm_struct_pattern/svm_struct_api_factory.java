@@ -13,7 +13,10 @@ public class svm_struct_api_factory {
 		{
 			return new svm_struct_tb();
 		}
-		
+		else if(svmconfig.model_type==3)
+		{
+			return new svm_struct_tbs();
+		}
 		return null;
 		
 	}

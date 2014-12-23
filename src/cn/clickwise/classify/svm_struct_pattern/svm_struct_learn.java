@@ -1140,7 +1140,8 @@ public class svm_struct_learn {
 		 * logger.info("the svm model kernel_parm is null"); }
 		 */
 
-		if((svmconfig.model_type==0)||(svmconfig.model_type==2))//medlda不要把特征向量加和
+		logger.info("model type in slsj:"+svmconfig.model_type);
+		if(svmconfig.model_type!=1)//medlda不要把特征向量加和
 		{
 		  svm_struct_api.print_struct_learning_stats(sample, sm, cset, alpha_g,sparm);
 		}

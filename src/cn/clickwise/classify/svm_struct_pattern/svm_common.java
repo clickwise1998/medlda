@@ -437,7 +437,8 @@ public class svm_common {
 				}
 				//label[dnum] = read_doc_label;
 				/*********medlda +1*************/
-				if((svmconfig.model_type==0)||(svmconfig.model_type==2))
+				logger.info("model type in rd:"+svmconfig.model_type);
+				if(svmconfig.model_type!=1)
 				{
 					label[dnum] = read_doc_label;
 				}
@@ -552,7 +553,8 @@ public class svm_common {
 				read_words[wpos].wnum = Integer.parseInt(pstr);
 				
 				/***********medlda+1*************/
-				if((svmconfig.model_type==0)||(svmconfig.model_type==2))
+				logger.info("model type in pd:"+svmconfig.model_type);
+				if(svmconfig.model_type!=1)
 				{
 					read_words[wpos].wnum= read_words[wpos].wnum;
 				}
