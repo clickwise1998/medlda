@@ -215,14 +215,7 @@ public class svm_struct_tb extends svm_struct_api {
 		 
          if(sparm.loss_function == 1) { /* type 1 loss: squared difference */
 
-             if((y.first_class==ybar.first_class)&&(y.second_class==ybar.second_class)&&(y.third_class==ybar.third_class))
-             {
-                     return(0);
-             }
-             else
-             {
-                     return(100);
-             }
+        	 return ((y.first_class - ybar.class_index) * (y.class_index - ybar.class_index));
          }
          else {
              /* Put your code for different loss functions here. But then
@@ -584,7 +577,10 @@ public class svm_struct_tb extends svm_struct_api {
 		int ci=0;
 		doc = x.doc.copyDoc();
 		y.scores = new double[posslabels.length ];
-		y.num_classes = sparm.num_classes;
+		//y.num_classes = sparm.num_classes;
+		y.first_size=sparm.first_size;
+		y.second_size=sparm.second_size;
+		y.third_size=sparm.third_size;
 		words = doc.fvec.words;
 
 		
@@ -879,6 +875,7 @@ public class svm_struct_tb extends svm_struct_api {
 			line=line.trim();
 			pls.add(line);
 		}
+		
 		logger.info("pls.size:"+pls.size());
 		posslabels=new LABEL[pls.size()];
 		
