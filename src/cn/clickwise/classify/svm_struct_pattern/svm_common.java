@@ -422,6 +422,7 @@ public class svm_common {
 		}
 		dnum = 0;
 		read_totwords = 0;
+		
 		try {
 			while ((line = br.readLine()) != null) {
 				line = line.trim();
