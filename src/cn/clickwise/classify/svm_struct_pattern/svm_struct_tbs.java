@@ -268,6 +268,7 @@ public class svm_struct_tbs extends svm_struct_api{
 		}
 
 		for (i = 0; i < n; i++)
+		{
 			/* find highest class label */
 			if (num_first_classes < (target[i].first_class + 0.1))
 			{
@@ -278,7 +279,7 @@ public class svm_struct_tbs extends svm_struct_api{
 		    {
 			    num_second_classes = (int) (target[i].second_class + 0.1);
 		    }
-		
+		}
 
 
 
