@@ -10,8 +10,7 @@ import java.util.regex.Pattern;
 
 import cn.clickwise.str.basic.SSO;
 
-public class svm_struct_tb extends svm_struct_api {
-	
+public class svm_struct_tbs extends svm_struct_api{
 	public  int read_totdocs;
 	public  int read_totwords;
 	public  int read_max_docs;
@@ -19,7 +18,7 @@ public class svm_struct_tb extends svm_struct_api {
 
 	public  double read_first_label;
 	public  double read_second_label;
-	public  double read_third_label;
+
 	
 	public  int read_queryid;
 	public  int read_slackid;
@@ -30,7 +29,7 @@ public class svm_struct_tb extends svm_struct_api {
 	public  WORD[] read_words;
 	public  LABEL[] read_target = null;
 	public LABEL[] posslabels=null;
-	public svm_struct_tb()
+	public svm_struct_tbs()
 	{
 		super();
 		readPossLabels();
@@ -45,7 +44,6 @@ public class svm_struct_tb extends svm_struct_api {
 		//sparm.num_classes = 1;
 		sparm.first_size = 1;
 		sparm.second_size = 1;
-		sparm.third_size = 1;
 		logger.info("sample.nh:"+sample.n);
 		logger.info("sample.examples.len:"+sample.examples.length);
 		for (i = 0; i < sample.n; i++)
@@ -61,10 +59,6 @@ public class svm_struct_tb extends svm_struct_api {
 			    sparm.second_size = (int) (sample.examples[i].y.second_class + 0.1);
 		    }
 		
-		    if (sparm.third_size < ((sample.examples[i].y.third_class) + 0.1))
-		    {
-			    sparm.third_size = (int) (sample.examples[i].y.third_class + 0.1);
-		    }
 		}
 		
 		for (i = 0; i < sample.n; i++) /* find highest feature number */
@@ -82,7 +76,7 @@ public class svm_struct_tb extends svm_struct_api {
 		sparm.num_features = totwords;
 		if (svm_struct_common.struct_verbosity >= 0) {
 			System.out.println("Training set properties: " + sparm.num_features
-					+ " features " + sparm.first_size + " first_classes "+sparm.second_size+" second_classes "+sparm.third_size+" third_classes");
+					+ " features " + sparm.first_size + " first_classes "+sparm.second_size+" second_classes ");
 		}
 		// logger.info("sparm.num_features:"+sparm.num_features);
 
@@ -90,7 +84,7 @@ public class svm_struct_tb extends svm_struct_api {
 		sm.sizePsi=0;
 		sm.sizePsi+=sparm.num_features*sparm.first_size;
 		sm.sizePsi+=sparm.num_features*sparm.second_size;
-		sm.sizePsi+=sparm.num_features*sparm.third_size;
+
 		// logger.info("sm.sizePsi:"+sm.sizePsi);
 		if (svm_struct_common.struct_verbosity >= 2) {
 			System.out.println("Size of Phi: " + sm.sizePsi + "\n");
@@ -108,17 +102,17 @@ public class svm_struct_tb extends svm_struct_api {
 		 * wwinfo+x.doc.fvec.words[k].wnum+":"+x.doc.fvec.words[k].weight+" "; }
 		 * logger.info("wwwwinfo:"+wwinfo);
 		 */
-		fvec.words=new WORD[x.doc.fvec.words.length*3];
+		int xlen=x.doc.fvec.words.length;
+		fvec.words=new WORD[xlen*2];
 
 		for(int i=0;i<x.doc.fvec.words.length;i++)
 		{
 		  fvec.words[i]=x.doc.fvec.words[i].copy_word();
-		  fvec.words[i+x.doc.fvec.words.length]=x.doc.fvec.words[i].copy_word();
-		  fvec.words[i+x.doc.fvec.words.length*2]=x.doc.fvec.words[i].copy_word();
+		  fvec.words[i+xlen]=x.doc.fvec.words[i].copy_word();
 		  
 		  fvec.words[i].wnum+=(y.first_class-1)*sparm.num_features;
-		  fvec.words[i+x.doc.fvec.words.length].wnum+=((y.second_class-1)*sparm.num_features+y.first_size*sparm.num_features);
-		  fvec.words[i+x.doc.fvec.words.length*2].wnum+=((y.third_class-1)*sparm.num_features+y.first_size*sparm.num_features+y.second_size*sparm.num_features);
+		  fvec.words[i+xlen].wnum+=((y.second_class-1)*sparm.num_features+y.first_size*sparm.num_features);
+
 		}
 		
 		String userdefined = "";
@@ -143,7 +137,7 @@ public class svm_struct_tb extends svm_struct_api {
 		int ci = 0;
 		int bestfirst = -1,first=1;
 		int bestsecond = -1;
-		int bestthird = -1;
+
 		double score, bestscore = -1;
 
 		/*
@@ -158,7 +152,6 @@ public class svm_struct_tb extends svm_struct_api {
 		//ybar.num_classes = sparm.num_classes;
 		ybar.first_size = sparm.first_size;
 		ybar.second_size = sparm.second_size;
-		ybar.third_size = sparm.third_size;
 		
 		// logger.info("ybar_num_classes:"+ybar.num_classes);
 		// String winfo="";
@@ -166,7 +159,6 @@ public class svm_struct_tb extends svm_struct_api {
 			 logger.info("ci="+ci);
 			ybar.first_class= posslabels[ci].first_class;
 			ybar.second_class= posslabels[ci].second_class;
-			ybar.third_class= posslabels[ci].third_class;
 			
 			// logger.info("before psi");
 			doc.fvec = psi(x, ybar, sm, sparm);
@@ -178,21 +170,20 @@ public class svm_struct_tb extends svm_struct_api {
 				bestscore = score;
 				bestfirst = posslabels[ci].first_class;
 				bestsecond=posslabels[ci].second_class;
-				bestthird=posslabels[ci].third_class;
 				first = 0;
 			}
 		}
-		if (bestfirst == -1|bestsecond == -1||bestthird == -1)
+		if (bestfirst == -1|bestsecond == -1)
 			logger.debug("ERROR: Only one class\n");
 		//logger.info("bestclass is "+bestclass);
 		//ybar.class_index = bestclass;
 		ybar.first_class = bestfirst;
 		ybar.second_class = bestsecond;
-		ybar.third_class = bestthird;
+
 		
 		// logger.info("ybar_class_index:"+ybar.class_index);
 		if (svm_struct_common.struct_verbosity >= 3) {
-			logger.info("[%" + bestfirst +"_"+bestsecond+"_"+bestthird+ ":" + bestscore + "] ");
+			logger.info("[%" + bestfirst +"_"+bestsecond+":" + bestscore + "] ");
 		}
 		//logger.info("bestscore:"+bestscore);
 		return (ybar);
@@ -203,7 +194,7 @@ public class svm_struct_tb extends svm_struct_api {
 		
 		 if(sparm.loss_function == 0) { /* type 0 loss: 0/1 loss */
 
-             if((y.first_class==ybar.first_class)&&(y.second_class==ybar.second_class)&&(y.third_class==ybar.third_class))
+             if((y.first_class==ybar.first_class)&&(y.second_class==ybar.second_class))
              {
                      return(0);
              }
@@ -215,7 +206,7 @@ public class svm_struct_tb extends svm_struct_api {
 		 
          if(sparm.loss_function == 1) { /* type 1 loss: squared difference */
 
-             if((y.first_class==ybar.first_class)&&(y.second_class==ybar.second_class)&&(y.third_class==ybar.third_class))
+             if((y.first_class==ybar.first_class)&&(y.second_class==ybar.second_class))
              {
                      return(0);
              }
@@ -247,7 +238,7 @@ public class svm_struct_tb extends svm_struct_api {
 		int n; /* number of examples */
 		DOC[] docs; /* examples in original SVM-light format */
 		LABEL[] target = null;
-		int totwords, i, num_first_classes = 0,num_second_classes = 0,num_third_classes = 0;
+		int totwords, i, num_first_classes = 0,num_second_classes = 0;
 
 		/* Using the read_documents function from SVM-light */
 		docs = read_documents(file, target);
@@ -288,12 +279,8 @@ public class svm_struct_tb extends svm_struct_api {
 			    num_second_classes = (int) (target[i].second_class + 0.1);
 		    }
 		
-		    if (num_third_classes < (target[i].third_class + 0.1))
-		    {
-			    num_third_classes = (int) (target[i].third_class + 0.1);
-		    }
-		for (i = 0; i < n; i++)
-			/* make sure all class labels are positive */
+
+
 
 		for (i = 0; i < n; i++) { /* copy docs over into new datastructure */
 			examples[i].x.doc = docs[i];
@@ -301,13 +288,12 @@ public class svm_struct_tb extends svm_struct_api {
 			//examples[i].y.class_index = (int) (target[i] + 0.1);
 			examples[i].y.first_class = (int) (target[i].first_class + 0.1);
 			examples[i].y.second_class = (int) (target[i].second_class + 0.1);
-			examples[i].y.third_class = (int) (target[i].third_class + 0.1);
 			// logger.info("the label is "+target[i]+" \n");
 			examples[i].y.scores = null;
 			//examples[i].y.num_classes = num_classes;
 			examples[i].y.first_size = num_first_classes;
 			examples[i].y.second_size = num_second_classes;
-			examples[i].y.third_size = num_third_classes;
+
 		}
 
 		sample.n = n;
@@ -335,7 +321,6 @@ public class svm_struct_tb extends svm_struct_api {
 			//modelfl.print(sparm.num_classes + "# number of classes\n");
 			modelfl.print(sparm.first_size + "# number of first classes\n");
 			modelfl.print(sparm.second_size + "# number of second classes\n");
-			modelfl.print(sparm.third_size + "# number of third classes\n");
 			modelfl.print(sparm.num_features + "# number of base features\n");
 			modelfl.print(sparm.loss_function + " # loss function\n");
 			modelfl.print(model.kernel_parm.kernel_type + " # kernel type\n");
@@ -444,12 +429,7 @@ public class svm_struct_tb extends svm_struct_api {
 			sparm.second_size = Integer.parseInt(SSO.beforeStr(line, "#")
 					.trim());
             logger.info("sparm.second_size:"+sparm.second_size);
-			line = br.readLine();
-			//logger.info("line:"+line);
-			sparm.third_size = Integer.parseInt(SSO.beforeStr(line, "#")
-					.trim());
-            logger.info("sparm.third_size:"+sparm.third_size);
-            
+      
 			line = br.readLine();
 			//logger.info("line:"+line);
 			sparm.num_features = Integer.parseInt(SSO.beforeStr(line, "#")
@@ -573,7 +553,7 @@ public class svm_struct_tb extends svm_struct_api {
 		DOC doc;
 		int first_class, bestfirst = -1;
 		int second_class, bestsecond = -1;
-		int third_class, bestthird = -1;
+
 		int  j;
 		boolean first = true;
 		double score=0.0, bestscore = -1;
@@ -582,7 +562,9 @@ public class svm_struct_tb extends svm_struct_api {
 		int ci=0;
 		doc = x.doc.copyDoc();
 		y.scores = new double[posslabels.length ];
-		y.num_classes = sparm.num_classes;
+		y.first_size=sparm.first_size;
+		y.second_size=sparm.second_size;
+		//y.num_classes = sparm.num_classes;
 		words = doc.fvec.words;
 
 		
@@ -597,7 +579,7 @@ public class svm_struct_tb extends svm_struct_api {
 		for (ci = 0; ci < posslabels.length; ci++) {
 			y.first_class = posslabels[ci].first_class;
 			y.second_class = posslabels[ci].second_class;
-			y.third_class = posslabels[ci].third_class;
+	
 			
 			doc.fvec = psi(x, y, sm, sparm);
 	
@@ -607,14 +589,13 @@ public class svm_struct_tb extends svm_struct_api {
 				bestscore = score;
 				bestfirst = y.first_class;
 				bestsecond = y.second_class;
-				bestthird = y.third_class;
 				first = false;
 			}
 		}
       
 		y.first_class = bestfirst;
 		y.second_class = bestsecond;
-		y.third_class = bestthird;
+
 		
 		return y;
 	}
@@ -695,7 +676,6 @@ public class svm_struct_tb extends svm_struct_api {
 
 				label[dnum].first_class = (int)read_first_label;
 				label[dnum].second_class = (int)read_second_label;
-				label[dnum].third_class = (int)read_third_label;
 
 				
 				if ((read_wpos > 1)
@@ -771,17 +751,16 @@ public class svm_struct_tb extends svm_struct_api {
 		dline = dline.trim();
 		wpos = 0;
 		String[] seg_arr = dline.split(" ");
-		if ((seg_arr.length < 3) || (seg_arr[0].indexOf("#") > -1)) {
+		if ((seg_arr.length < 2) || (seg_arr[0].indexOf("#") > -1)) {
 			return null;
 		}
 		read_first_label = Double.parseDouble(seg_arr[0]);
 		read_second_label = Double.parseDouble(seg_arr[1]);
-		read_third_label = Double.parseDouble(seg_arr[2]);
 		
 		String wstr = "";
 		String pstr = "";
 		String sstr = "";
-		for (int i = 3; i < seg_arr.length; i++) {
+		for (int i = 2; i < seg_arr.length; i++) {
 			wstr = seg_arr[i].trim();
 			if (wstr.indexOf(":") < 0) {
 				continue;
@@ -900,14 +879,13 @@ public class svm_struct_tb extends svm_struct_api {
 			}
 			labelStr=labelStr.trim();
 			labels=labelStr.split("\\|");
-			if(labels.length!=3)
+			if(labels.length!=2)
 			{
 				continue;
 			}
 			tlabel=new LABEL();
 			tlabel.first_class=Integer.parseInt(labels[0]);
 			tlabel.second_class=Integer.parseInt(labels[1]);
-			tlabel.third_class=Integer.parseInt(labels[2]);
 			posslabels[i]=tlabel;
 		}
 		
