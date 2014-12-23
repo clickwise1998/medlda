@@ -163,7 +163,7 @@ public class svm_struct_tb extends svm_struct_api {
 		// logger.info("ybar_num_classes:"+ybar.num_classes);
 		// String winfo="";
 		for (ci = 0; ci < posslabels.length; ci++) {
-			 logger.info("ci="+ci);
+			// logger.info("ci="+ci);
 			ybar.first_class= posslabels[ci].first_class;
 			ybar.second_class= posslabels[ci].second_class;
 			ybar.third_class= posslabels[ci].third_class;
