@@ -1442,9 +1442,9 @@ public class svm_struct_learn {
 		if (svm_struct_common.struct_verbosity >= 2)
 			rt_viol_g += Math.max(svm_common.get_runtime() - rt2, 0);
 
-		if (svm_struct_api.empty_label(ybar)) {
-			logger.info("ERROR: empty label was returned for example\n");
-		}
+		//if (svm_struct_api.empty_label(ybar)) {
+		//	logger.info("ERROR: empty label was returned for example\n");
+		//}
 
 		/**** get psi(x,y) and psi(x,ybar) ****/
 		if (svm_struct_common.struct_verbosity >= 2)
