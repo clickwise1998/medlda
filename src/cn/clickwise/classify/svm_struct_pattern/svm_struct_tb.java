@@ -277,6 +277,7 @@ public class svm_struct_tb extends svm_struct_api {
 		}
 
 		for (i = 0; i < n; i++)
+		{
 			/* find highest class label */
 			if (num_first_classes < (target[i].first_class + 0.1))
 			{
@@ -292,8 +293,9 @@ public class svm_struct_tb extends svm_struct_api {
 		    {
 			    num_third_classes = (int) (target[i].third_class + 0.1);
 		    }
-		for (i = 0; i < n; i++)
-			/* make sure all class labels are positive */
+		}
+		
+
 
 		for (i = 0; i < n; i++) { /* copy docs over into new datastructure */
 			examples[i].x.doc = docs[i];
