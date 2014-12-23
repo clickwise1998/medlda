@@ -661,7 +661,7 @@ public class svm_struct_tbs extends svm_struct_api{
 		try {
 			while ((line = br.readLine()) != null) {
 				line = line.trim();
-				System.out.println(line);
+				//System.out.println(line);
 				if (line.charAt(0) == '#')
 					continue; /* line contains comments */
 				// System.out.println(line);
