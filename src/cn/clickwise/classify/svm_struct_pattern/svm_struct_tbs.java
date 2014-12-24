@@ -11,6 +11,7 @@ import java.util.regex.Pattern;
 import cn.clickwise.str.basic.SSO;
 
 public class svm_struct_tbs extends svm_struct_api{
+	
 	public  int read_totdocs;
 	public  int read_totwords;
 	public  int read_max_docs;
