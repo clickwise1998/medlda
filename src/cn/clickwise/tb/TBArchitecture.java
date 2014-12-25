@@ -471,6 +471,8 @@ public class TBArchitecture {
 			mcate=cate;
 		}
 		***************/
+		
+		/********bat5**********
 		if(cate.equals("床上用品/靠垫/毛巾/布艺|枕套/枕巾/枕头/枕芯"))
 		{
 			mcate="家居建材|家纺布艺|枕套/枕巾/枕头/枕芯";
@@ -478,6 +480,27 @@ public class TBArchitecture {
 		else if(cate.equals("床上用品/靠垫/毛巾/布艺|床褥/床垫/床单/毛毯"))
 		{
 			mcate="家居建材|家纺布艺|床褥/床垫/床单/毛毯";
+		}
+		else
+		{
+			mcate=cate;
+		}
+		***********************/
+		if((cate.equals("母婴用品|儿童玩具|1-2岁"))||(cate.equals("母婴用品|儿童玩具|6岁以上"))||(cate.equals("母婴用品|儿童玩具|早教/智能玩具")))
+		{
+			mcate="母婴用品|儿童玩具|儿童玩具";
+		}
+		else if(cate.equals("文化玩乐|鲜花园艺|仿真花/绿植/蔬果成品"))
+		{
+			mcate="家居建材|家居饰品|仿真花卉";
+		}
+		else if(cate.equals("日用百货|成人用品|情趣丝袜/配饰"))
+		{
+			mcate="日用百货|成人用品|情趣内衣";
+		}
+		else if(cate.equals("家居建材|家装主材|厨房挂架"))
+		{
+			mcate="日用百货|收纳整理|整理架/置物架";
 		}
 		else
 		{
@@ -493,8 +516,8 @@ public class TBArchitecture {
 	
 	public static void main(String[] args)
 	{
-		String input="tb/tb_goods_short_mod_rearch1217_2.txt";
-		String output="tb/tb_goods_short_mod_rearch1217_3.txt";
+		String input="tb/tb_goods_short_mod_rearch1217_3.txt";
+		String output="tb/tb_goods_short_mod_rearch1224.txt";
 		
 		TBArchitecture tbarch=new TBArchitecture();
 		tbarch.reArch(input, output);
