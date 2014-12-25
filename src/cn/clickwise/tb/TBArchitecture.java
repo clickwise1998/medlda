@@ -486,6 +486,8 @@ public class TBArchitecture {
 			mcate=cate;
 		}
 		***********************/
+		
+		/**********bat6************
 		if((cate.equals("母婴用品|儿童玩具|1-2岁"))||(cate.equals("母婴用品|儿童玩具|6岁以上"))||(cate.equals("母婴用品|儿童玩具|早教/智能玩具")))
 		{
 			mcate="母婴用品|儿童玩具|儿童玩具";
@@ -506,6 +508,19 @@ public class TBArchitecture {
 		{
 			mcate=cate;
 		}
+		*****************************/
+		if(cate.equals("家电办公|影音电器|Hifi音响配件"))
+		{
+			mcate="家电办公|影音电器|组合/迷你/插卡音响";
+		}
+		else if(cate.equals("运动户外|运动/瑜伽/健身/球迷用品|自行车/装备/配件"))
+		{
+			mcate="运动户外|运动/瑜伽/健身/球迷用品|自行车/单车";
+		}
+		else
+		{
+			mcate=cate;
+		}
 		
 		mcate=mcate.trim();
 		
@@ -516,8 +531,8 @@ public class TBArchitecture {
 	
 	public static void main(String[] args)
 	{
-		String input="tb/tb_goods_short_mod_rearch1217_3.txt";
-		String output="tb/tb_goods_short_mod_rearch1224.txt";
+		String input="tb/tb_goods_short_mod_rearch1225_filtered.txt";
+		String output="tb/tb_goods_short_mod_rearch1225_2.txt";
 		
 		TBArchitecture tbarch=new TBArchitecture();
 		tbarch.reArch(input, output);

@@ -72,6 +72,6 @@ public class TBStatis {
 	public static void main(String[] args)
 	{
 		TBStatis tbs=new TBStatis();
-		tbs.statis("tb/tb_goods_short_mod_rearch1217_3.txt", "tb/tb_goods_short_mod_rearch1217_2_count.txt");
+		tbs.statis("tb/trainLog_1225/tb_goods_short_mod_rearch1224.txt", "tb/tb_goods_short_mod_rearch1217_2_count.txt");
 	}
 }
