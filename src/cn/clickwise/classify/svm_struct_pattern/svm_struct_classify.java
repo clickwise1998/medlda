@@ -88,6 +88,9 @@ public class svm_struct_classify {
 		
 		predfl=FileWriterUtil.getPW(predictionsfile);
 		
+		int first_correct=0,first_incorrect=0;
+		int second_correct=0,second_incorrect=0;
+		
 		for(i=0;i<testsample.n;i++)
 		{
 			
@@ -112,6 +115,27 @@ public class svm_struct_classify {
 			else
 			{
 				incorrect++;
+			}
+			
+			if(svmconfig.model_type==2)
+			{
+				if(y.first_class==testsample.examples[i].y.first_class)
+				{
+					first_correct++;
+				}
+				else
+				{
+					first_incorrect++;
+				}
+				
+				if((y.first_class==testsample.examples[i].y.first_class)&&(y.second_class==testsample.examples[i].y.second_class))
+				{
+					second_correct++;
+				}
+				else
+				{
+					second_incorrect++;
+				}
 			}
 			
 			svm_struct_api.eval_prediction(i,testsample.examples[i],y, model, sparm, teststats);
@@ -141,9 +165,13 @@ public class svm_struct_classify {
 		//if((no_accuracy==0)&&(svm_struct_common.struct_verbosity>=1))
 		//{
 			logger.info("Average loss on test set:"+(float)avgloss);
-			logger.info("Zero/one-error on test set "+(float)100.0*incorrect/testsample.n+"("+correct+" correct, "+incorrect+" incorrect,"+testsample.n+", total");
+			logger.info("Zero/one-error on test set "+(float)100.0*((double)incorrect/(double)(correct+incorrect))+"("+correct+" correct, "+incorrect+" incorrect,"+testsample.n+", total");
 		//}
-		
+		    if(svmconfig.model_type==2)
+			{
+		    	logger.info("first Zero/one-error on test set "+(float)100.0*((double)first_incorrect/(double)(first_correct+first_incorrect))+"("+first_correct+" correct, "+first_incorrect+" incorrect,"+testsample.n+", total");
+		    	logger.info("second Zero/one-error on test set "+(float)100.0*((double)second_incorrect/(double)(second_correct+second_incorrect))+"("+second_correct+" correct, "+second_incorrect+" incorrect,"+testsample.n+", total");
+			}
 		svm_struct_api.print_struct_testing_stats(testsample, model, sparm, teststats);
 		
 	}
