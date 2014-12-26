@@ -345,6 +345,6 @@ public class svm_struct_classify {
 		  System.out.println("         -v [0..3]  -> verbosity level (default 2)\n\n");
 
 		  svm_struct_api.print_struct_help_classify();
-		}
+	}
 	
 }

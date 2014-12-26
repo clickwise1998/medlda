@@ -836,34 +836,37 @@ public class svm_struct_learn {
 				rt_total += Math.max(svm_common.get_runtime() - rt1, 0);
 
 				double rtPrepareStart=svm_common.get_runtime();
-				
+				LABEL ybar;
 				for (i = 0; i < n; i++) {
-					rt1 = svm_common.get_runtime();
+					//rt1 = svm_common.get_runtime();
 
-					if (svm_struct_common.struct_verbosity >= 1)
-						sc.print_percent_progress(n, 10, ".");
+					//if (svm_struct_common.struct_verbosity >= 1)
+					//	sc.print_percent_progress(n, 10, ".");
 				
 					/*
 					 * compute most violating fydelta=fy-fybar and rhs for
 					 * example i
 					 */
 					////****medlda add ybar return value************
-					LABEL ybar=find_most_violated_constraint(ex[i], fycache[i], n, sm,sparm);
+					ybar=find_most_violated_constraint(ex[i], fycache[i], n, sm,sparm);
 					//logger.info("ybar label is :"+ybar.class_index);
 					//***************medlda***********************
 					vecLabel[i] = ybar.class_index - 1;
 					//********************************************
 					
 					/* add current fy-fybar to lhs of constraint */
+					
 					if (kparm.kernel_type == svm_common.LINEAR) {
 						svm_common.add_list_n_ns(lhs_n, fydelta_g, 1.0);
 					} else {
 						svm_common.append_svector_list(fydelta_g, lhs_g);
 						lhs_g = fydelta_g;
 					}
+					
+					
 					rhs_g += rhs_i_g; /* add loss to rhs */
 
-					rt_total += Math.max(svm_common.get_runtime() - rt1, 0);
+					//rt_total += Math.max(svm_common.get_runtime() - rt1, 0);
 
 				} /* end of example loop */
 
@@ -1422,15 +1425,16 @@ public class svm_struct_learn {
 	 */
 	{
 		// logger.info("begin find_most_violated_constraint");
-		double rt2 = 0;
+		//double rt2 = 0;
 		LABEL ybar;
-		SVECTOR fybar, fy;
+		//SVECTOR fybar, fy;
+		SVECTOR fy;
 		double factor, lossval;
 
 		// logger.info("in the find_most_violated_constraint");
 
-		if (svm_struct_common.struct_verbosity >= 2)
-			rt2 = svm_common.get_runtime();
+		//if (svm_struct_common.struct_verbosity >= 2)
+		//	rt2 = svm_common.get_runtime();
 		argmax_count_g++;
 		if (sparm.loss_type == SLACK_RESCALING) {
 			// logger.info("call method find_most_violated_constraint_slackrescaling");
@@ -1439,25 +1443,25 @@ public class svm_struct_learn {
 			// logger.info("call method find_most_violated_constraint_marginrescaling");
 			ybar = ssa.find_most_violated_constraint_marginrescaling(ex.x, ex.y,sm, sparm);
 		}
-		if (svm_struct_common.struct_verbosity >= 2)
-			rt_viol_g += Math.max(svm_common.get_runtime() - rt2, 0);
+		//if (svm_struct_common.struct_verbosity >= 2)
+		//	rt_viol_g += Math.max(svm_common.get_runtime() - rt2, 0);
 
 		//if (svm_struct_api.empty_label(ybar)) {
 		//	logger.info("ERROR: empty label was returned for example\n");
 		//}
 
 		/**** get psi(x,y) and psi(x,ybar) ****/
-		if (svm_struct_common.struct_verbosity >= 2)
-			rt2 = svm_common.get_runtime();
+		//if (svm_struct_common.struct_verbosity >= 2)
+		//	rt2 = svm_common.get_runtime();
 		if (fycached != null)
 			fy = svm_common.copy_svector(fycached);
 		else
 			fy = ssa.psi(ex.x, ex.y, sm, sparm);
 		// logger.info("ybar label info:"+ybar.class_index);
-		fybar = ssa.psi(ex.x, ybar, sm, sparm);
+		fydelta_g = ssa.psi(ex.x, ybar, sm, sparm);
 		// logger.info("fydelta find yeah:"+fybar.toString());
-		if (svm_struct_common.struct_verbosity >= 2)
-			rt_psi_g += Math.max(svm_common.get_runtime() - rt2, 0);
+		//if (svm_struct_common.struct_verbosity >= 2)
+		//	rt_psi_g += Math.max(svm_common.get_runtime() - rt2, 0);
 		lossval = ssa.loss(ex.y, ybar, sparm);
 
 		/**** scale feature vector and margin by loss ****/
@@ -1467,25 +1471,15 @@ public class svm_struct_learn {
 			/* do not rescale vector for */
 			factor = 1.0 / n; /* margin rescaling loss type */
 		svm_common.mult_svector_list(fy, factor);
-		svm_common.mult_svector_list(fybar, -factor);
-		svm_common.append_svector_list(fybar, fy); /* compute fy-fybar */
-		/*
-		 * String winfo=""; if(fybar!=null) { winfo=""; for(int
-		 * l=0;l<fybar.words.length;l++) {
-		 * winfo=winfo+fybar.words[l].wnum+":"+fybar.words[l].weight+" "; }
-		 * logger.info("ybar info:"+winfo);
-		 * 
-		 * }
-		 */
-		fydelta_g = fybar;
+		svm_common.mult_svector_list(fydelta_g, -factor);
+		svm_common.append_svector_list(fydelta_g, fy); /* compute fy-fybar */
+		
+		//fydelta_g = fybar;
 
-		// logger.info("fydelta find year:" + fydelta_g.toString());
-		//rhs_i_g = lossval / n;
-		//rhs_i_g = lossval / n;
-		//rhs_i_g=WU.div(lossval, n, 20);
+
 		rhs_i_g = lossval / (double)n;
-		// logger.info("rhs_i_g:" + rhs_i_g);
-		// logger.info("end find_most_violated_constraint");
+		
+		fy=null;
 		return ybar;
 	}
 

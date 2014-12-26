@@ -130,15 +130,10 @@ public class svm_learn {
 		if (learn_parm.svm_c == 0.0) { /* default value for C */
 			learn_parm.svm_c = 1.0 / (r_delta_avg * r_delta_avg);
 			if (svm_common.verbosity >= 1)
-				System.out
-						.println("Setting default regularization parameter C="
-								+ learn_parm.svm_c);
+				System.out.println("Setting default regularization parameter C="+ learn_parm.svm_c);
 		}
 
-		learn_parm.eps = -1.0; /*
-								 * equivalent regression epsilon for
-								 * classification
-								 */
+		learn_parm.eps = -1.0; /* equivalent regression epsilon for classification*/
 
 		for (i = 0; i < totdoc; i++) { /* various inits */
 			docs[i].docnum = i;

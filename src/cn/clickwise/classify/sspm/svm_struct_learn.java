@@ -2,6 +2,8 @@ package cn.clickwise.classify.sspm;
 
 import org.apache.log4j.Logger;
 
+import cn.clickwise.time.utils.TimeOpera;
+
 /**
  * Basic algorithm for learning structured outputs (e.g. parses, sequences,
  * multi-label classification) with a Support Vector Machine.
@@ -854,8 +856,10 @@ public class svm_struct_learn {
 					vecLabel[i] = ybar.class_index - 1;
 					//********************************************
 					
+					
 					/* add current fy-fybar to lhs of constraint */
 					if (kparm.kernel_type == svm_common.LINEAR) {
+						logger.info("kernel type: is linear 1226");
 						svm_common.add_list_n_ns(lhs_n, fydelta_g, 1.0);
 					} else {
 						svm_common.append_svector_list(fydelta_g, lhs_g);
@@ -1371,11 +1375,7 @@ public class svm_struct_learn {
 				rhs_g += ccache_g.constlist[i].rhs;
 				sumviol += ccache_g.constlist[i].viol;
 				if (lhs_n != null) { /* linear case? */
-					svm_common.add_list_n_ns(lhs_n, fydelta, 1.0); /*
-																	 * add
-																	 * fy-fybar
-																	 * to sum
-																	 */
+					svm_common.add_list_n_ns(lhs_n, fydelta, 1.0); /* add fy-fybar to sum*/
 				} else { /* add fy-fybar to vector list */
 					fydelta = svm_common.copy_svector(fydelta);
 					svm_common.append_svector_list(fydelta, lhs_g);
@@ -1690,6 +1690,164 @@ public class svm_struct_learn {
 			}
 		}
 		// logger.info("end update_constraint_cache_for_model");
+	}
+	
+	private class MostViolated implements Runnable{
+
+		/****input parameters****/
+		private EXAMPLE[] ex;
+		private SVECTOR[] fycache;
+		private int n;
+		private STRUCTMODEL sm;
+		private STRUCT_LEARN_PARM sparm;
+		
+		/*****output parameters***/
+		private double[] local_lhs_n;
+		private double local_rhs_g;
+		private double local_rt_psi_g;
+		private double local_rt_viol_g;
+		private int local_argmax_count_g;
+		
+		/*****local parameters************/
+		private double local_rhs_i_g;
+		private SVECTOR local_fydelta_g;
+		private svm_struct_api local_ssa;
+
+		
+		@Override
+		public void run() {
+			// TODO Auto-generated method stub
+			
+		}
+		
+		private void init()
+		{
+			
+		}
+		
+		/*
+		 * returns fydelta=fy-fybar and rhs scalar value that correspond to the most
+		 * violated constraint for example ex
+		 */
+		private LABEL find_most_violated_constraint(EXAMPLE ex, SVECTOR fycached,
+				int n, STRUCTMODEL sm, STRUCT_LEARN_PARM sparm)
+		{
+			double rt2 = 0;
+			LABEL ybar;
+			SVECTOR fybar, fy;
+			double factor, lossval;
+			
+			if (svm_struct_common.struct_verbosity >= 2)
+				rt2 = get_runtime();
+			local_argmax_count_g++;
+			if (sparm.loss_type == SLACK_RESCALING) {
+				ybar = local_ssa.find_most_violated_constraint_slackrescaling(ex.x, ex.y, sm, sparm);
+			} else {
+				ybar = local_ssa.find_most_violated_constraint_marginrescaling(ex.x, ex.y,sm, sparm);
+			}
+			if (svm_struct_common.struct_verbosity >= 2)
+				local_rt_viol_g += Math.max(svm_common.get_runtime() - rt2, 0);
+
+
+			/**** get psi(x,y) and psi(x,ybar) ****/
+			if (svm_struct_common.struct_verbosity >= 2)
+				rt2 = get_runtime();
+			if (fycached != null)
+				fy = copy_svector(fycached);
+			else
+				fy = ssa.psi(ex.x, ex.y, sm, sparm);
+			// logger.info("ybar label info:"+ybar.class_index);
+			fybar = ssa.psi(ex.x, ybar, sm, sparm);
+			// logger.info("fydelta find yeah:"+fybar.toString());
+			if (svm_struct_common.struct_verbosity >= 2)
+				local_rt_psi_g += Math.max(get_runtime() - rt2, 0);
+			lossval = ssa.loss(ex.y, ybar, sparm);
+
+			/**** scale feature vector and margin by loss ****/
+			if (sparm.loss_type == SLACK_RESCALING)
+				factor = lossval / n;
+			else
+				/* do not rescale vector for */
+				factor = 1.0 / n; /* margin rescaling loss type */
+			mult_svector_list(fy, factor);
+			mult_svector_list(fybar, -factor);
+			append_svector_list(fybar, fy); /* compute fy-fybar */
+
+			local_fydelta_g = fybar;
+			local_rhs_i_g = lossval / (double)n;
+
+			return ybar;
+		}
+		
+		private  void mult_svector_list(SVECTOR a, double factor)
+		/* multiplies the factor of each element in vector list with factor */
+		{
+			SVECTOR f;
+
+			for (f = a; f != null; f = f.next)
+				f.factor *= factor;
+		}
+		
+		private  void append_svector_list(SVECTOR a, SVECTOR b)
+		/* appends SVECTOR b to the end of SVECTOR a. */
+		{
+			SVECTOR f;
+
+			for (f = a; f.next != null; f = f.next)
+				; /* find end of first vector list */
+			f.next = b; /* append the two vector lists */
+		}
+		
+		private  SVECTOR copy_svector(SVECTOR vec) {
+			SVECTOR newvec = null;
+			if (vec != null) {
+				newvec = create_svector(vec.words, vec.userdefined, vec.factor);
+				newvec.kernel_id = vec.kernel_id;
+				newvec.next = copy_svector(vec.next);
+			}
+			return (newvec);
+		}
+		
+		private  SVECTOR create_svector(WORD[] words, String userdefined,
+				double factor) {
+			SVECTOR vec;
+			int fnum, i;
+
+			fnum = 0;
+
+			vec = new SVECTOR();
+			vec.words = new WORD[words.length];
+
+			for (i = 0; i < words.length; i++) {
+				vec.words[i] = words[i];
+			}
+
+			vec.twonorm_sq = -1;
+
+			if (userdefined != null) {
+				vec.userdefined = userdefined;
+			} else {
+				vec.userdefined = null;
+			}
+
+			vec.kernel_id = 0;
+			vec.next = null;
+			vec.factor = factor;
+			return vec;
+		}
+		
+		private  double get_runtime() {
+			int c = (int) getCurrentTimeLong();
+			double hc = 0;
+			hc = ((double) c) * 10;
+			return hc;
+		}
+		
+		private  long getCurrentTimeLong()
+		{
+			long ctime=System.currentTimeMillis();
+			return ctime;
+		}
 	}
 
 }
