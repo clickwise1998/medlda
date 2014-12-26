@@ -1709,9 +1709,10 @@ public class svm_struct_learn {
 		private int local_argmax_count_g;
 		
 		/*****local parameters************/
-		private double local_rhs_i_g;
-		private SVECTOR local_fydelta_g;
-		private svm_struct_api local_ssa;
+		private double local_rhs_i_g=0;
+		private SVECTOR local_fydelta_g=null;
+		private svm_struct_api local_ssa=null;
+		private LABEL[] mostViolatedLabels=null;
 
 		
 		@Override
@@ -1739,14 +1740,14 @@ public class svm_struct_learn {
 			
 			if (svm_struct_common.struct_verbosity >= 2)
 				rt2 = get_runtime();
-			local_argmax_count_g++;
+			setLocal_argmax_count_g(getLocal_argmax_count_g() + 1);
 			if (sparm.loss_type == SLACK_RESCALING) {
 				ybar = local_ssa.find_most_violated_constraint_slackrescaling(ex.x, ex.y, sm, sparm);
 			} else {
 				ybar = local_ssa.find_most_violated_constraint_marginrescaling(ex.x, ex.y,sm, sparm);
 			}
 			if (svm_struct_common.struct_verbosity >= 2)
-				local_rt_viol_g += Math.max(svm_common.get_runtime() - rt2, 0);
+				setLocal_rt_viol_g(getLocal_rt_viol_g() + Math.max(svm_common.get_runtime() - rt2, 0));
 
 
 			/**** get psi(x,y) and psi(x,ybar) ****/
@@ -1760,7 +1761,7 @@ public class svm_struct_learn {
 			fybar = ssa.psi(ex.x, ybar, sm, sparm);
 			// logger.info("fydelta find yeah:"+fybar.toString());
 			if (svm_struct_common.struct_verbosity >= 2)
-				local_rt_psi_g += Math.max(get_runtime() - rt2, 0);
+				setLocal_rt_psi_g(getLocal_rt_psi_g() + Math.max(get_runtime() - rt2, 0));
 			lossval = ssa.loss(ex.y, ybar, sparm);
 
 			/**** scale feature vector and margin by loss ****/
@@ -1773,8 +1774,8 @@ public class svm_struct_learn {
 			mult_svector_list(fybar, -factor);
 			append_svector_list(fybar, fy); /* compute fy-fybar */
 
-			local_fydelta_g = fybar;
-			local_rhs_i_g = lossval / (double)n;
+			setLocal_fydelta_g(fybar);
+			setLocal_rhs_i_g(lossval / (double)n);
 
 			return ybar;
 		}
@@ -1847,6 +1848,110 @@ public class svm_struct_learn {
 		{
 			long ctime=System.currentTimeMillis();
 			return ctime;
+		}
+
+		public EXAMPLE[] getEx() {
+			return ex;
+		}
+
+		public void setEx(EXAMPLE[] ex) {
+			this.ex = ex;
+		}
+
+		public SVECTOR[] getFycache() {
+			return fycache;
+		}
+
+		public void setFycache(SVECTOR[] fycache) {
+			this.fycache = fycache;
+		}
+
+		public int getN() {
+			return n;
+		}
+
+		public void setN(int n) {
+			this.n = n;
+		}
+
+		public STRUCTMODEL getSm() {
+			return sm;
+		}
+
+		public void setSm(STRUCTMODEL sm) {
+			this.sm = sm;
+		}
+
+		public STRUCT_LEARN_PARM getSparm() {
+			return sparm;
+		}
+
+		public void setSparm(STRUCT_LEARN_PARM sparm) {
+			this.sparm = sparm;
+		}
+
+		public double[] getLocal_lhs_n() {
+			return local_lhs_n;
+		}
+
+		public void setLocal_lhs_n(double[] local_lhs_n) {
+			this.local_lhs_n = local_lhs_n;
+		}
+
+		public double getLocal_rhs_g() {
+			return local_rhs_g;
+		}
+
+		public void setLocal_rhs_g(double local_rhs_g) {
+			this.local_rhs_g = local_rhs_g;
+		}
+
+		public double getLocal_rt_psi_g() {
+			return local_rt_psi_g;
+		}
+
+		public void setLocal_rt_psi_g(double local_rt_psi_g) {
+			this.local_rt_psi_g = local_rt_psi_g;
+		}
+
+		public double getLocal_rt_viol_g() {
+			return local_rt_viol_g;
+		}
+
+		public void setLocal_rt_viol_g(double local_rt_viol_g) {
+			this.local_rt_viol_g = local_rt_viol_g;
+		}
+
+		public int getLocal_argmax_count_g() {
+			return local_argmax_count_g;
+		}
+
+		public void setLocal_argmax_count_g(int local_argmax_count_g) {
+			this.local_argmax_count_g = local_argmax_count_g;
+		}
+
+		public double getLocal_rhs_i_g() {
+			return local_rhs_i_g;
+		}
+
+		public void setLocal_rhs_i_g(double local_rhs_i_g) {
+			this.local_rhs_i_g = local_rhs_i_g;
+		}
+
+		public SVECTOR getLocal_fydelta_g() {
+			return local_fydelta_g;
+		}
+
+		public void setLocal_fydelta_g(SVECTOR local_fydelta_g) {
+			this.local_fydelta_g = local_fydelta_g;
+		}
+
+		public LABEL[] getMostViolatedLabels() {
+			return mostViolatedLabels;
+		}
+
+		public void setMostViolatedLabels(LABEL[] mostViolatedLabels) {
+			this.mostViolatedLabels = mostViolatedLabels;
 		}
 	}
 
