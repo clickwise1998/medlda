@@ -123,6 +123,7 @@ public class svm_struct_tb extends svm_struct_api {
 		
 		String userdefined = "";
 		SVECTOR vec = svm_common.create_svector_shallow(fvec.words, userdefined, x.doc.fvec.factor);
+		fvec=null;
 		// logger.info("fvec psi:"+fvec.toString());
 		//vec.kernel_id = y.class_index;
 		return vec;
@@ -151,8 +152,6 @@ public class svm_struct_tb extends svm_struct_api {
 		 * computing a new PSI vector.
 		 */
 		doc = x.doc.copyDoc();
-        //logger.info("in find_most_violated_constraint_marginrescaling");
-        //logger.info(doc.fvec.toString());
         
 		ybar.scores = null;
 		//ybar.num_classes = sparm.num_classes;
@@ -182,8 +181,9 @@ public class svm_struct_tb extends svm_struct_api {
 				first = 0;
 			}
 		}
-		if (bestfirst == -1|bestsecond == -1||bestthird == -1)
-			logger.debug("ERROR: Only one class\n");
+		
+		//if (bestfirst == -1|bestsecond == -1||bestthird == -1)
+		//	logger.debug("ERROR: Only one class\n");
 		//logger.info("bestclass is "+bestclass);
 		//ybar.class_index = bestclass;
 		ybar.first_class = bestfirst;
@@ -191,10 +191,10 @@ public class svm_struct_tb extends svm_struct_api {
 		ybar.third_class = bestthird;
 		
 		// logger.info("ybar_class_index:"+ybar.class_index);
-		if (svm_struct_common.struct_verbosity >= 3) {
-			logger.info("[%" + bestfirst +"_"+bestsecond+"_"+bestthird+ ":" + bestscore + "] ");
-		}
-		//logger.info("bestscore:"+bestscore);
+		//if (svm_struct_common.struct_verbosity >= 3) {
+		//	logger.info("[%" + bestfirst +"_"+bestsecond+"_"+bestthird+ ":" + bestscore + "] ");
+		//}
+		doc=null;
 		return (ybar);
 	}
 
