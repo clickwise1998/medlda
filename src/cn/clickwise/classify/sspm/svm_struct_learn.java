@@ -870,7 +870,9 @@ public class svm_struct_learn {
 					rt_total += Math.max(svm_common.get_runtime() - rt1, 0);
 
 				} 
-                */
+                
+				*/
+				
 				int threadNum=3;
 				int batNum=(int)((double)n/(double)threadNum);
 				int currentStartIndex=0;
@@ -880,27 +882,29 @@ public class svm_struct_learn {
 				{
 					subThreadsFinished[th]=0;
 				}
-				
+				MostViolated[] mvs=new MostViolated[threadNum];
 				for(int th=0;th<threadNum;th++)
 				{
-					MostViolated mv=new MostViolated();
-					mv.setEx(ex);
-					mv.setFycache(fycache);
-					mv.setN(n);
-					mv.setSm(sm);
-					mv.setSparm(sparm);
-					mv.setStartIndex(currentStartIndex);
+					mvs[th]=new MostViolated();
+					mvs[th].setEx(ex);
+					mvs[th].setFycache(fycache);
+					mvs[th].setN(n);
+					mvs[th].setSm(sm);
+					mvs[th].setSparm(sparm);
+					mvs[th].setStartIndex(currentStartIndex);
+					mvs[th].setLocalnumIt(numIt);
 					currentEndIndex=currentStartIndex+batNum;
-					mv.setEndIndex(currentEndIndex);
-			        mv.setThreadIndex(th);
+					mvs[th].setEndIndex(currentEndIndex);
+					mvs[th].setThreadIndex(th);
 					currentStartIndex=currentEndIndex;
-					Thread t=new Thread(mv);
+					Thread t=new Thread(mvs[th]);
 					t.start();
 				}
 				
 				boolean allSubFinish=false;
 				while(allSubFinish==false)
 				{
+					System.out.println("waiting all subthreas stop");
 					try{
 					Thread.sleep(1000);
 					}
@@ -918,6 +922,35 @@ public class svm_struct_learn {
 					}
 				}
 				
+				for(int tk=0;tk<most_violated_g.length;tk++)
+				{
+					most_violated_g[tk]=new LABEL();
+				}
+				//update 
+				for(int th=0;th<threadNum;th++)
+				{
+				 	for(int tk=0;tk<lhs_n.length;tk++)
+				  	{
+				  		lhs_n[tk]+=(mvs[th].getLocal_lhs_n()[tk]);
+				  	}
+	
+				 	rhs_g+=mvs[th].getLocal_rhs_g();
+				 	for(int tk=0;tk<most_violated_g.length;tk++)
+					{
+				 		if((mvs[th].getViolatedValid()[tk])==true)
+				 		{
+						   most_violated_g[tk]=mvs[th].getMostViolatedLabels()[tk];
+				 		}
+					}
+				 	argmax_count_g+=(mvs[th].getLocal_argmax_count_g());
+				 	mvs[th].des();
+				}
+				
+				for(int ti=0;ti<n;ti++)
+				{
+					vecLabel[ti] = most_violated_g[ti].class_index - 1;
+				}
+				System.out.println("all has finished find most violated");
 				
 				
 				double rtPrepareEnd=svm_common.get_runtime();
@@ -1744,6 +1777,7 @@ public class svm_struct_learn {
 	//更新 lhs_n
 	public synchronized void add_local_lhs(double[] local_lhs)
 	{
+		System.out.println("in add_local_lhs");
 	  	for(int i=0;i<lhs_n.length;i++)
 	  	{
 	  		lhs_n[i]+=local_lhs[i];
@@ -1753,11 +1787,13 @@ public class svm_struct_learn {
 	//更新rhs_g
 	public synchronized void add_local_rhs(double local_rhs)
 	{
+		System.out.println("in add_local_rhs");
 	  	rhs_g+=local_rhs;
 	}
 	
 	public synchronized void update_local_mostVoilated(LABEL[] local_mostviolated)
 	{
+		System.out.println("in update_local_mostVoilated");
 		for(int i=0;i<most_violated_g.length;i++)
 		{
 			most_violated_g[i]=local_mostviolated[i];
@@ -1766,7 +1802,14 @@ public class svm_struct_learn {
 	
 	public synchronized void add_local_argmax_count(double argmax_count)
 	{
+		System.out.println("in add_local_argmax_count");
 		argmax_count_g+=argmax_count;
+	}
+	
+	public synchronized void updateSubThreadsFinished(int threadIndex,int status)
+	{
+		System.out.println("thread "+threadIndex+" is setting status");
+		subThreadsFinished[threadIndex]=status;
 	}
 	
 	private class MostViolated implements Runnable{
@@ -1780,6 +1823,7 @@ public class svm_struct_learn {
 		private int startIndex;
 		private int endIndex;
 		private int threadIndex=0;
+		private int localnumIt;
 		
 		/*****output parameters***/
 		private double[] local_lhs_n;
@@ -1793,7 +1837,7 @@ public class svm_struct_learn {
 		private SVECTOR local_fydelta_g=null;
 		private svm_struct_api local_ssa=null;
 		private LABEL[] mostViolatedLabels=null;
-
+		private boolean[] violatedValid=null;
 		
 		
 		@Override
@@ -1806,13 +1850,18 @@ public class svm_struct_learn {
 				add_list_n_ns(local_lhs_n, local_fydelta_g, 1.0);
 				local_rhs_g+=local_rhs_i_g;	
 				mostViolatedLabels[i]=ybar;
+				violatedValid[i]=true;
 			}
 			
-			add_local_lhs(local_lhs_n);
-			add_local_rhs(local_rhs_g);
-			update_local_mostVoilated(mostViolatedLabels);
-			add_local_argmax_count(local_argmax_count_g);
-			subThreadsFinished[threadIndex]=1;
+			System.out.println("numIt:"+localnumIt+" thread:"+threadIndex+" has finished find most violated");
+			//add_local_lhs(local_lhs_n);
+			//add_local_rhs(local_rhs_g);
+			//update_local_mostVoilated(mostViolatedLabels);
+			//add_local_argmax_count(local_argmax_count_g);
+			//subThreadsFinished[threadIndex]=1;
+			updateSubThreadsFinished(threadIndex,1);
+			//des();
+			
 		}
 		
 		private void init()
@@ -1823,6 +1872,19 @@ public class svm_struct_learn {
 				local_lhs_n[i]=0;
 			}
 			mostViolatedLabels=new LABEL[n];
+			violatedValid=new boolean[n];
+			for(int i=0;i<n;i++)
+			{
+				violatedValid[i]=false;
+			}
+			local_ssa=svm_struct_api_factory.getSvmStructApi();
+		}
+		
+		public void des()
+		{
+			local_lhs_n=null;
+			mostViolatedLabels=null;
+			local_ssa=null;
 		}
 		
 		private void add_list_n_ns(double[] vec_n, SVECTOR vec_s,
@@ -1891,6 +1953,9 @@ public class svm_struct_learn {
 			setLocal_fydelta_g(fybar);
 			setLocal_rhs_i_g(lossval / (double)n);
 
+			fy=null;
+			fybar=null;
+			
 			return ybar;
 		}
 		
@@ -2053,6 +2118,11 @@ public class svm_struct_learn {
 		public void setMostViolatedLabels(LABEL[] mostViolatedLabels) {
 			this.mostViolatedLabels = mostViolatedLabels;
 		}
+		
+		public boolean[] getViolatedValid()
+		{
+			return violatedValid;
+		}
 
 		public int getStartIndex() {
 			return startIndex;
@@ -2076,6 +2146,14 @@ public class svm_struct_learn {
 
 		public void setThreadIndex(int threadIndex) {
 			this.threadIndex = threadIndex;
+		}
+
+		public int getLocalnumIt() {
+			return localnumIt;
+		}
+
+		public void setLocalnumIt(int localnumIt) {
+			this.localnumIt = localnumIt;
 		}
 	}
 
