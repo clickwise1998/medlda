@@ -36,6 +36,8 @@ public class svm_struct_learn {
 	public double[] alpha_g = null;
 	public int[] alphahist_g = null;
 	public int[] remove_g = null;
+	
+	public int[] subThreadsFinished;
 
 	private static Logger logger = Logger.getLogger(svm_struct_learn.class);
 	
@@ -839,26 +841,23 @@ public class svm_struct_learn {
 				rt_total += Math.max(svm_common.get_runtime() - rt1, 0);
 
 				double rtPrepareStart=svm_common.get_runtime();
+				most_violated_g=new LABEL[n];
 				
+				/*
 				for (i = 0; i < n; i++) {
 					rt1 = svm_common.get_runtime();
 
 					if (svm_struct_common.struct_verbosity >= 1)
 						sc.print_percent_progress(n, 10, ".");
 				
-					/*
-					 * compute most violating fydelta=fy-fybar and rhs for
-					 * example i
-					 */
+
 					////****medlda add ybar return value************
 					LABEL ybar=find_most_violated_constraint(ex[i], fycache[i], n, sm,sparm);
-					//logger.info("ybar label is :"+ybar.class_index);
+					
 					//***************medlda***********************
 					vecLabel[i] = ybar.class_index - 1;
-					//********************************************
-					
-					
-					/* add current fy-fybar to lhs of constraint */
+					//********************************************					
+					// add current fy-fybar to lhs of constraint 
 					if (kparm.kernel_type == svm_common.LINEAR) {
 						logger.info("kernel type: is linear 1226");
 						svm_common.add_list_n_ns(lhs_n, fydelta_g, 1.0);
@@ -866,12 +865,61 @@ public class svm_struct_learn {
 						svm_common.append_svector_list(fydelta_g, lhs_g);
 						lhs_g = fydelta_g;
 					}
-					rhs_g += rhs_i_g; /* add loss to rhs */
+					rhs_g += rhs_i_g; 
 
 					rt_total += Math.max(svm_common.get_runtime() - rt1, 0);
 
-				} /* end of example loop */
-
+				} 
+                */
+				int threadNum=3;
+				int batNum=(int)((double)n/(double)threadNum);
+				int currentStartIndex=0;
+				int currentEndIndex=0;
+				subThreadsFinished=new int[threadNum];
+				for(int th=0;th<threadNum;th++)
+				{
+					subThreadsFinished[th]=0;
+				}
+				
+				for(int th=0;th<threadNum;th++)
+				{
+					MostViolated mv=new MostViolated();
+					mv.setEx(ex);
+					mv.setFycache(fycache);
+					mv.setN(n);
+					mv.setSm(sm);
+					mv.setSparm(sparm);
+					mv.setStartIndex(currentStartIndex);
+					currentEndIndex=currentStartIndex+batNum;
+					mv.setEndIndex(currentEndIndex);
+			        mv.setThreadIndex(th);
+					currentStartIndex=currentEndIndex;
+					Thread t=new Thread(mv);
+					t.start();
+				}
+				
+				boolean allSubFinish=false;
+				while(allSubFinish==false)
+				{
+					try{
+					Thread.sleep(1000);
+					}
+					catch(Exception e)
+					{
+						e.printStackTrace();
+					}
+					allSubFinish=true;
+					for(int th=0;th<threadNum;th++)
+					{
+						if(subThreadsFinished[th]==0)
+						{
+							allSubFinish=false;
+						}
+					}
+				}
+				
+				
+				
 				double rtPrepareEnd=svm_common.get_runtime();
 				logger.info("numIt:"+numIt+" prepareTime:"+((rtPrepareEnd-rtPrepareStart)/100));
 				
@@ -1696,23 +1744,29 @@ public class svm_struct_learn {
 	//更新 lhs_n
 	public synchronized void add_local_lhs(double[] local_lhs)
 	{
-	  	
+	  	for(int i=0;i<lhs_n.length;i++)
+	  	{
+	  		lhs_n[i]+=local_lhs[i];
+	  	}
 	}
 	
 	//更新rhs_g
 	public synchronized void add_local_rhs(double local_rhs)
 	{
-	  	
+	  	rhs_g+=local_rhs;
 	}
 	
 	public synchronized void update_local_mostVoilated(LABEL[] local_mostviolated)
 	{
-		
+		for(int i=0;i<most_violated_g.length;i++)
+		{
+			most_violated_g[i]=local_mostviolated[i];
+		}
 	}
 	
 	public synchronized void add_local_argmax_count(double argmax_count)
 	{
-	  	
+		argmax_count_g+=argmax_count;
 	}
 	
 	private class MostViolated implements Runnable{
@@ -1725,6 +1779,7 @@ public class svm_struct_learn {
 		private STRUCT_LEARN_PARM sparm;
 		private int startIndex;
 		private int endIndex;
+		private int threadIndex=0;
 		
 		/*****output parameters***/
 		private double[] local_lhs_n;
@@ -1757,12 +1812,16 @@ public class svm_struct_learn {
 			add_local_rhs(local_rhs_g);
 			update_local_mostVoilated(mostViolatedLabels);
 			add_local_argmax_count(local_argmax_count_g);
-			
+			subThreadsFinished[threadIndex]=1;
 		}
 		
 		private void init()
 		{
-			local_lhs_n = new double[sm.sizePsi+1];	
+			local_lhs_n = new double[sm.sizePsi+1];
+			for(int i=0;i<local_lhs_n.length;i++)
+			{
+				local_lhs_n[i]=0;
+			}
 			mostViolatedLabels=new LABEL[n];
 		}
 		
@@ -2009,6 +2068,14 @@ public class svm_struct_learn {
 
 		public void setEndIndex(int endIndex) {
 			this.endIndex = endIndex;
+		}
+		
+		public int getThreadIndex() {
+			return threadIndex;
+		}
+
+		public void setThreadIndex(int threadIndex) {
+			this.threadIndex = threadIndex;
 		}
 	}
 
