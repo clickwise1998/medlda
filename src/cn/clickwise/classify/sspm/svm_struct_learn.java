@@ -31,10 +31,13 @@ public class svm_struct_learn {
 	public int argmax_count_g;
 	public CCACHE ccache_g;
 	public SVECTOR fydelta_g = null;
+	public LABEL[] most_violated_g=null;
 
 	public double[] alpha_g = null;
 	public int[] alphahist_g = null;
 	public int[] remove_g = null;
+	
+	public int[] subThreadsFinished;
 
 	private static Logger logger = Logger.getLogger(svm_struct_learn.class);
 	
@@ -838,26 +841,23 @@ public class svm_struct_learn {
 				rt_total += Math.max(svm_common.get_runtime() - rt1, 0);
 
 				double rtPrepareStart=svm_common.get_runtime();
+				most_violated_g=new LABEL[n];
 				
+				/*
 				for (i = 0; i < n; i++) {
 					rt1 = svm_common.get_runtime();
 
 					if (svm_struct_common.struct_verbosity >= 1)
 						sc.print_percent_progress(n, 10, ".");
 				
-					/*
-					 * compute most violating fydelta=fy-fybar and rhs for
-					 * example i
-					 */
+
 					////****medlda add ybar return value************
 					LABEL ybar=find_most_violated_constraint(ex[i], fycache[i], n, sm,sparm);
-					//logger.info("ybar label is :"+ybar.class_index);
+					
 					//***************medlda***********************
 					vecLabel[i] = ybar.class_index - 1;
-					//********************************************
-					
-					
-					/* add current fy-fybar to lhs of constraint */
+					//********************************************					
+					// add current fy-fybar to lhs of constraint 
 					if (kparm.kernel_type == svm_common.LINEAR) {
 						logger.info("kernel type: is linear 1226");
 						svm_common.add_list_n_ns(lhs_n, fydelta_g, 1.0);
@@ -865,12 +865,94 @@ public class svm_struct_learn {
 						svm_common.append_svector_list(fydelta_g, lhs_g);
 						lhs_g = fydelta_g;
 					}
-					rhs_g += rhs_i_g; /* add loss to rhs */
+					rhs_g += rhs_i_g; 
 
 					rt_total += Math.max(svm_common.get_runtime() - rt1, 0);
 
-				} /* end of example loop */
-
+				} 
+                
+				*/
+				
+				int threadNum=3;
+				int batNum=(int)((double)n/(double)threadNum);
+				int currentStartIndex=0;
+				int currentEndIndex=0;
+				subThreadsFinished=new int[threadNum];
+				for(int th=0;th<threadNum;th++)
+				{
+					subThreadsFinished[th]=0;
+				}
+				MostViolated[] mvs=new MostViolated[threadNum];
+				for(int th=0;th<threadNum;th++)
+				{
+					mvs[th]=new MostViolated();
+					mvs[th].setEx(ex);
+					mvs[th].setFycache(fycache);
+					mvs[th].setN(n);
+					mvs[th].setSm(sm);
+					mvs[th].setSparm(sparm);
+					mvs[th].setStartIndex(currentStartIndex);
+					mvs[th].setLocalnumIt(numIt);
+					currentEndIndex=currentStartIndex+batNum;
+					mvs[th].setEndIndex(currentEndIndex);
+					mvs[th].setThreadIndex(th);
+					currentStartIndex=currentEndIndex;
+					Thread t=new Thread(mvs[th]);
+					t.start();
+				}
+				
+				boolean allSubFinish=false;
+				while(allSubFinish==false)
+				{
+					System.out.println("waiting all subthreas stop");
+					try{
+					Thread.sleep(1000);
+					}
+					catch(Exception e)
+					{
+						e.printStackTrace();
+					}
+					allSubFinish=true;
+					for(int th=0;th<threadNum;th++)
+					{
+						if(subThreadsFinished[th]==0)
+						{
+							allSubFinish=false;
+						}
+					}
+				}
+				
+				for(int tk=0;tk<most_violated_g.length;tk++)
+				{
+					most_violated_g[tk]=new LABEL();
+				}
+				//update 
+				for(int th=0;th<threadNum;th++)
+				{
+				 	for(int tk=0;tk<lhs_n.length;tk++)
+				  	{
+				  		lhs_n[tk]+=(mvs[th].getLocal_lhs_n()[tk]);
+				  	}
+	
+				 	rhs_g+=mvs[th].getLocal_rhs_g();
+				 	for(int tk=0;tk<most_violated_g.length;tk++)
+					{
+				 		if((mvs[th].getViolatedValid()[tk])==true)
+				 		{
+						   most_violated_g[tk]=mvs[th].getMostViolatedLabels()[tk];
+				 		}
+					}
+				 	argmax_count_g+=(mvs[th].getLocal_argmax_count_g());
+				 	mvs[th].des();
+				}
+				
+				for(int ti=0;ti<n;ti++)
+				{
+					vecLabel[ti] = most_violated_g[ti].class_index - 1;
+				}
+				System.out.println("all has finished find most violated");
+				
+				
 				double rtPrepareEnd=svm_common.get_runtime();
 				logger.info("numIt:"+numIt+" prepareTime:"+((rtPrepareEnd-rtPrepareStart)/100));
 				
@@ -1692,6 +1774,44 @@ public class svm_struct_learn {
 		// logger.info("end update_constraint_cache_for_model");
 	}
 	
+	//更新 lhs_n
+	public synchronized void add_local_lhs(double[] local_lhs)
+	{
+		System.out.println("in add_local_lhs");
+	  	for(int i=0;i<lhs_n.length;i++)
+	  	{
+	  		lhs_n[i]+=local_lhs[i];
+	  	}
+	}
+	
+	//更新rhs_g
+	public synchronized void add_local_rhs(double local_rhs)
+	{
+		System.out.println("in add_local_rhs");
+	  	rhs_g+=local_rhs;
+	}
+	
+	public synchronized void update_local_mostVoilated(LABEL[] local_mostviolated)
+	{
+		System.out.println("in update_local_mostVoilated");
+		for(int i=0;i<most_violated_g.length;i++)
+		{
+			most_violated_g[i]=local_mostviolated[i];
+		}
+	}
+	
+	public synchronized void add_local_argmax_count(double argmax_count)
+	{
+		System.out.println("in add_local_argmax_count");
+		argmax_count_g+=argmax_count;
+	}
+	
+	public synchronized void updateSubThreadsFinished(int threadIndex,int status)
+	{
+		System.out.println("thread "+threadIndex+" is setting status");
+		subThreadsFinished[threadIndex]=status;
+	}
+	
 	private class MostViolated implements Runnable{
 
 		/****input parameters****/
@@ -1700,36 +1820,98 @@ public class svm_struct_learn {
 		private int n;
 		private STRUCTMODEL sm;
 		private STRUCT_LEARN_PARM sparm;
+		private int startIndex;
+		private int endIndex;
+		private int threadIndex=0;
+		private int localnumIt;
 		
 		/*****output parameters***/
 		private double[] local_lhs_n;
-		private double local_rhs_g;
-		private double local_rt_psi_g;
-		private double local_rt_viol_g;
-		private int local_argmax_count_g;
+		private double local_rhs_g=0;
+		//private double local_rt_psi_g;
+		//private double local_rt_viol_g;
+		private int local_argmax_count_g=0;
 		
 		/*****local parameters************/
-		private double local_rhs_i_g;
-		private SVECTOR local_fydelta_g;
-		private svm_struct_api local_ssa;
-
+		private double local_rhs_i_g=0;
+		private SVECTOR local_fydelta_g=null;
+		private svm_struct_api local_ssa=null;
+		private LABEL[] mostViolatedLabels=null;
+		private boolean[] violatedValid=null;
+		
 		
 		@Override
 		public void run() {
-			// TODO Auto-generated method stub
+			init();
+		   	
+			for(int i=startIndex;i<endIndex;i++)
+			{
+				LABEL ybar=find_most_violated_constraint_local(ex[i], fycache[i], n, sm,sparm);
+				add_list_n_ns(local_lhs_n, local_fydelta_g, 1.0);
+				local_rhs_g+=local_rhs_i_g;	
+				mostViolatedLabels[i]=ybar;
+				violatedValid[i]=true;
+			}
+			
+			System.out.println("numIt:"+localnumIt+" thread:"+threadIndex+" has finished find most violated");
+			//add_local_lhs(local_lhs_n);
+			//add_local_rhs(local_rhs_g);
+			//update_local_mostVoilated(mostViolatedLabels);
+			//add_local_argmax_count(local_argmax_count_g);
+			//subThreadsFinished[threadIndex]=1;
+			updateSubThreadsFinished(threadIndex,1);
+			//des();
 			
 		}
 		
 		private void init()
 		{
-			
+			local_lhs_n = new double[sm.sizePsi+1];
+			for(int i=0;i<local_lhs_n.length;i++)
+			{
+				local_lhs_n[i]=0;
+			}
+			mostViolatedLabels=new LABEL[n];
+			violatedValid=new boolean[n];
+			for(int i=0;i<n;i++)
+			{
+				violatedValid[i]=false;
+			}
+			local_ssa=svm_struct_api_factory.getSvmStructApi();
 		}
 		
+		public void des()
+		{
+			local_lhs_n=null;
+			mostViolatedLabels=null;
+			local_ssa=null;
+		}
+		
+		private void add_list_n_ns(double[] vec_n, SVECTOR vec_s,
+				double faktor) {
+			SVECTOR f;
+			for (f = vec_s; f != null; f = f.next)
+				add_vector_ns(vec_n, f, f.factor * faktor);
+		}
+		
+		private  void add_vector_ns(double[] vec_n, SVECTOR vec_s,
+				double faktor) {
+			WORD[] ai;
+			ai = vec_s.words;
+			for (int i = 0; i < ai.length; i++) {
+				if (ai[i] != null) {
+					vec_n[ai[i].wnum] += (faktor * ai[i].weight);
+					//vec_n[ai[i].wnum]=WeightsUpdate.sum(vec_n[ai[i].wnum], WeightsUpdate.mul(faktor, ai[i].weight));
+				} else {
+					continue;
+				}
+			}
+		}
 		/*
 		 * returns fydelta=fy-fybar and rhs scalar value that correspond to the most
 		 * violated constraint for example ex
 		 */
-		private LABEL find_most_violated_constraint(EXAMPLE ex, SVECTOR fycached,
+		private LABEL find_most_violated_constraint_local(EXAMPLE ex, SVECTOR fycached,
 				int n, STRUCTMODEL sm, STRUCT_LEARN_PARM sparm)
 		{
 			double rt2 = 0;
@@ -1737,16 +1919,13 @@ public class svm_struct_learn {
 			SVECTOR fybar, fy;
 			double factor, lossval;
 			
-			if (svm_struct_common.struct_verbosity >= 2)
-				rt2 = get_runtime();
-			local_argmax_count_g++;
+			setLocal_argmax_count_g(getLocal_argmax_count_g() + 1);
 			if (sparm.loss_type == SLACK_RESCALING) {
 				ybar = local_ssa.find_most_violated_constraint_slackrescaling(ex.x, ex.y, sm, sparm);
 			} else {
 				ybar = local_ssa.find_most_violated_constraint_marginrescaling(ex.x, ex.y,sm, sparm);
 			}
-			if (svm_struct_common.struct_verbosity >= 2)
-				local_rt_viol_g += Math.max(svm_common.get_runtime() - rt2, 0);
+			
 
 
 			/**** get psi(x,y) and psi(x,ybar) ****/
@@ -1758,9 +1937,7 @@ public class svm_struct_learn {
 				fy = ssa.psi(ex.x, ex.y, sm, sparm);
 			// logger.info("ybar label info:"+ybar.class_index);
 			fybar = ssa.psi(ex.x, ybar, sm, sparm);
-			// logger.info("fydelta find yeah:"+fybar.toString());
-			if (svm_struct_common.struct_verbosity >= 2)
-				local_rt_psi_g += Math.max(get_runtime() - rt2, 0);
+	
 			lossval = ssa.loss(ex.y, ybar, sparm);
 
 			/**** scale feature vector and margin by loss ****/
@@ -1773,9 +1950,12 @@ public class svm_struct_learn {
 			mult_svector_list(fybar, -factor);
 			append_svector_list(fybar, fy); /* compute fy-fybar */
 
-			local_fydelta_g = fybar;
-			local_rhs_i_g = lossval / (double)n;
+			setLocal_fydelta_g(fybar);
+			setLocal_rhs_i_g(lossval / (double)n);
 
+			fy=null;
+			fybar=null;
+			
 			return ybar;
 		}
 		
@@ -1847,6 +2027,133 @@ public class svm_struct_learn {
 		{
 			long ctime=System.currentTimeMillis();
 			return ctime;
+		}
+
+		public EXAMPLE[] getEx() {
+			return ex;
+		}
+
+		public void setEx(EXAMPLE[] ex) {
+			this.ex = ex;
+		}
+
+		public SVECTOR[] getFycache() {
+			return fycache;
+		}
+
+		public void setFycache(SVECTOR[] fycache) {
+			this.fycache = fycache;
+		}
+
+		public int getN() {
+			return n;
+		}
+
+		public void setN(int n) {
+			this.n = n;
+		}
+
+		public STRUCTMODEL getSm() {
+			return sm;
+		}
+
+		public void setSm(STRUCTMODEL sm) {
+			this.sm = sm;
+		}
+
+		public STRUCT_LEARN_PARM getSparm() {
+			return sparm;
+		}
+
+		public void setSparm(STRUCT_LEARN_PARM sparm) {
+			this.sparm = sparm;
+		}
+
+		public double[] getLocal_lhs_n() {
+			return local_lhs_n;
+		}
+
+		public void setLocal_lhs_n(double[] local_lhs_n) {
+			this.local_lhs_n = local_lhs_n;
+		}
+
+		public double getLocal_rhs_g() {
+			return local_rhs_g;
+		}
+
+		public void setLocal_rhs_g(double local_rhs_g) {
+			this.local_rhs_g = local_rhs_g;
+		}
+
+
+
+		public int getLocal_argmax_count_g() {
+			return local_argmax_count_g;
+		}
+
+		public void setLocal_argmax_count_g(int local_argmax_count_g) {
+			this.local_argmax_count_g = local_argmax_count_g;
+		}
+
+		public double getLocal_rhs_i_g() {
+			return local_rhs_i_g;
+		}
+
+		public void setLocal_rhs_i_g(double local_rhs_i_g) {
+			this.local_rhs_i_g = local_rhs_i_g;
+		}
+
+		public SVECTOR getLocal_fydelta_g() {
+			return local_fydelta_g;
+		}
+
+		public void setLocal_fydelta_g(SVECTOR local_fydelta_g) {
+			this.local_fydelta_g = local_fydelta_g;
+		}
+
+		public LABEL[] getMostViolatedLabels() {
+			return mostViolatedLabels;
+		}
+
+		public void setMostViolatedLabels(LABEL[] mostViolatedLabels) {
+			this.mostViolatedLabels = mostViolatedLabels;
+		}
+		
+		public boolean[] getViolatedValid()
+		{
+			return violatedValid;
+		}
+
+		public int getStartIndex() {
+			return startIndex;
+		}
+
+		public void setStartIndex(int startIndex) {
+			this.startIndex = startIndex;
+		}
+
+		public int getEndIndex() {
+			return endIndex;
+		}
+
+		public void setEndIndex(int endIndex) {
+			this.endIndex = endIndex;
+		}
+		
+		public int getThreadIndex() {
+			return threadIndex;
+		}
+
+		public void setThreadIndex(int threadIndex) {
+			this.threadIndex = threadIndex;
+		}
+
+		public int getLocalnumIt() {
+			return localnumIt;
+		}
+
+		public void setLocalnumIt(int localnumIt) {
+			this.localnumIt = localnumIt;
 		}
 	}
 

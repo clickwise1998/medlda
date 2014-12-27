@@ -164,14 +164,14 @@ public class svm_struct_classify {
 		
 		//if((no_accuracy==0)&&(svm_struct_common.struct_verbosity>=1))
 		//{
-			logger.info("Average loss on test set:"+(float)avgloss);
-			logger.info("Zero/one-error on test set "+(float)100.0*((double)incorrect/(double)(correct+incorrect))+"("+correct+" correct, "+incorrect+" incorrect,"+testsample.n+", total");
+		logger.info("Average loss on test set:"+(float)avgloss);
+		logger.info("Zero/one-error on test set "+(float)100.0*((double)incorrect/(double)(correct+incorrect))+"("+correct+" correct, "+incorrect+" incorrect,"+testsample.n+", total");
 		//}
-		    if(svmconfig.model_type==2)
-			{
-		    	logger.info("first Zero/one-error on test set "+(float)100.0*((double)first_incorrect/(double)(first_correct+first_incorrect))+"("+first_correct+" correct, "+first_incorrect+" incorrect,"+testsample.n+", total");
-		    	logger.info("second Zero/one-error on test set "+(float)100.0*((double)second_incorrect/(double)(second_correct+second_incorrect))+"("+second_correct+" correct, "+second_incorrect+" incorrect,"+testsample.n+", total");
-			}
+		if(svmconfig.model_type==2)
+		{
+		    logger.info("first Zero/one-error on test set "+(float)100.0*((double)first_incorrect/(double)(first_correct+first_incorrect))+"("+first_correct+" correct, "+first_incorrect+" incorrect,"+testsample.n+", total");
+		    logger.info("second Zero/one-error on test set "+(float)100.0*((double)second_incorrect/(double)(second_correct+second_incorrect))+"("+second_correct+" correct, "+second_incorrect+" incorrect,"+testsample.n+", total");
+		}
 		svm_struct_api.print_struct_testing_stats(testsample, model, sparm, teststats);
 		
 	}
@@ -298,7 +298,7 @@ public class svm_struct_classify {
 		struct_verbosity=1;
 		struct_parm.custom_argc=0;
 		
-		  for(i=1;(i<argc) &&((argv[i].charAt(0)) == '-');i++) {
+		for(i=1;(i<argc) &&((argv[i].charAt(0)) == '-');i++) {
 			    switch ((argv[i].charAt(1))) 
 			      { 
 			      case 'h': print_help(); System.exit(0);
