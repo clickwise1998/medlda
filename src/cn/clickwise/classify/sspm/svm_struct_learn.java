@@ -31,6 +31,7 @@ public class svm_struct_learn {
 	public int argmax_count_g;
 	public CCACHE ccache_g;
 	public SVECTOR fydelta_g = null;
+	public LABEL[] most_violated_g=null;
 
 	public double[] alpha_g = null;
 	public int[] alphahist_g = null;
@@ -1692,6 +1693,28 @@ public class svm_struct_learn {
 		// logger.info("end update_constraint_cache_for_model");
 	}
 	
+	//更新 lhs_n
+	public synchronized void add_local_lhs(double[] local_lhs)
+	{
+	  	
+	}
+	
+	//更新rhs_g
+	public synchronized void add_local_rhs(double local_rhs)
+	{
+	  	
+	}
+	
+	public synchronized void update_local_mostVoilated(LABEL[] local_mostviolated)
+	{
+		
+	}
+	
+	public synchronized void add_local_argmax_count(double argmax_count)
+	{
+	  	
+	}
+	
 	private class MostViolated implements Runnable{
 
 		/****input parameters****/
@@ -1700,13 +1723,15 @@ public class svm_struct_learn {
 		private int n;
 		private STRUCTMODEL sm;
 		private STRUCT_LEARN_PARM sparm;
+		private int startIndex;
+		private int endIndex;
 		
 		/*****output parameters***/
 		private double[] local_lhs_n;
-		private double local_rhs_g;
-		private double local_rt_psi_g;
-		private double local_rt_viol_g;
-		private int local_argmax_count_g;
+		private double local_rhs_g=0;
+		//private double local_rt_psi_g;
+		//private double local_rt_viol_g;
+		private int local_argmax_count_g=0;
 		
 		/*****local parameters************/
 		private double local_rhs_i_g=0;
@@ -1715,22 +1740,57 @@ public class svm_struct_learn {
 		private LABEL[] mostViolatedLabels=null;
 
 		
+		
 		@Override
 		public void run() {
-			// TODO Auto-generated method stub
+			init();
+		   	
+			for(int i=startIndex;i<endIndex;i++)
+			{
+				LABEL ybar=find_most_violated_constraint_local(ex[i], fycache[i], n, sm,sparm);
+				add_list_n_ns(local_lhs_n, local_fydelta_g, 1.0);
+				local_rhs_g+=local_rhs_i_g;	
+				mostViolatedLabels[i]=ybar;
+			}
+			
+			add_local_lhs(local_lhs_n);
+			add_local_rhs(local_rhs_g);
+			update_local_mostVoilated(mostViolatedLabels);
+			add_local_argmax_count(local_argmax_count_g);
 			
 		}
 		
 		private void init()
 		{
-			
+			local_lhs_n = new double[sm.sizePsi+1];	
+			mostViolatedLabels=new LABEL[n];
 		}
 		
+		private void add_list_n_ns(double[] vec_n, SVECTOR vec_s,
+				double faktor) {
+			SVECTOR f;
+			for (f = vec_s; f != null; f = f.next)
+				add_vector_ns(vec_n, f, f.factor * faktor);
+		}
+		
+		private  void add_vector_ns(double[] vec_n, SVECTOR vec_s,
+				double faktor) {
+			WORD[] ai;
+			ai = vec_s.words;
+			for (int i = 0; i < ai.length; i++) {
+				if (ai[i] != null) {
+					vec_n[ai[i].wnum] += (faktor * ai[i].weight);
+					//vec_n[ai[i].wnum]=WeightsUpdate.sum(vec_n[ai[i].wnum], WeightsUpdate.mul(faktor, ai[i].weight));
+				} else {
+					continue;
+				}
+			}
+		}
 		/*
 		 * returns fydelta=fy-fybar and rhs scalar value that correspond to the most
 		 * violated constraint for example ex
 		 */
-		private LABEL find_most_violated_constraint(EXAMPLE ex, SVECTOR fycached,
+		private LABEL find_most_violated_constraint_local(EXAMPLE ex, SVECTOR fycached,
 				int n, STRUCTMODEL sm, STRUCT_LEARN_PARM sparm)
 		{
 			double rt2 = 0;
@@ -1738,16 +1798,13 @@ public class svm_struct_learn {
 			SVECTOR fybar, fy;
 			double factor, lossval;
 			
-			if (svm_struct_common.struct_verbosity >= 2)
-				rt2 = get_runtime();
 			setLocal_argmax_count_g(getLocal_argmax_count_g() + 1);
 			if (sparm.loss_type == SLACK_RESCALING) {
 				ybar = local_ssa.find_most_violated_constraint_slackrescaling(ex.x, ex.y, sm, sparm);
 			} else {
 				ybar = local_ssa.find_most_violated_constraint_marginrescaling(ex.x, ex.y,sm, sparm);
 			}
-			if (svm_struct_common.struct_verbosity >= 2)
-				setLocal_rt_viol_g(getLocal_rt_viol_g() + Math.max(svm_common.get_runtime() - rt2, 0));
+			
 
 
 			/**** get psi(x,y) and psi(x,ybar) ****/
@@ -1759,9 +1816,7 @@ public class svm_struct_learn {
 				fy = ssa.psi(ex.x, ex.y, sm, sparm);
 			// logger.info("ybar label info:"+ybar.class_index);
 			fybar = ssa.psi(ex.x, ybar, sm, sparm);
-			// logger.info("fydelta find yeah:"+fybar.toString());
-			if (svm_struct_common.struct_verbosity >= 2)
-				setLocal_rt_psi_g(getLocal_rt_psi_g() + Math.max(get_runtime() - rt2, 0));
+	
 			lossval = ssa.loss(ex.y, ybar, sparm);
 
 			/**** scale feature vector and margin by loss ****/
@@ -1906,21 +1961,7 @@ public class svm_struct_learn {
 			this.local_rhs_g = local_rhs_g;
 		}
 
-		public double getLocal_rt_psi_g() {
-			return local_rt_psi_g;
-		}
 
-		public void setLocal_rt_psi_g(double local_rt_psi_g) {
-			this.local_rt_psi_g = local_rt_psi_g;
-		}
-
-		public double getLocal_rt_viol_g() {
-			return local_rt_viol_g;
-		}
-
-		public void setLocal_rt_viol_g(double local_rt_viol_g) {
-			this.local_rt_viol_g = local_rt_viol_g;
-		}
 
 		public int getLocal_argmax_count_g() {
 			return local_argmax_count_g;
@@ -1952,6 +1993,22 @@ public class svm_struct_learn {
 
 		public void setMostViolatedLabels(LABEL[] mostViolatedLabels) {
 			this.mostViolatedLabels = mostViolatedLabels;
+		}
+
+		public int getStartIndex() {
+			return startIndex;
+		}
+
+		public void setStartIndex(int startIndex) {
+			this.startIndex = startIndex;
+		}
+
+		public int getEndIndex() {
+			return endIndex;
+		}
+
+		public void setEndIndex(int endIndex) {
+			this.endIndex = endIndex;
 		}
 	}
 
