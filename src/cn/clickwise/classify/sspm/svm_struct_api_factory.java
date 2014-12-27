@@ -4,7 +4,7 @@ public class svm_struct_api_factory {
 
 	public static svm_struct_api getSvmStructApi()
 	{
-		System.out.println("svmconfig.model_type:"+svmconfig.model_type);
+		//System.out.println("svmconfig.model_type:"+svmconfig.model_type);
 		if((svmconfig.model_type==0)||(svmconfig.model_type==1))
 		{
 		  return new svm_multiclass();

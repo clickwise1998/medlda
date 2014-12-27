@@ -752,29 +752,7 @@ public class svm_struct_learn {
 							i = randmapping[uptr];
 						else
 							i = uptr;
-						/*
-						 * find most violating fydelta=fy-fybar and rhs for
-						 * example i
-						 */
-						/*
-						 * String winfo=""; if(ex[i].x.doc!=null) { for(int
-						 * l=0;l<ex[i].x.doc.fvec.words.length;l++) {
-						 * winfo=winfo
-						 * +ex[i].x.doc.fvec.words[l].wnum+":"+ex[i].x
-						 * .doc.fvec.words[l].weight+" "; }
-						 * logger.info("winfoii["+i+"]:"+winfo); }
-						 */
-						/*
-						 * if(fydelta!=null) { winfo=""; for(int
-						 * l=0;l<fydelta.words.length;l++) {
-						 * winfo=winfo+fydelta.
-						 * words[l].wnum+":"+fydelta.words[l].weight+" "; }
-						 * logger.info("winfoiiii["+i+"]:"+winfo);
-						 * 
-						 * }
-						 */
-						// logger.info("call find find_most_violated_constraint and i="
-						// + i);
+					
 					
 						///*********medlda add ybar return value**************************
 						LABEL yybar=find_most_violated_constraint(ex[i], fycache[i], n, sm,sparm);
@@ -873,7 +851,7 @@ public class svm_struct_learn {
                 
 				*/
 				
-				int threadNum=3;
+				int threadNum=10;
 				int batNum=(int)((double)n/(double)threadNum);
 				int currentStartIndex=0;
 				int currentEndIndex=0;
@@ -904,7 +882,7 @@ public class svm_struct_learn {
 				boolean allSubFinish=false;
 				while(allSubFinish==false)
 				{
-					System.out.println("waiting all subthreas stop");
+					//System.out.println("waiting all subthreas stop");
 					try{
 					Thread.sleep(1000);
 					}
@@ -1853,7 +1831,7 @@ public class svm_struct_learn {
 				violatedValid[i]=true;
 			}
 			
-			System.out.println("numIt:"+localnumIt+" thread:"+threadIndex+" has finished find most violated");
+			//System.out.println("numIt:"+localnumIt+" thread:"+threadIndex+" has finished find most violated");
 			//add_local_lhs(local_lhs_n);
 			//add_local_rhs(local_rhs_g);
 			//update_local_mostVoilated(mostViolatedLabels);
@@ -1885,6 +1863,7 @@ public class svm_struct_learn {
 			local_lhs_n=null;
 			mostViolatedLabels=null;
 			local_ssa=null;
+			violatedValid=null;
 		}
 		
 		private void add_list_n_ns(double[] vec_n, SVECTOR vec_s,
