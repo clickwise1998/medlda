@@ -125,6 +125,7 @@ public class svm_struct_tb extends svm_struct_api {
 		SVECTOR vec = svm_common.create_svector_shallow(fvec.words, userdefined, x.doc.fvec.factor);
 		// logger.info("fvec psi:"+fvec.toString());
 		//vec.kernel_id = y.class_index;
+		fvec=null;
 		return vec;
 	}
 
@@ -182,18 +183,12 @@ public class svm_struct_tb extends svm_struct_api {
 				first = 0;
 			}
 		}
-		if (bestfirst == -1|bestsecond == -1||bestthird == -1)
-			logger.debug("ERROR: Only one class\n");
-		//logger.info("bestclass is "+bestclass);
-		//ybar.class_index = bestclass;
+	
 		ybar.first_class = bestfirst;
 		ybar.second_class = bestsecond;
 		ybar.third_class = bestthird;
 		
-		// logger.info("ybar_class_index:"+ybar.class_index);
-		if (svm_struct_common.struct_verbosity >= 3) {
-			logger.info("[%" + bestfirst +"_"+bestsecond+"_"+bestthird+ ":" + bestscore + "] ");
-		}
+	    doc=null;
 		//logger.info("bestscore:"+bestscore);
 		return (ybar);
 	}

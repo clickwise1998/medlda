@@ -922,6 +922,7 @@ public class svm_struct_learn {
 					}
 				 	argmax_count_g+=(mvs[th].getLocal_argmax_count_g());
 				 	mvs[th].des();
+				 	mvs[th]=null;
 				}
 				
 				for(int ti=0;ti<n;ti++)
