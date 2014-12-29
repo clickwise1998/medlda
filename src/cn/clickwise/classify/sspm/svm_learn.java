@@ -994,6 +994,9 @@ public class svm_learn {
 			}
 		}
 		
+		/********free memory**********/
+		f=null;
+		/****************************/
 		/*
 		String lin_str = "";
 		for (int li = 0; li < lin.length; li++) {
@@ -1023,6 +1026,12 @@ public class svm_learn {
 					+ sc.kernel(kernel_parm, nulldoc, nulldoc));
 		}
 
+		/********free memory**********/
+		nulldoc=null;
+		nullword[0]=null;
+		nullword=null;
+		/****************************/
+		
 		return (avgxlen / totdoc);
 	}
 
@@ -1191,28 +1200,8 @@ public class svm_learn {
 			model.b = 0;
 			b_calculated = 1;
 		}
-		String supvec_str = "";
-		String alpha_str = "";
-		String index_str = "";
-		String svm_cost_str = "";
-		// logger.info("learn_parm.sharedslack is "+learn_parm.sharedslack);
-		// logger.info("learn_parm.epsilon_a "+learn_parm.epsilon_a);
-		// logger.info("learn_parm.eps "+ learn_parm.eps);
-		/*
-		 * for(int k=0;k<100;k++) {
-		 * 
-		 * alpha_str+=(k+":"+model.alpha[k]+" ");
-		 * index_str+=(k+":"+model.index[k]+" "); //
-		 * svm_cost_str+=(k+":"+learn_parm.svm_cost[k]+" "); }
-		 */
-		// logger.info("alpha_str_before:"+alpha_str);
-		// logger.info("index_str_before:"+index_str);
-		// logger.info("svm_cost_str_before:"+svm_cost_str);
 
-		supvec_str = "";
-		alpha_str = "";
-		index_str = "";
-		svm_cost_str = "";
+
 
 		for (ii = 0; (i = working2dnum[ii]) >= 0; ii++) {
 			if ((a_old[i] > 0) && (a[i] == 0)) {
@@ -1256,24 +1245,10 @@ public class svm_learn {
 				b_calculated = 1;
 			}
 
-			/*
-			if(model.supvec[i]!=null)
-			{
-			 supvec_str += (ii + ":" + i + ":" + model.supvec[i].lvecString() + " ");
-			}
-			
-			alpha_str += (ii + ":" + i + ":" + model.alpha[i] + " ");
-			index_str += (ii + ":" + i + ":" + model.index[i] + " ");
-			svm_cost_str += (ii + ":" + i + ":" + learn_parm.svm_cost[i] + " ");
-            */
+
 		}
 
-		// logger.info("supvec_str:"+supvec_str);
-		// logger.info("alpha_str:"+alpha_str);
-		// logger.info("index_str:"+index_str);
-		// logger.info("svm_cost_str:"+svm_cost_str);
-		// logger.info("model.sv_num:"+model.sv_num);
-		// logger.info("model.at_upper_bound:"+model.at_upper_bound);
+
 
 		/**
 		 * No alpha in the working set not at bounds, so b was not calculated in
@@ -3360,15 +3335,7 @@ public class svm_learn {
 							learn_parm.svm_maxqpsize - choosenum) >= 4)
 							&& (kernel_parm.kernel_type != svm_common.LINEAR)) {
 						/* select part of the working set from cache */
-						//logger.info("minl select");
-                        /*
-						String sc_str = "";
-						for (int ci = 0; ci < totdoc; ci++) {
-							sc_str += (ci + ":" + selcrit[ci] + " ");
-						}
 
-						logger.info("sc_str:" + sc_str);
-                        */
 						
 						already_chosen = select_next_qp_subproblem_grad(label,
 								unlabeled, a, lin, c, totdoc, (int) (Math.min(
