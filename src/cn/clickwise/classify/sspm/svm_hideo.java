@@ -686,95 +686,6 @@ public class svm_hideo {
 		}
 
 		if ((changed == 0) || (n_indep > 1)) {
-
-			/*
-			logger.info("n_indep:" + n_indep);
-			logger.info("m:" + m);
-			logger.info("precision:" + precision);
-			logger.info("epsilon_crit:" + epsilon_crit);
-			logger.info("maxiter:" + maxiter);
-
-			String g_new_str = "";
-			for (int p = 0; p < n * n; p++) {
-				g_new_str += (p + ":" + g_new[p] + " ");
-			}
-			logger.info("g_new_str:" + g_new_str);
-
-			String g0_new_str = "";
-			for (int p = 0; p < n; p++) {
-				g0_new_str += (p + ":" + g0_new[p] + " ");
-			}
-			logger.info("g0_new_str:" + g0_new_str);
-
-			String ce_new_str = "";
-			for (int p = 0; p < n; p++) {
-				ce_new_str += (p + ":" + ce_new[p] + " ");
-			}
-			logger.info("ce_new_str:" + ce_new_str);
-
-			String ce0_new_str = "";
-			for (int p = 0; p < m; p++) {
-				ce0_new_str += (p + ":" + ce0_new[p] + " ");
-			}
-			logger.info("ce0_new_str:" + ce0_new_str);
-
-			String low_new_str = "";
-			for (int p = 0; p < n; p++) {
-				low_new_str += (p + ":" + low_new[p] + " ");
-			}
-			logger.info("low_new_str:" + low_new_str);
-
-			String up_new_str = "";
-			for (int p = 0; p < n; p++) {
-				up_new_str += (p + ":" + up_new[p] + " ");
-			}
-			logger.info("up_new_str:" + up_new_str);
-
-			String primal_str = "";
-			for (int p = 0; p < n; p++) {
-				primal_str += (p + ":" + primal[p] + " ");
-			}
-			logger.info("primal_str:" + primal_str);
-
-			String d_str = "";
-			for (int p = 0; p < (n + m) * 2 * (n + m) * 2; p++) {
-				d_str += (p + ":" + d[p] + " ");
-			}
-			logger.info("d_str:" + d_str);
-
-			String d0_str = "";
-			for (int p = 0; p < (n + m) * 2; p++) {
-				d_str += (p + ":" + d0[p] + " ");
-			}
-			logger.info("d0_str:" + d0_str);
-
-			String ig_str = "";
-			for (int p = 0; p < n * n; p++) {
-				d_str += (p + ":" + ig[p] + " ");
-			}
-			logger.info("ig_str:" + ig_str);
-
-			String dual_str = "";
-			for (int p = 0; p < (n + m) * 2; p++) {
-				dual_str += (p + ":" + dual[p] + " ");
-			}
-			logger.info("dual_str:" + dual_str);
-
-			String dual_old_str = "";
-			for (int p = 0; p < (n + m) * 2; p++) {
-				dual_old_str += (p + ":" + dual_old[p] + " ");
-			}
-			logger.info("dual_old_str:" + dual_old_str);
-
-			String temp_str = "";
-			for (int p = 0; p < n; p++) {
-				temp_str += (p + ":" + temp[p] + " ");
-			}
-			logger.info("temp_str:" + temp_str);
-			logger.info("goal:" + goal);
-			*/
-			
-
 			result = solve_dual(n_indep, m, precision, epsilon_crit, maxiter,
 					g_new, g0_new, ce_new, ce0_new, low_new, up_new, primal, d,
 					d0, ig, dual, dual_old, temp, goal);
@@ -796,14 +707,34 @@ public class svm_hideo {
 		obj_before = calculate_qp_objective(n, g, g0, init);
 		obj_after = calculate_qp_objective(n, g, g0, primal);
 		progress = obj_before - obj_after;
-		// System.out.println("progress:"+progress);
-		//verbosity = 5;
-		/*
-		if (verbosity >= 3) {
-			logger.info("before(" + obj_before + ")...after(" + obj_after
-					+ ")...result_sd(" + result + ")...");
-		}
-        */
+
+		/***free memory*******
+		 
+		double[] d, d0, ig, dual_old, temp, start;
+		double[] g0_new, g_new, ce_new, ce0_new, low_new, up_new;
+		double add, t;
+		int result;
+
+		double obj_before, obj_after;
+		int b1, b2;
+		double g0_b1 = 0, g0_b2 = 0, ce0_b;
+
+		g0_new = new double[n];
+		d = new double[(n + m) * 2 * (n + m) * 2];
+		d0 = new double[(n + m) * 2];
+		ce_new = new double[n];
+		ce0_new = new double[m];
+		ig = new double[n * n];
+		dual_old = new double[(n + m) * 2];
+		low_new = new double[n];
+		up_new = new double[n];
+		start = new double[n];
+		g_new = new double[n * n];
+		temp = new double[n];
+		
+		 *****************/
+		
+
 		return ((int) result);
 	}
 
