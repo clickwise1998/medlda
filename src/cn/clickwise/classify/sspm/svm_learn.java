@@ -3659,6 +3659,7 @@ public class svm_learn {
 		  qp.opt_low=null;
 		  qp.opt_up=null;
 		}
+		qp=null;
 		
 		if(weights!=null)
 		{
