@@ -1865,6 +1865,10 @@ public class svm_struct_learn {
 			mostViolatedLabels=null;
 			local_ssa=null;
 			violatedValid=null;
+			/**********free memory******/
+			local_fydelta_g=null;
+			local_lhs_n=null;
+			/**************************/
 		}
 		
 		private void add_list_n_ns(double[] vec_n, SVECTOR vec_s,
@@ -1872,10 +1876,14 @@ public class svm_struct_learn {
 			SVECTOR f;
 			for (f = vec_s; f != null; f = f.next)
 				add_vector_ns(vec_n, f, f.factor * faktor);
+			/**********free memory******/
+			f=null;
+			/**************************/
 		}
 		
 		private  void add_vector_ns(double[] vec_n, SVECTOR vec_s,
 				double faktor) {
+			
 			WORD[] ai;
 			ai = vec_s.words;
 			for (int i = 0; i < ai.length; i++) {
@@ -1886,6 +1894,10 @@ public class svm_struct_learn {
 					continue;
 				}
 			}
+			
+			/**********free memory******/
+			ai=null;
+			/**************************/
 		}
 		/*
 		 * returns fydelta=fy-fybar and rhs scalar value that correspond to the most

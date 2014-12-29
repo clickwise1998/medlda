@@ -55,7 +55,7 @@ public class TBStatis {
 				list.add(m.getKey()+"\001"+m.getValue());
 			}
 			
-			String[] sort=SortStrArray.sort_List(list, 0, "str", 2, "\001");
+			String[] sort=SortStrArray.sort_List(list, 1, "dou", 2, "\001");
 			
 			for(int i=0;i<sort.length;i++)
 			{
@@ -72,6 +72,6 @@ public class TBStatis {
 	public static void main(String[] args)
 	{
 		TBStatis tbs=new TBStatis();
-		tbs.statis("tb/trainLog_1225/tb_goods_short_mod_rearch1224.txt", "tb/tb_goods_short_mod_rearch1217_2_count.txt");
+		tbs.statis("tb/tb_goods_short_mod_rearch1224.txt", "tb/tb_goods_short_mod_rearch1217_2_count.txt");
 	}
 }

@@ -65,7 +65,6 @@ public class svm_struct_main {
 		type = "c";
 
 		
-		
 		for (i = 0; (i < argc) && ((argv[i].charAt(0)) == '-'); i++) {
 			System.out.println("i:" + i + " " + argv[i]);
 			switch ((argv[i].charAt(1))) {
