@@ -19,5 +19,5 @@ cv_paramnum 10
 53.0
 57.0
 61.0
-train_file: metrics/mtrainsample.txt
-test_file: metrics/mtestsample.txt
+train_file: metrics_all/mtrainsample.txt
+test_file: metrics_all/mtestsample.txt
