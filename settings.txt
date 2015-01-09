@@ -21,4 +21,3 @@ cv_paramnum 10
 61.0
 train_file: mletrics_NN_NR_L5/mltrainSample_NN_NR_L5.txt
 test_file: mletrics_NN_NR_L5/mltestSample_NN_NR_L5.txt
-

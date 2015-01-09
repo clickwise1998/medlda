@@ -1,9 +1,12 @@
 package cn.clickwise.medlda;
 
 import java.io.File;
-
+/*
 import cn.clickwise.classify.svm_struct.svm_common;
 import cn.clickwise.classify.svm_struct.svmconfig;
+*/
+import cn.clickwise.classify.sspm.svm_common;
+import cn.clickwise.classify.sspm.svmconfig;
 import cn.clickwise.file.utils.FileCreateUtil;
 
 public class Main {
