@@ -11,6 +11,7 @@ import java.util.Vector;
 
 import org.apache.log4j.Logger;
 
+/*
 import cn.clickwise.classify.svm_struct.KERNEL_PARM;
 import cn.clickwise.classify.svm_struct.LEARN_PARM;
 import cn.clickwise.classify.svm_struct.SAMPLE;
@@ -21,6 +22,18 @@ import cn.clickwise.classify.svm_struct.svm_struct_api;
 import cn.clickwise.classify.svm_struct.svm_struct_common;
 import cn.clickwise.classify.svm_struct.svm_struct_learn;
 import cn.clickwise.classify.svm_struct.svmconfig;
+*/
+import cn.clickwise.classify.sspm.KERNEL_PARM;
+import cn.clickwise.classify.sspm.LEARN_PARM;
+import cn.clickwise.classify.sspm.SAMPLE;
+import cn.clickwise.classify.sspm.STRUCTMODEL;
+import cn.clickwise.classify.sspm.STRUCT_LEARN_PARM;
+import cn.clickwise.classify.sspm.svm_common;
+import cn.clickwise.classify.sspm.svm_struct_api;
+import cn.clickwise.classify.sspm.svm_struct_api_factory;
+import cn.clickwise.classify.sspm.svm_struct_common;
+import cn.clickwise.classify.sspm.svm_struct_learn;
+import cn.clickwise.classify.sspm.svmconfig;
 import cn.clickwise.math.random.SeedRandom;
 import cn.clickwise.str.basic.SSO;
 import cn.clickwise.time.utils.TimeOpera;
@@ -1308,7 +1321,8 @@ public class MedLDA {
 		String buff;
 		buff = ss.dir + "/Feature.txt";
 		outputLowDimData(buff, ss);
-		svm_struct_api ssa=new svm_struct_api();
+		//svm_struct_api ssa=new svm_struct_api();
+		svm_struct_api ssa=svm_struct_api_factory.getSvmStructApi();
 		/* read the training examples */
 		SAMPLE sample = ssa.read_struct_examples(buff, struct_parm);
 
