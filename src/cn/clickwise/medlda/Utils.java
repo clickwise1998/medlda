@@ -10,6 +10,8 @@ import cn.clickwise.sort.utils.SortStrArray;
 
 public class Utils {
 	
+	public static double upmul=0;
+	
 	private static Logger logger = Logger.getLogger(Utils.class);
 	
 	public static double log_sum(double log_a, double log_b)
@@ -224,7 +226,7 @@ public class Utils {
 	   */
 		
 		
-		int upthreshodIndex=(int)(sorted.length*(0.15));		
+		int upthreshodIndex=(int)(sorted.length*(upmul));		
 		double upthreshold=Double.parseDouble((sorted[upthreshodIndex].split("\001"))[1]);
 		System.out.println("upthreshold:"+upthreshold);
 		
