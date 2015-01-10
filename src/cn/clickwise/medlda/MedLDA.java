@@ -868,13 +868,16 @@ public class MedLDA {
 		
         double avgPrecision=0;
         double avgRecall=0;
+        double f;
         ecorpus.analysis();
-        avgPrecision=ecorpus.getAvgPrecsion();
+        avgPrecision=ecorpus.getAvgPrecision();
         avgRecall=ecorpus.getAvgRecall();
-        
+        f=ecorpus.getF();
+        logger.info("labelSize:" +  ecorpus.getLabelSize());
 		logger.info("Accuracy:" + dAcc);
 		logger.info("AvgPrecision:" + avgPrecision);
 		logger.info("AvgRecall:" + avgRecall);
+		logger.info("F:" + f);
 		PrintWriter fileptr = null;
 
 		try {

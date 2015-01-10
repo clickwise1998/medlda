@@ -4,6 +4,9 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
+import cn.clickwise.file.utils.FileToArray;
+import cn.clickwise.str.basic.SSO;
+
 /**
  * 待评估的文档集
  * @author lq
@@ -24,7 +27,9 @@ public class ECORPUS {
     
     private double[] recalls=null;	
     
+    private double precision;
     
+    private double recall;
 	
 	public void add(EDOC doc)
 	{
@@ -38,15 +43,16 @@ public class ECORPUS {
 		labelsPreRecFromConfus();
 	}
 	
-	public double getAvgPrecsion()
+	public double getAvgPrecision()
 	{
 		double sum=0;
 		for(int i=0;i<precisions.length;i++)
 		{
 			sum+=precisions[i];
 		}
+		precision=sum/(double)labelSize;
 		
-	    return sum/(double)labelSize;
+	    return precision;
 	    
 	}
 	
@@ -58,7 +64,13 @@ public class ECORPUS {
 			sum+=recalls[i];
 		}
 		
-	    return sum/(double)labelSize;
+		recall=sum/(double)labelSize;
+	    return recall;
+	}
+	
+	public double getF()
+	{
+		return 2*precision*recall/(precision+recall);
 	}
 	
 	public double[] getPrecisions()
@@ -95,11 +107,13 @@ public class ECORPUS {
 	   	ELABEL label=null;
 	   	ELABEL predLabel=null;
 	   	
+	   	int maxlabel=-1;
 	   	for(int i=0;i<corpus.size();i++)
 	   	{
 	   		edoc=corpus.get(i);
 	   	    label=edoc.getLabel();
 	   	    predLabel=edoc.getPredLabel();
+	   	    /*
 	   	    if(!(labelIndex.containsKey(label.getKey())))
 	   	    {
 	   	    	labelIndex.put(label.getKey(), index++);
@@ -109,9 +123,24 @@ public class ECORPUS {
 	   	    {
 	   	    	labelIndex.put(predLabel.getKey(), index++);
 	   	    } 
-	   	    
+	   	    */
+	   	    if(label.getLabel()>maxlabel)
+	   	    {
+	   	    	maxlabel=label.getLabel();
+	   	    }
+	   	   
+		    if(predLabel.getLabel()>maxlabel)
+	   	    {
+	   	    	maxlabel=predLabel.getLabel();
+	   	    }
+	   	        
 	   	}
 	
+	   	for(int i=1;i<=maxlabel;i++)
+	   	{
+	   		labelIndex.put(i+"", i-1);
+	   	}
+	   	
 	   	labelSize=labelIndex.size();
 	   	
 	   	System.out.println("labelSize:"+labelSize);
@@ -144,6 +173,7 @@ public class ECORPUS {
 	   	/*
 	   	for(int i=0;i<labelSize;i++)
 	   	{
+	   		System.out.print("i="+i+" ");
 	   		for(int j=0;j<labelSize;j++)
 	   		{
 	   			System.out.print(confus[i][j]+" ");
@@ -151,6 +181,7 @@ public class ECORPUS {
 	   		System.out.println();
 	   	}
 	   	*/
+	   	
 	}
 	
 	public void labelsPreRecFromConfus()
@@ -173,6 +204,7 @@ public class ECORPUS {
 			}
 		}
 		
+		
 		/*
 		for(int i=0;i<labelSize;i++)
 		{
@@ -186,8 +218,25 @@ public class ECORPUS {
 		
 		for(int i=0;i<labelSize;i++)
 		{
+		
 			precisions[i]=((double)confus[i][i])/((double)rowsum[i]);
 			recalls[i]=((double)confus[i][i])/((double)colsum[i]);
+			if(rowsum[i]==0)
+			{
+			    	if(confus[i][i]==0)
+			    	{
+			    		precisions[i]=1;
+			    	}
+			}
+			
+			if(colsum[i]==0)
+			{
+			    	if(confus[i][i]==0)
+			    	{
+			    		recalls[i]=1;
+			    	}
+			}
+			
 		}
 		
 		/*
@@ -196,6 +245,8 @@ public class ECORPUS {
 			System.out.println("i="+i+": pre "+precisions[i]+" rec "+recalls[i]);
 		}
 		*/
+		getAvgPrecision();
+		getAvgRecall();
 		
 	}
 	
@@ -226,7 +277,7 @@ public class ECORPUS {
 	public static void main(String[] args)
 	{
 		ECORPUS ecorpus=new ECORPUS();
-		
+		/*
 		//row 1
 		for(int i=0;i<69;i++)
 		{
@@ -442,6 +493,33 @@ public class ECORPUS {
 		{
 			ecorpus.add(new EDOC(7,7));
 		}
+		*/
+		try{
+		  String[] lines=FileToArray.fileToDimArr("temp/info.log");
+		  String line="";
+		  String[] tokens;
+		  for(int i=0;i<lines.length;i++)
+		  {
+			  line=lines[i];
+			  if(SSO.tioe(line))
+			  {
+				  continue;
+			  }
+			  line=line.trim();
+			  tokens=line.split("\\s+");
+			  if(tokens.length!=6)
+			  {
+				  continue;
+			  }
+			  ecorpus.add(new EDOC(tokens[4],tokens[5]));
+		  }
+		}
+		catch(Exception e)
+		{
+			e.printStackTrace();
+		}
+		
+		
 		ecorpus.analysis();
 		 
         double[] precisions=ecorpus.getPrecisions();
@@ -453,8 +531,9 @@ public class ECORPUS {
         	System.out.println("i="+i+" pre:"+precisions[i]+" rec:"+recalls[i]);
         }
 		*/
-        System.out.println("avgPre:"+ecorpus.getAvgPrecsion());
+        System.out.println("avgPre:"+ecorpus.getAvgPrecision());
         System.out.println("avgRec:"+ecorpus.getAvgRecall());
+        System.out.println("f:"+ecorpus.getF());
 	}
 		
 	

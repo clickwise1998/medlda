@@ -21,6 +21,12 @@ public class EDOC {
 		this.predLabel=new ELABEL(predLabel);
 	}
 
+	public EDOC(String label,String predLabel)
+	{
+		this.label=new ELABEL(Integer.parseInt(label));
+		this.predLabel=new ELABEL(Integer.parseInt(predLabel));
+	}
+	
 	public ELABEL getLabel() {
 		return label;
 	}
