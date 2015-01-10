@@ -228,6 +228,7 @@ public class Utils {
 		double upthreshold=0;
 		double lowthreshold=0;
 		
+		logger.info("true upmul:"+upmul);
 		if(isUp==true)
 		{
 		    int upthreshodIndex=(int)(sorted.length*(upmul));		
@@ -236,7 +237,7 @@ public class Utils {
 		}
 		else
 		{
-			int lowthreshodIndex=(int)(sorted.length*(0.5));
+			int lowthreshodIndex=(int)(sorted.length*(upmul));
 			lowthreshold=Double.parseDouble((sorted[lowthreshodIndex].split("\001"))[1]);
 	       	System.out.println("lowthreshold:"+lowthreshold);
 		}
