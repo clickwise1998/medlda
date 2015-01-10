@@ -114,11 +114,20 @@ public class Main {
 					 }
 					  
 				    double upmul=Double.parseDouble(args[k]);
+				    Utils.isUp=true;
 				    Utils.upmul=upmul;
 					MedLDA model=new MedLDA();
 					double dAcc = model.infer(args[2], c, param,"");
 					System.err.printf("Accuracy: %.3f\n", dAcc);
 					model=null;
+					
+				    Utils.isUp=false;
+				    Utils.upmul=1-upmul;
+				    model=new MedLDA();
+					dAcc = model.infer(args[2], c, param,"");
+					System.err.printf("Accuracy: %.3f\n", dAcc);
+					model=null;
+					
 				  }
 				  
 				}
