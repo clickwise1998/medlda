@@ -525,12 +525,12 @@ public class ECORPUS {
         double[] precisions=ecorpus.getPrecisions();
         double[] recalls=ecorpus.getRecalls();
        
-        /*
+        
         for(int i=0;i<precisions.length;i++)
         {
         	System.out.println("i="+i+" pre:"+precisions[i]+" rec:"+recalls[i]);
         }
-		*/
+		
         System.out.println("avgPre:"+ecorpus.getAvgPrecision());
         System.out.println("avgRec:"+ecorpus.getAvgRecall());
         System.out.println("f:"+ecorpus.getF());

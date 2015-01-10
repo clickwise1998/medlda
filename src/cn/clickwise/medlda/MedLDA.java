@@ -873,6 +873,9 @@ public class MedLDA {
         avgPrecision=ecorpus.getAvgPrecision();
         avgRecall=ecorpus.getAvgRecall();
         f=ecorpus.getF();
+        
+        logger.info("upmul:" +  Utils.upmul);
+        logger.info("isup:" +  Utils.isUp);
         logger.info("labelSize:" +  ecorpus.getLabelSize());
 		logger.info("Accuracy:" + dAcc);
 		logger.info("AvgPrecision:" + avgPrecision);
