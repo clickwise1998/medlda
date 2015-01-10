@@ -8,7 +8,7 @@
 #java -Xmx10000m -cp out/medlda.jar cn.clickwise.classify.sspm.svm_struct_classify example/test.txt example/model example/prediction
 
 
-java -Xmx1500m -cp out/medlda.jar cn.clickwise.medlda.Main est 120 29 10 16 64 temp random
+#java -Xmx1500m -cp out/medlda.jar cn.clickwise.medlda.Main est 120 29 10 16 64 temp random
 
 
-#java -cp out/medlda.jar cn.clickwise.medlda.Main inf 29 temp120_c16_f10
+java -Xmx5000m -cp out/medlda.jar cn.clickwise.medlda.Main inf 29 temp120_c16_f10
