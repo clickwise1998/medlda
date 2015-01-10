@@ -61,6 +61,15 @@ public class ECORPUS {
 	    return sum/(double)labelSize;
 	}
 	
+	public double[] getPrecisions()
+	{
+		return precisions;
+	}
+	
+	public double[] getRecalls()
+	{
+		return recalls;
+	}
 	
 	public String labelOfIndex(int index)
 	{
@@ -105,7 +114,7 @@ public class ECORPUS {
 	
 	   	labelSize=labelIndex.size();
 	   	
-	   	
+	   	System.out.println("labelSize:"+labelSize);
 	}
 	
 	//计算混淆矩阵
@@ -132,6 +141,16 @@ public class ECORPUS {
 	   	    confus[labelIndex.get(label.getKey())][labelIndex.get(predLabel.getKey())]++;
 	   	}
 	   	
+	   	/*
+	   	for(int i=0;i<labelSize;i++)
+	   	{
+	   		for(int j=0;j<labelSize;j++)
+	   		{
+	   			System.out.print(confus[i][j]+" ");
+	   		}
+	   		System.out.println();
+	   	}
+	   	*/
 	}
 	
 	public void labelsPreRecFromConfus()
@@ -154,6 +173,14 @@ public class ECORPUS {
 			}
 		}
 		
+		/*
+		for(int i=0;i<labelSize;i++)
+		{
+			System.out.println("i="+i+": rowsum "+rowsum[i]+" colsum "+colsum[i]);
+		}
+		*/
+		
+		
 		precisions=new double[labelSize];
 		recalls=new double[labelSize];
 		
@@ -162,6 +189,13 @@ public class ECORPUS {
 			precisions[i]=((double)confus[i][i])/((double)rowsum[i]);
 			recalls[i]=((double)confus[i][i])/((double)colsum[i]);
 		}
+		
+		/*
+		for(int i=0;i<labelSize;i++)
+		{
+			System.out.println("i="+i+": pre "+precisions[i]+" rec "+recalls[i]);
+		}
+		*/
 		
 	}
 	
@@ -189,7 +223,239 @@ public class ECORPUS {
 		this.labelIndex = labelIndex;
 	}
     
-
+	public static void main(String[] args)
+	{
+		ECORPUS ecorpus=new ECORPUS();
+		
+		//row 1
+		for(int i=0;i<69;i++)
+		{
+			ecorpus.add(new EDOC(1,1));
+		}
+		for(int i=0;i<2;i++)
+		{
+			ecorpus.add(new EDOC(1,2));
+		}
+		for(int i=0;i<4;i++)
+		{
+			ecorpus.add(new EDOC(1,3));
+		}
+		for(int i=0;i<6;i++)
+		{
+			ecorpus.add(new EDOC(1,4));
+		}
+		for(int i=0;i<1;i++)
+		{
+			ecorpus.add(new EDOC(1,5));
+		}
+		for(int i=0;i<14;i++)
+		{
+			ecorpus.add(new EDOC(1,6));
+		}
+		for(int i=0;i<4;i++)
+		{
+			ecorpus.add(new EDOC(1,7));
+		}
+		
+		
+		//row 2
+		for(int i=0;i<3;i++)
+		{
+			ecorpus.add(new EDOC(2,1));
+		}
+		for(int i=0;i<70;i++)
+		{
+			ecorpus.add(new EDOC(2,2));
+		}
+		for(int i=0;i<6;i++)
+		{
+			ecorpus.add(new EDOC(2,3));
+		}
+		for(int i=0;i<2;i++)
+		{
+			ecorpus.add(new EDOC(2,4));
+		}
+		for(int i=0;i<7;i++)
+		{
+			ecorpus.add(new EDOC(2,5));
+		}
+		for(int i=0;i<6;i++)
+		{
+			ecorpus.add(new EDOC(2,6));
+		}
+		for(int i=0;i<6;i++)
+		{
+			ecorpus.add(new EDOC(2,7));
+		}
+		
+		
+		//row 3
+		for(int i=0;i<4;i++)
+		{
+			ecorpus.add(new EDOC(3,1));
+		}
+		for(int i=0;i<6;i++)
+		{
+			ecorpus.add(new EDOC(3,2));
+		}
+		for(int i=0;i<66;i++)
+		{
+			ecorpus.add(new EDOC(3,3));
+		}
+		for(int i=0;i<2;i++)
+		{
+			ecorpus.add(new EDOC(3,4));
+		}
+		for(int i=0;i<5;i++)
+		{
+			ecorpus.add(new EDOC(3,5));
+		}
+		for(int i=0;i<6;i++)
+		{
+			ecorpus.add(new EDOC(3,6));
+		}
+		for(int i=0;i<11;i++)
+		{
+			ecorpus.add(new EDOC(3,7));
+		}
+		
+		
+		//row 4
+		for(int i=0;i<2;i++)
+		{
+			ecorpus.add(new EDOC(4,1));
+		}
+		for(int i=0;i<2;i++)
+		{
+			ecorpus.add(new EDOC(4,2));
+		}
+		for(int i=0;i<18;i++)
+		{
+			ecorpus.add(new EDOC(4,3));
+		}
+		for(int i=0;i<51;i++)
+		{
+			ecorpus.add(new EDOC(4,4));
+		}
+		for(int i=0;i<9;i++)
+		{
+			ecorpus.add(new EDOC(4,5));
+		}
+		for(int i=0;i<12;i++)
+		{
+			ecorpus.add(new EDOC(4,6));
+		}
+		for(int i=0;i<6;i++)
+		{
+			ecorpus.add(new EDOC(4,7));
+		}
+		
+		
+		//row 5
+		for(int i=0;i<4;i++)
+		{
+			ecorpus.add(new EDOC(5,1));
+		}
+		for(int i=0;i<8;i++)
+		{
+			ecorpus.add(new EDOC(5,2));
+		}
+		for(int i=0;i<1;i++)
+		{
+			ecorpus.add(new EDOC(5,3));
+		}
+		for(int i=0;i<2;i++)
+		{
+			ecorpus.add(new EDOC(5,4));
+		}
+		for(int i=0;i<80;i++)
+		{
+			ecorpus.add(new EDOC(5,5));
+		}
+		for(int i=0;i<3;i++)
+		{
+			ecorpus.add(new EDOC(5,6));
+		}
+		for(int i=0;i<2;i++)
+		{
+			ecorpus.add(new EDOC(5,7));
+		}
+		
+		
+		//row 6
+		for(int i=0;i<7;i++)
+		{
+			ecorpus.add(new EDOC(6,1));
+		}
+		for(int i=0;i<6;i++)
+		{
+			ecorpus.add(new EDOC(6,2));
+		}
+		for(int i=0;i<3;i++)
+		{
+			ecorpus.add(new EDOC(6,3));
+		}
+		for(int i=0;i<7;i++)
+		{
+			ecorpus.add(new EDOC(6,4));
+		}
+		for(int i=0;i<2;i++)
+		{
+			ecorpus.add(new EDOC(6,5));
+		}
+		for(int i=0;i<67;i++)
+		{
+			ecorpus.add(new EDOC(6,6));
+		}
+		for(int i=0;i<8;i++)
+		{
+			ecorpus.add(new EDOC(6,7));
+		}
+		
+		
+		//row 7
+		for(int i=0;i<11;i++)
+		{
+			ecorpus.add(new EDOC(7,1));
+		}
+		for(int i=0;i<6;i++)
+		{
+			ecorpus.add(new EDOC(7,2));
+		}
+		for(int i=0;i<7;i++)
+		{
+			ecorpus.add(new EDOC(7,3));
+		}
+		for(int i=0;i<5;i++)
+		{
+			ecorpus.add(new EDOC(7,4));
+		}
+		for(int i=0;i<7;i++)
+		{
+			ecorpus.add(new EDOC(7,5));
+		}
+		for(int i=0;i<6;i++)
+		{
+			ecorpus.add(new EDOC(7,6));
+		}
+		for(int i=0;i<58;i++)
+		{
+			ecorpus.add(new EDOC(7,7));
+		}
+		ecorpus.analysis();
+		 
+        double[] precisions=ecorpus.getPrecisions();
+        double[] recalls=ecorpus.getRecalls();
+       
+        /*
+        for(int i=0;i<precisions.length;i++)
+        {
+        	System.out.println("i="+i+" pre:"+precisions[i]+" rec:"+recalls[i]);
+        }
+		*/
+        System.out.println("avgPre:"+ecorpus.getAvgPrecsion());
+        System.out.println("avgRec:"+ecorpus.getAvgRecall());
+	}
 		
 	
 }
