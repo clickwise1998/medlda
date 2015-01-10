@@ -34,6 +34,8 @@ import cn.clickwise.classify.sspm.svm_struct_api_factory;
 import cn.clickwise.classify.sspm.svm_struct_common;
 import cn.clickwise.classify.sspm.svm_struct_learn;
 import cn.clickwise.classify.sspm.svmconfig;
+import cn.clickwise.evaluation.ECORPUS;
+import cn.clickwise.evaluation.EDOC;
 import cn.clickwise.math.random.SeedRandom;
 import cn.clickwise.str.basic.SSO;
 import cn.clickwise.time.utils.TimeOpera;
@@ -851,14 +853,28 @@ public class MedLDA {
 		}
 		double perwordlikelihood1 = sumlikelihood / nterms;
 		double perwordlikelihood2 = sumavglikelihood / corpus.num_docs;
-
+     
 		int nAcc = 0;
+		ECORPUS ecorpus=new ECORPUS();
+		
 		for (int d = 0; d < corpus.num_docs; d++)
+		{
 			if (corpus.docs[d].gndlabel == corpus.docs[d].predlabel)
 				nAcc += 1;
+			ecorpus.add(new EDOC(corpus.docs[d].gndlabel,corpus.docs[d].predlabel));
+		}
+		
 		double dAcc = (double) nAcc / corpus.num_docs;
-
+		
+        double avgPrecision=0;
+        double avgRecall=0;
+        ecorpus.analysis();
+        avgPrecision=ecorpus.getAvgPrecsion();
+        avgRecall=ecorpus.getAvgRecall();
+        
 		logger.info("Accuracy:" + dAcc);
+		logger.info("AvgPrecision:" + avgPrecision);
+		logger.info("AvgRecall:" + avgRecall);
 		PrintWriter fileptr = null;
 
 		try {
