@@ -244,7 +244,7 @@ public class MedLDA {
 	
 		 double ldamend=TimeOpera.getCurrentTimeLong();
 		 logger.info("lda mstep run time:"+(ldamend-ldamstart)/((double)1000));
-		 System.out.println("lda mstep run time:"+(ldamend-ldamstart));
+		 System.out.println("lda mstep run time:"+(ldamend-ldamstart)/((double)1000));
 		//update wprob parameters
 		if(MedLDAConfig.isWordSelection==true)
 		{
@@ -412,7 +412,7 @@ public class MedLDA {
 					break;
 				}
 				double mend=TimeOpera.getCurrentTimeLong();
-				System.out.println("mstep:"+(mend-mstart)/((double)1000));
+				System.out.println("mstep run time:"+(mend-mstart)/((double)1000));
 				logger.info("mstep run time:"+(mend-mstart)/((double)1000));
 				// check for convergence
 				lhood += m_dsvm_primalobj;
