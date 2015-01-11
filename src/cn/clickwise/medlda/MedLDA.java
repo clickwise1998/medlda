@@ -379,6 +379,7 @@ public class MedLDA {
 					break;
 				}
 				ci++;
+				double estart=TimeOpera.getCurrentTimeLong();
 				// e-step
 				for (d = 0; d < corpus.num_docs; d++) {
 					for (n = 0; n < max_length; n++)// initialize to uniform
@@ -395,14 +396,21 @@ public class MedLDA {
 						
 					
 				}
-
+				
+				double eend=TimeOpera.getCurrentTimeLong();
+				
+                System.out.println("estep run time:"+(eend-estart)/((double)1000));
+                logger.info("estep run time:"+(eend-estart)/((double)1000));
 				// m-step
+                double mstart=TimeOpera.getCurrentTimeLong();
 				if (mle(ss, param, false)) {
 					nIt = i + 1;
 				} else {
 					break;
 				}
-
+				double mend=TimeOpera.getCurrentTimeLong();
+				System.out.println("mstep:"+(mend-mstart)/((double)1000));
+				logger.info("mstep run time:"+(mend-mstart)/((double)1000));
 				// check for convergence
 				lhood += m_dsvm_primalobj;
 
