@@ -45,7 +45,7 @@ public class OptAlpha {
 		        df = d_alhood(a, ss, D, K);
 		        d2f = d2_alhood(a, D, K);
 		        log_a = log_a - df/(d2f * a + df);
-		        logger.info("alpha maximization : "+ f+"\t"+df);
+		       // logger.info("alpha maximization : "+ f+"\t"+df);
 		    }
 		    while ((Math.abs(df) > NEWTON_THRESH) && (iter < MAX_ALPHA_ITER));
 		    return(Math.exp(log_a));
