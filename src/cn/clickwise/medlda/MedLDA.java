@@ -188,7 +188,7 @@ public class MedLDA {
 	public boolean mle(SuffStats ss, Params param, boolean bInit) {
 		int k;
 		int w;
-
+        double ldamstart=TimeOpera.getCurrentTimeLong();
 		// beta parameters(K*N)
 		for (k = 0; k < m_nK; k++) {
 			for (w = 0; w < m_nNumTerms; w++) {
@@ -242,6 +242,9 @@ public class MedLDA {
 			//}
 		}
 	
+		 double ldamend=TimeOpera.getCurrentTimeLong();
+		 logger.info("lda mstep run time:"+(ldamend-ldamstart));
+		 System.out.println("lda mstep run time:"+(ldamend-ldamstart));
 		//update wprob parameters
 		if(MedLDAConfig.isWordSelection==true)
 		{
