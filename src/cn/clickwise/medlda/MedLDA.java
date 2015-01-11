@@ -243,7 +243,7 @@ public class MedLDA {
 		}
 	
 		 double ldamend=TimeOpera.getCurrentTimeLong();
-		 logger.info("lda mstep run time:"+(ldamend-ldamstart));
+		 logger.info("lda mstep run time:"+(ldamend-ldamstart)/((double)1000));
 		 System.out.println("lda mstep run time:"+(ldamend-ldamstart));
 		//update wprob parameters
 		if(MedLDAConfig.isWordSelection==true)
