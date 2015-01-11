@@ -19,5 +19,5 @@ cv_paramnum 10
 53.0
 57.0
 61.0
-train_file: mletrics_NN_NR_L5/mltrainSample_NN_NR_L5.txt
-test_file: mletrics_NN_NR_L5/mltestSample_NN_NR_L5.txt
+train_file:metrics_NN_NR_L5_top3281/mtrainSample_3281.txt
+test_file: metrics_NN_NR_L5_top3281/mtestSample_3281.txt
