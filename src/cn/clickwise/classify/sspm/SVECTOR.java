@@ -2,7 +2,6 @@ package cn.clickwise.classify.sspm;
 
 
 
-
 public class SVECTOR {
 	  public WORD[] words;
 	  public double twonorm_sq;
@@ -79,4 +78,29 @@ public class SVECTOR {
 		  
 		  return wi;
 	  }	  
+	  
+	  public void destroy()
+	  {
+		  if(words!=null)
+		  {
+			  for(int i=0;i<words.length;i++)
+			  {
+				  words[i]=null;
+			  }
+		  }
+		  
+		  words=null;
+		  
+		  SVECTOR cur;
+		  
+		  cur=next;
+		  
+		  while(cur!=null)
+		  {
+			 cur.destroy();
+			 cur=cur.next;
+		  }
+		  
+		  next=null;
+	  }
 }

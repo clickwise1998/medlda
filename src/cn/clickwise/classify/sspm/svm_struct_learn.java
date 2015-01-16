@@ -1896,6 +1896,13 @@ public class svm_struct_learn {
 			}
 			
 			/**********free memory******/
+			if(ai!=null)
+			{
+				for(int i=0;i<ai.length;i++)
+				{
+					ai[i]=null;
+				}
+			}
 			ai=null;
 			/**************************/
 		}
@@ -1991,8 +1998,12 @@ public class svm_struct_learn {
 			vec.words = new WORD[words.length];
 
 			for (i = 0; i < words.length; i++) {
-				vec.words[i] = words[i];
+				//before reform
+				//vec.words[i] = words[i];
+				vec.words[i] = words[i].copy_word();
 			}
+			
+			
 
 			vec.twonorm_sq = -1;
 

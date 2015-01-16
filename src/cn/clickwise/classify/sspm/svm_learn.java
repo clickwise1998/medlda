@@ -3859,6 +3859,12 @@ public class svm_learn {
 				maxxlen = xlen;
 			}
 		}
+		
+		/********free memory**********/
+		nulldoc=null;
+		nullword[0]=null;
+		nullword=null;
+		/****************************/
 
 		return (maxxlen);
 	}
@@ -3943,6 +3949,12 @@ public class svm_learn {
 			}
 		}
 
+		/********free memory**********/
+		nulldoc=null;
+		nullword[0]=null;
+		nullword=null;
+		/****************************/
+		
 		return (maxxlen);
 	}
 
