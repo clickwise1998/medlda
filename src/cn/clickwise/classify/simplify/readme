@@ -1,0 +1,1 @@
+简化svm_struct模型，只实现ONESLACK_PRIMAL_ALG 和 ONESLACK_DUAL_ALG
