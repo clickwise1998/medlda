@@ -41,10 +41,10 @@ public class svm_hideo {
 	private long precision_violations = 0;
 	private double opt_precision = DEF_PRECISION;
 	private int maxiter = DEF_MAX_ITERATIONS;
-	private double lindep_sensitivity = DEF_LINDEP_SENSITIVITY;
-	private double[] buffer = new double[(QP_SIZE + 1) * 2 * (QP_SIZE + 1) * 2 + QP_SIZE * QP_SIZE + 2
+	private static double lindep_sensitivity = DEF_LINDEP_SENSITIVITY;
+	private static double[] buffer = new double[(QP_SIZE + 1) * 2 * (QP_SIZE + 1) * 2 + QP_SIZE * QP_SIZE + 2
 	                 					* (QP_SIZE + 1) * 2 + 2 * QP_SIZE + 1 + 2 * QP_SIZE + QP_SIZE + QP_SIZE + QP_SIZE * QP_SIZE];
-	private int[] nonoptimal = new int[QP_SIZE];
+	private static int[] nonoptimal = new int[QP_SIZE];
 
 	private  int smallroundcount = 0;
 
