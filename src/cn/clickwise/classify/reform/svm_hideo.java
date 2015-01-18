@@ -1030,5 +1030,53 @@ public class svm_hideo {
 		return (obj);
 
 	}
+	
+	public static void main(String[] args)
+	{
+		
+		QP qp=new QP();
+		qp.opt_n=2;
+		qp.opt_m=0;
+		qp.opt_g=new double[4];
+		qp.opt_g[0]=1;
+		qp.opt_g[1]=0;
+		qp.opt_g[2]=0;
+		qp.opt_g[3]=1;
+		
+		qp.opt_ce=new double[2];
+		qp.opt_ce[0]=0;
+		qp.opt_ce[1]=0;
+		qp.opt_ce0=new double[1];
+		qp.opt_ce0[0]=0;
+		
+		qp.opt_g0=new double[2];
+		qp.opt_g0[0]=-2;
+		qp.opt_g0[1]=-2;
+		
+		qp.opt_xinit=new double[2];
+		qp.opt_xinit[0]=0;
+		qp.opt_xinit[1]=0;
+		
+		qp.opt_low=new double[2];
+		qp.opt_low[0]=0;
+		qp.opt_low[1]=0;
+		
+		qp.opt_up=new double[2];
+		qp.opt_up[0]=1;
+		qp.opt_up[1]=1;
+		
+		LEARN_PARM learn_parm=new LEARN_PARM();
+		learn_parm.biased_hyperplane=1;
+		
+		svm_hideo sh=new svm_hideo();
+		double[] result=sh.optimize_qp(qp, 0.0001, 10, 0.1, learn_parm);
+		for(int i=0;i<result.length;i++)
+		{
+			System.out.println("result["+i+"]="+result[i]);
+		}
+		
+		
+	}
+	
 
 }

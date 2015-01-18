@@ -19,6 +19,7 @@ public class svm_hideo {
 	private static final int NAN_SOLUTION = 4;
 	private static final int ONLY_ONE_VARIABLE = 5;
 	private static final int QP_SIZE=10;
+	private static final int M_SIZE=1;
 
 	private static final int SMALLROUND = 1;
 
@@ -28,6 +29,7 @@ public class svm_hideo {
 	private static final double EPSILON_HIDEO = 1E-20;
 	private static final double EPSILON_EQ = 1E-5;
 	
+	//various buffers
 	/**
 	 * store the values of vector x 
 	 */
@@ -38,14 +40,31 @@ public class svm_hideo {
 	 */
 	private static double[] dual = new double[2 * (QP_SIZE + 1)];
 
+	//private static double[] buffer = new double[(QP_SIZE + 1) * 2 * (QP_SIZE + 1) * 2 + QP_SIZE * QP_SIZE + 2
+	 //               					* (QP_SIZE + 1) * 2 + 2 * QP_SIZE + 1 + 2 * QP_SIZE + QP_SIZE + QP_SIZE + QP_SIZE * QP_SIZE];
+	private static int[] nonoptimal = new int[QP_SIZE];
+
+	private static double[] d=new double[(QP_SIZE + M_SIZE) * 2 * (QP_SIZE + M_SIZE) * 2];
+	private static double[] d0=new double[(QP_SIZE + M_SIZE) * 2]; 
+	private static double[] ig=new double[QP_SIZE*QP_SIZE];
+	private static double[] dual_old=new double[(QP_SIZE + M_SIZE) * 2]; 
+	private static double[] temp=new double[QP_SIZE]; 
+	private static double[] start=new double[QP_SIZE];
+	private static double[] g0_new=new double[QP_SIZE];
+	private static double[] g_new=new double[QP_SIZE*QP_SIZE]; 
+	private static double[] ce_new=new double[QP_SIZE]; 
+	private static double[] ce0_new=new double[M_SIZE]; 
+	private static double[] low_new=new double[QP_SIZE]; 
+	private static double[] up_new=new double[QP_SIZE];
+	
+	//various buffers
+	
+	
 	private long precision_violations = 0;
 	private double opt_precision = DEF_PRECISION;
 	private int maxiter = DEF_MAX_ITERATIONS;
 	private static double lindep_sensitivity = DEF_LINDEP_SENSITIVITY;
-	private static double[] buffer = new double[(QP_SIZE + 1) * 2 * (QP_SIZE + 1) * 2 + QP_SIZE * QP_SIZE + 2
-	                 					* (QP_SIZE + 1) * 2 + 2 * QP_SIZE + 1 + 2 * QP_SIZE + QP_SIZE + QP_SIZE + QP_SIZE * QP_SIZE];
-	private static int[] nonoptimal = new int[QP_SIZE];
-
+	
 	private  int smallroundcount = 0;
 
 	private  int roundnumber = 0;
@@ -78,8 +97,7 @@ public class svm_hideo {
 		result = optimize_hildreth_despo(qp.opt_n, qp.opt_m, opt_precision,
 				epsilon_crit, learn_param.epsilon_a, maxiter, 0, 0,
 				lindep_sensitivity, qp.opt_g, qp.opt_g0, qp.opt_ce, qp.opt_ce0,
-				qp.opt_low, qp.opt_up, primal, qp.opt_xinit, dual, nonoptimal,
-				buffer);
+				qp.opt_low, qp.opt_up, primal, qp.opt_xinit, dual, nonoptimal);
 
 		if (learn_param.totwords < learn_param.svm_maxqpsize) {
 			learn_param.svm_maxqpsize = SimFunc.maxi(learn_param.totwords, 2);
@@ -97,13 +115,14 @@ public class svm_hideo {
 
 		if ((result != PRIMAL_OPTIMAL) || (roundnumber % 31 == 0)
 				|| (progress <= 0)) {
+			
 			smallroundcount++;
 
 			result = optimize_hildreth_despo(qp.opt_n, qp.opt_m, opt_precision,
 					epsilon_crit, learn_param.epsilon_a, maxiter,
 					PRIMAL_OPTIMAL, SMALLROUND, lindep_sensitivity, qp.opt_g,
 					qp.opt_g0, qp.opt_ce, qp.opt_ce0, qp.opt_low, qp.opt_up,
-					primal, qp.opt_xinit, dual, nonoptimal, buffer);
+					primal, qp.opt_xinit, dual, nonoptimal);
 
 			if (result != PRIMAL_OPTIMAL) {
 				if (result != ONLY_ONE_VARIABLE) {
@@ -139,7 +158,7 @@ public class svm_hideo {
 			threshold = 0;
 		}
 
-		freeMemory();
+		//freeMemory();
 		
 		return primal;
 	}
@@ -148,12 +167,10 @@ public class svm_hideo {
 			double epsilon_crit, double epsilon_a, int maxiter, int goal,
 			int smallround, double lindep_sensitivity, double[] g, double[] g0,
 			double[] ce, double ce0, double[] low, double[] up,
-			double[] primal, double[] init, double[] dual, int[] lin_dependent,
-			double[] buffer) {
+			double[] primal, double[] init, double[] dual, int[] lin_dependent) {
 		int i, j, k, from, to, n_indep, changed;
 		double sum, bmin = 0, bmax = 0;
-		double[] d, d0, ig, dual_old, temp, start;
-		double[] g0_new, g_new, ce_new, ce0_new, low_new, up_new;
+
 		double add, t;
 		int result;
 
@@ -162,6 +179,9 @@ public class svm_hideo {
 		double g0_b1 = 0, g0_b2 = 0;
 		//double ce0_b;
 
+		/*
+		double[] d, d0, ig, dual_old, temp, start;
+		double[] g0_new, g_new, ce_new, ce0_new, low_new, up_new;
 		g0_new = new double[n];
 		d = new double[(n + m) * 2 * (n + m) * 2];
 		d0 = new double[(n + m) * 2];
@@ -174,6 +194,7 @@ public class svm_hideo {
 		start = new double[n];
 		g_new = new double[n * n];
 		temp = new double[n];
+		*/
 
 		b1 = -1;
 		b2 = -1;
@@ -886,16 +907,59 @@ public class svm_hideo {
 
 	}
 
+	/*
 	public  void freeMemory()
 	{
 		dual=null;
-		buffer = null;
+		//buffer = null;
 		nonoptimal = null;
 		System.gc();
 	}
+	*/
 	
 	public static void main(String[] args)
 	{
+		QP qp=new QP();
+		qp.opt_n=2;
+		qp.opt_m=0;
+		qp.opt_g=new double[4];
+		qp.opt_g[0]=1;
+		qp.opt_g[1]=0;
+		qp.opt_g[2]=0;
+		qp.opt_g[3]=1;
+		
+		qp.opt_ce=new double[2];
+		qp.opt_ce[0]=0;
+		qp.opt_ce[1]=0;
+		qp.opt_ce0=0;
+		
+		qp.opt_g0=new double[2];
+		qp.opt_g0[0]=-2;
+		qp.opt_g0[1]=-2;
+		
+		qp.opt_xinit=new double[2];
+		qp.opt_xinit[0]=0;
+		qp.opt_xinit[1]=0;
+		
+		qp.opt_low=new double[2];
+		qp.opt_low[0]=0;
+		qp.opt_low[1]=0;
+		
+		qp.opt_up=new double[2];
+		qp.opt_up[0]=1;
+		qp.opt_up[1]=1;
+		
+		LEARN_PARM learn_parm=new LEARN_PARM();
+		learn_parm.biased_hyperplane=1;
+		
+		svm_hideo sh=new svm_hideo();
+		double[] result=sh.optimize_qp(qp, 0.0001, 10, 0.1, learn_parm);
+		for(int i=0;i<result.length;i++)
+		{
+			System.out.println("result["+i+"]="+result[i]);
+		}
+		
+		
 		
 		
 	}
