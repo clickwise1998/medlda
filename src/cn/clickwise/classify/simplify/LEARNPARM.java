@@ -110,7 +110,7 @@ public class LEARNPARM {
    
 	 public  double svm_unlabbound;
    
-	 /** individual upper bounds for each var */
+	 /** individual upper bounds for each var , that the dual variable for each constraint in P1 */
 	 public  double[] svm_cost;            
     
 	 /** number of features */

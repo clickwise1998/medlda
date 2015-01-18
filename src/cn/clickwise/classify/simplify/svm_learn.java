@@ -52,7 +52,7 @@ public class svm_learn {
 
 		//free memory at the end of the methods
 		int[] label;
-		double[] lin;
+		double[] lin;//lin 的作用是什么？ 
 		double[] a;
 		double[] c;
 		int[] unlabeled;
@@ -2076,7 +2076,6 @@ public class svm_learn {
 			if ((iteration % 101) != 0) {
 				slackset = select_next_qp_slackset(docs, label, a, lin, slack,
 						alphaslack, c, learn_parm, active2dnum);
-				//logger.info("slackset="+slackset+" maxsharedviol:"+maxsharedviol+" learn_parm.epsilon_crit:"+learn_parm.epsilon_crit);
 				if (((iteration % 100) == 0) || (slackset == 0)
 						|| (maxsharedviol < learn_parm.epsilon_crit)) {
 					/* do a step with examples from different slack sets */
@@ -2093,11 +2092,9 @@ public class svm_learn {
 						} else {
 							chosen[j]++;
 							working2dnum[i++] = j;
-							//logger.info("working2dum " + i + " " + j);
 						}
 					}
 					working2dnum[i] = -1;
-					//logger.info("working2dum[" + i + "] is -1");
 					already_chosen = 0;
 					if ((Math.min(learn_parm.svm_newvarsinqp,
 							learn_parm.svm_maxqpsize - choosenum) >= 4)
@@ -2115,7 +2112,7 @@ public class svm_learn {
 
 						choosenum += already_chosen;
 					}
-					//logger.info("or select \n");
+					
 					choosenum += select_next_qp_subproblem_grad(
 							label,
 							unlabeled,
@@ -2129,7 +2126,6 @@ public class svm_learn {
 							working2dnum, selcrit, selexam, kernel_cache, 0,
 							key, chosen);
 				} else { /* do a step with all examples from same slack set */
-					// logger.info("do a step with all examples from same slack set");
 					if (SVMCommon.verbosity >= 2) {
 						System.out.println("(j-step on " + slackset + ")");
 					}
@@ -2143,7 +2139,6 @@ public class svm_learn {
 					working2dnum[0] = -1;
 					eq_target = alphaslack[slackset];
 					for (j = 0; j < totdoc; j++) { /* mask all but slackset */
-						/* for(jj=0;(j=active2dnum[jj])>=0;jj++) { */
 						if (docs[j].slackid != slackset) {
 							ignore[j] = 1;
 						} else {
@@ -2164,7 +2159,6 @@ public class svm_learn {
 					 * get unlocked of infinite loops due to numerical
 					 * inaccuracies in the core qp-solver
 					 */
-				//logger.info("in else yr");
 				choosenum += select_next_qp_subproblem_rand(label, unlabeled,
 						a, lin, c, totdoc, Math.min(learn_parm.svm_maxqpsize
 								- choosenum, learn_parm.svm_newvarsinqp),
@@ -2301,8 +2295,7 @@ public class svm_learn {
 					if (SVMCommon.verbosity == 1) {
 						// System.out.println();
 					}
-					System.out
-							.println(" Checking optimality of inactive variables...");
+					System.out.println(" Checking optimality of inactive variables...");
 
 				}
 
@@ -2340,7 +2333,6 @@ public class svm_learn {
 				
 				if (((SVMCommon.verbosity >= 1) && (kernel_parm.kernel_type != SVMCommon.LINEAR))
 						|| (SVMCommon.verbosity >= 2)) {
-					// System.out.println("done.");
 					System.out.println(" Number of inactive variables = "
 							+ inactivenum);
 				}
@@ -2358,8 +2350,7 @@ public class svm_learn {
 				learn_parm.epsilon_crit = epsilon_crit_org;
 			}
 			if (SVMCommon.verbosity >= 2) {
-				System.out.println(" => (" + supvecnum + " SV (incl. "
-						+ model.at_upper_bound
+				System.out.println(" => (" + supvecnum + " SV (incl. "+ model.at_upper_bound
 						+ " SV at u-bound), max violation=" + maxdiff + ")");
 			}
 		
@@ -2378,6 +2369,7 @@ public class svm_learn {
 								Math.max((int) (totdoc / 500), 100)), a,
 						inconsistent);
 				inactivenum = totdoc - activenum;
+				/*
 				if ((kernel_cache != null)
 						&& (supvecnum > kernel_cache.max_elems)
 						&& ((kernel_cache.activenum - activenum) > Math.max(
@@ -2387,6 +2379,7 @@ public class svm_learn {
 							(kernel_cache.activenum - supvecnum)),
 							shrink_state.active);
 				}
+				*/
 			}
 
 		}
@@ -2427,10 +2420,10 @@ public class svm_learn {
 
 	}
 
+	/** compute the value of shared slacks and the joint alphas */
 	public void compute_shared_slacks(DOC[] docs, int[] label, double[] a,
 			double[] lin, double[] c, int[] active2dnum, LEARNPARM learn_parm,
 			double[] slack, double[] alphaslack)
-	/* compute the value of shared slacks and the joint alphas */
 	{
 		int jj, i;
 		double dist, target;
