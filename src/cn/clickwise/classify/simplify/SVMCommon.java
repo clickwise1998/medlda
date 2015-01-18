@@ -1,5 +1,7 @@
 package cn.clickwise.classify.simplify;
 
+import cn.clickwise.time.utils.TimeOpera;
+
 /**
  * utility methods
  * @author lq
@@ -169,4 +171,12 @@ public class SVMCommon {
 		
 		return nmodel;
 	  }
+	
+	
+	public static double get_runtime() {
+		int c = (int) TimeOpera.getCurrentTimeLong();
+		double hc = 0;
+		hc = ((double) c) ;
+		return hc;
+	}
 }
