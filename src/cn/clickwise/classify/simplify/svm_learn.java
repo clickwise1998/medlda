@@ -52,7 +52,9 @@ public class svm_learn {
 
 		//free memory at the end of the methods
 		int[] label;
-		double[] lin;//lin 的作用是什么？ 
+		
+		//lin 的作用是什么？ store  x_i * w,在check_optimality用到
+		double[] lin; 
 		double[] a;
 		double[] c;
 		int[] unlabeled;
@@ -2174,10 +2176,12 @@ public class svm_learn {
 				t1 = SVMCommon.get_runtime();
 			}
 
+			/*
 			if (kernel_cache != null) {
 				cache_multiple_kernel_rows(kernel_cache, docs, working2dnum,
 						choosenum, kernel_parm);
 			}
+			*/
 
 			if (SVMCommon.verbosity >= 2) {
 				t2 = SVMCommon.get_runtime();
@@ -2382,7 +2386,7 @@ public class svm_learn {
 				*/
 			}
 
-		}
+		}//end loop for
 
 		alphaslack=null;
 		slack=null;
@@ -2500,6 +2504,7 @@ public class svm_learn {
 			
 			/* 'distance' from hyperplane */
 			dist_noslack = (lin[i] - model.b) * (double) label[i];
+			
 			dist = dist_noslack + slack[docs[i].slackid];
 			target = -(learn_parm.eps - (double) label[i] * c[i]);
 			ex_c = learn_parm.svm_c - learn_parm.epsilon_a;
