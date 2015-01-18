@@ -18,6 +18,7 @@ public class svm_hideo {
 	private static final int MAXITER_EXCEEDED = 3;
 	private static final int NAN_SOLUTION = 4;
 	private static final int ONLY_ONE_VARIABLE = 5;
+	private static final int QP_SIZE=10;
 
 	private static final int SMALLROUND = 1;
 
@@ -30,19 +31,20 @@ public class svm_hideo {
 	/**
 	 * store the values of vector x 
 	 */
-	private double[] primal = null;
+	private static double[] primal = new double[QP_SIZE];
 	
 	/**
 	 * store the values of dual variables respect to equality constraints and inequality constraints 
 	 */
-	private double[] dual = null;
+	private static double[] dual = new double[2 * (QP_SIZE + 1)];
 
 	private long precision_violations = 0;
 	private double opt_precision = DEF_PRECISION;
 	private int maxiter = DEF_MAX_ITERATIONS;
 	private double lindep_sensitivity = DEF_LINDEP_SENSITIVITY;
-	private double[] buffer = null;
-	private int[] nonoptimal = null;
+	private double[] buffer = new double[(QP_SIZE + 1) * 2 * (QP_SIZE + 1) * 2 + QP_SIZE * QP_SIZE + 2
+	                 					* (QP_SIZE + 1) * 2 + 2 * QP_SIZE + 1 + 2 * QP_SIZE + QP_SIZE + QP_SIZE + QP_SIZE * QP_SIZE];
+	private int[] nonoptimal = new int[QP_SIZE];
 
 	private  int smallroundcount = 0;
 
@@ -60,15 +62,17 @@ public class svm_hideo {
 		roundnumber++;
 
 		if (primal == null) {
+			/*
 			primal = new double[nx];
 			dual = new double[2 * (nx + 1)];
 			nonoptimal = new int[nx];
 			buffer = new double[(nx + 1) * 2 * (nx + 1) * 2 + nx * nx + 2
-					* (nx + 1) * 2 + 2 * nx + 1 + 2 * nx + nx + nx + nx * nx];
-			threshold = 0;
+					* (nx + 1) * 2 + 2 * nx + 1 + 2 * nx + nx + nx + nx * nx];	
 			for (i = 0; i < nx; i++) {
 				primal[i] = 0;
 			}
+			*/
+			threshold = 0;
 		}
 
 		result = optimize_hildreth_despo(qp.opt_n, qp.opt_m, opt_precision,
@@ -123,10 +127,9 @@ public class svm_hideo {
 		if (precision_violations > 50) {
 			precision_violations = 0;
 			epsilon_crit = 10.0;
-			// if(verbosity>=1) {
 			logger.info("\nWARNING: Relaxing epsilon on KT-Conditions "
 					+ (epsilon_crit));
-			// }
+		
 		}
 
 		if ((qp.opt_m > 0) && (result != NAN_SOLUTION)
@@ -136,6 +139,8 @@ public class svm_hideo {
 			threshold = 0;
 		}
 
+		freeMemory();
+		
 		return primal;
 	}
 
@@ -881,6 +886,14 @@ public class svm_hideo {
 
 	}
 
+	public  void freeMemory()
+	{
+		dual=null;
+		buffer = null;
+		nonoptimal = null;
+		System.gc();
+	}
+	
 	public static void main(String[] args)
 	{
 		
