@@ -25,7 +25,7 @@ public class svm_learn {
 	public int inconsistentnum = 0;
 	public double maxsharedviol;
 	//public double maxviol = 0;
-	public double[] alpha_g;
+	//////public double[] alpha_g;
 
 	public svm_common sc=null;
 	public svm_learn() {
@@ -40,7 +40,11 @@ public class svm_learn {
 	   min 0.5 w*w + C sum_i C_i \xi_i
 	   s.t. x_i * w > rhs_i - \xi_i
 
-	   This corresponds to the -z o option. 
+	   This corresponds to the -z o option.
+	   includes: model.alpha[i]
+	             model.sv_num
+	             model.supvec[i]
+	   return model 
     */
 	public void svm_learn_optimization(DOC[] docs, double[] rhs, int totdoc,
 			int totwords, LEARNPARM learn_parm, KERNELPARM kernel_parm, MODEL model, double[] alpha) {
@@ -149,7 +153,7 @@ public class svm_learn {
 			index2dnum = new int[totdoc + 11];
 			if (kernel_parm.kernel_type == SVMCommon.LINEAR) {
 				weights = new double[totwords + 1];
-				svm_common.clear_nvector(weights, totwords);
+				//svm_common.clear_nvector(weights, totwords);
 				aicache = null;
 			} else {
 				weights = null;
@@ -318,6 +322,7 @@ public class svm_learn {
 			write_alphas(learn_parm.alphafile, a, label, totdoc);
 		}
 	
+		/****simplify******
 		if (alpha == null) {
 			alpha_g = alpha;
 		} else {
@@ -326,6 +331,7 @@ public class svm_learn {
 				alpha_g[j] = alpha[j];
 			}
 		}
+		*/
 		
 		if(shrink_state!=null)
 		{
@@ -566,6 +572,25 @@ public class svm_learn {
 
 	}
 
+	/**
+	 * update the svm model parmaters ,that is
+	 *      model.alpha[i]
+	 *      model.sv_num
+	 *      model.supvec[i] 
+	 *      et al.
+	 * @param docs
+	 * @param label
+	 * @param unlabeled
+	 * @param lin
+	 * @param a
+	 * @param a_old
+	 * @param c
+	 * @param learn_parm
+	 * @param working2dnum
+	 * @param active2dnum
+	 * @param model
+	 * @return
+	 */
 	public int calculate_svm_model(DOC[] docs, int[] label, int[] unlabeled,
 			double[] lin, double[] a, double[] a_old, double[] c,
 			LEARNPARM learn_parm, int[] working2dnum, int[] active2dnum,
@@ -927,6 +952,28 @@ public class svm_learn {
 		}
 	}
 
+	/**
+	 * solve the dual problem
+	 * @param docs
+	 * @param label
+	 * @param unlabeled
+	 * @param exclude_from_eq_const
+	 * @param eq_target
+	 * @param chosen
+	 * @param active2dnum
+	 * @param model
+	 * @param totdoc
+	 * @param working2dnum
+	 * @param varnum
+	 * @param a
+	 * @param lin
+	 * @param c
+	 * @param learn_parm
+	 * @param aicache
+	 * @param kernel_parm
+	 * @param qp
+	 * @param epsilon_crit_target
+	 */
 	public void optimize_svm(DOC[] docs, int[] label, int[] unlabeled,
 			int[] exclude_from_eq_const, double eq_target, int[] chosen,
 			int[] active2dnum, MODEL model, int totdoc, int[] working2dnum,
@@ -943,8 +990,11 @@ public class svm_learn {
 	
 
 		/* call the qp-subsolver */
-		svm_hideo shid = new svm_hideo();
+		SVMHideo shid = new SVMHideo();
 
+		/**
+		 * the weights (a_v = primal) of qp problem(D1) is the dual variables of P1 
+		 */
 		a_v = shid.optimize_qp(qp, epsilon_crit_target,
 				learn_parm.svm_maxqpsize, (model.b), learn_parm);
 		
@@ -1884,7 +1934,6 @@ public class svm_learn {
 
 	/***
 	 * 此方法有问题
-	 * 
 	 * @param docs
 	 * @param label
 	 * @param totdoc
@@ -1905,7 +1954,7 @@ public class svm_learn {
 			KERNELPARM kernel_parm,
 			SHRINKSTATE shrink_state, MODEL model, double[] a, double[] lin,
 			double[] c) {
-		logger.info("in optimize_to_convergence_sharedslack");
+	
 		int[] chosen;
 		int[] key;
 		int i, j, jj;

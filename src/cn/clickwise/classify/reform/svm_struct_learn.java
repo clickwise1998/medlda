@@ -893,6 +893,7 @@ public class svm_struct_learn {
 				 * logger.info(kk+":"+svmModel.lin_weights[kk]+" "); } }
 				 */
 				optcount++;
+				
 				/*
 				 * keep track of when each constraint was last active.
 				 * constraints marked with -1 are not updated
