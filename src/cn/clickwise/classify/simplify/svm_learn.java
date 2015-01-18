@@ -17,7 +17,7 @@ import cn.clickwise.time.utils.TimeOpera;
 public class svm_learn {
 
 	private static Logger logger = Logger.getLogger(svm_learn.class);
-	public int kernel_cache_statistic;
+	//////public int kernel_cache_statistic;
 	public static final int MAXSHRINK = 50000;
 	public double maxdiff;
 
@@ -44,6 +44,7 @@ public class svm_learn {
 	   includes: model.alpha[i]
 	             model.sv_num
 	             model.supvec[i]
+	   the x_is are not the origin doc in the sample,but the constraints building on all samples          
 	   return model 
     */
 	public void svm_learn_optimization(DOC[] docs, double[] rhs, int totdoc,
@@ -66,7 +67,8 @@ public class svm_learn {
 		int i;
 		int misclassified, upsupvecnum;
 		double loss = 0, model_length, alphasum, example_length;
-		
+	      
+		//Setting default regularization parameter C if C is not setted
 		double r_delta_avg;
 		double runtime_start, runtime_end;
 		int iterations, maxslackid, svsetnum = 0;
@@ -76,12 +78,13 @@ public class svm_learn {
 
 		runtime_start = TimeOpera.getCurrentTimeLong();
 
-		kernel_cache_statistic = 0;
+		//////kernel_cache_statistic = 0;
 		learn_parm.totwords = totwords;
 		if ((learn_parm.svm_newvarsinqp < 2)
 				|| (learn_parm.svm_newvarsinqp > learn_parm.svm_maxqpsize)) {
 			learn_parm.svm_newvarsinqp = learn_parm.svm_maxqpsize;
 		}
+		
 		init_shrink_state(shrink_state, totdoc, MAXSHRINK);
 
 		label = new int[totdoc];
@@ -117,7 +120,6 @@ public class svm_learn {
 		r_delta_avg = estimate_r_delta_average(docs, totdoc, kernel_parm);
 
 		if (learn_parm.svm_c == 0) {
-
 			learn_parm.svm_c = 1.0 / (r_delta_avg * r_delta_avg);
 			if (SVMCommon.verbosity >= 1) {
 				System.out.println("Setting default regularization parameter C="+ learn_parm.svm_c);
@@ -189,20 +191,12 @@ public class svm_learn {
 
 		if (learn_parm.remove_inconsistent != 0) {
 			learn_parm.remove_inconsistent = 0;
-			System.out
-					.println("'remove inconsistent' not available in this mode. Switching option off!");
+			System.err.println("'remove inconsistent' not available in this mode. Switching option off!");
 		}
 
-		if (kernel_parm.kernel_type == SVMCommon.LINEAR) {
-			/** kernel_cache=NULL; **/
-		}
-
-		if (SVMCommon.verbosity == 1) {
-			System.out.println("Optimizing");
-		}
-		// // learn_parm.sharedslack=0;
+	
 		if (learn_parm.sharedslack != 0) {
-			 //logger.info("learn  sharedslack");
+		
 			iterations = optimize_to_convergence_sharedslack(docs, label,
 					totdoc, totwords, learn_parm, kernel_parm, 
 					shrink_state, model, a, lin, c);
@@ -219,13 +213,11 @@ public class svm_learn {
 					misclassified++;
 			}
 
-			System.out.println("Optimization finished (maxdiff=" + maxdiff
-					+ ").");
+			System.out.println("Optimization finished (maxdiff=" + maxdiff+ ").");
 
 			runtime_end = SVMCommon.get_runtime();
 
-			System.out.println("Runtime in cpu-seconds: "
-						+ (runtime_end - runtime_start) / 100.0);
+			System.out.println("Runtime in cpu-seconds: "+ (runtime_end - runtime_start) / 100.0);
 			
 		}
 
@@ -243,9 +235,9 @@ public class svm_learn {
 				alphasum += rhs[i] * a[i];
 			}
 			model_length = Math.sqrt(model_length);
-			System.out.println("Dual objective value: dval="
+			System.err.println("Dual objective value: dval="
 					+ (alphasum - 0.5 * model_length * model_length));
-			System.out.println("Norm of weight vector: |w|=" + model_length);
+			System.err.println("Norm of weight vector: |w|=" + model_length);
 		}
 
 		if (learn_parm.sharedslack != 0) {
@@ -307,10 +299,12 @@ public class svm_learn {
 							kernel_parm));
 		}
 
+		/****simplify*******
 		if (SVMCommon.verbosity >= 1) {
 			System.out.println("Number of kernel evaluations: "
 					+ kernel_cache_statistic);
 		}
+		*/
 
 		if (alpha != null) {
 			for (i = 0; i < totdoc; i++) { /* copy final alphas */
@@ -597,10 +591,7 @@ public class svm_learn {
 			MODEL model) {
 		int i, ii, pos, b_calculated = 0, first_low, first_high;
 		double ex_c, b_temp, b_low, b_high;
-		/*
-		 * if(SVMCommon.verbosity>=3){
-		 * System.out.println("Calculating model..."); }
-		 */
+	
 
 		if (learn_parm.biased_hyperplane == 0) {
 			model.b = 0;
@@ -1026,19 +1017,10 @@ public class svm_learn {
 
 		qp.opt_n = varnum;
 		qp.opt_ce0 = -eq_target;
-		// System.out.print("label");
-		for (int li = 0; li < label.length; li++) {
-			// System.out.print("label["+li+"]="+label[li]+" ");
-		}
-		// //logger.info("varnum:" + varnum);
-		// System.out.println();
+
+	
 		for (j = 1; j < model.sv_num; j++) {
-			// //logger.info("j=" + j + " chosen[" + model.supvec[j].docnum +
-			// "]="
-			// // + chosen[model.supvec[j].docnum]
-			// // + " exclude_from_eq_const="
-			// // + exclude_from_eq_const[model.supvec[j].docnum] + " alpha:"
-			// // + model.alpha[j]);
+		
 			if ((chosen[model.supvec[j].docnum] == 0)
 					&& (exclude_from_eq_const[model.supvec[j].docnum] == 0)) {
 				qp.opt_ce0 += model.alpha[j];
@@ -1052,21 +1034,17 @@ public class svm_learn {
 		}
 
 		for (i = 0; i < varnum; i++) {
-			// //logger.info("i=" + i + " keyi:" + key[i] + " lin:" +
-			// lin[key[i]]);
 			qp.opt_g0[i] = lin[key[i]];
 		}
 
 		for (i = 0; i < varnum; i++) {
 			ki = key[i];
-			// logger.info("ki:"+ki);
-			// System.out.print("  i="+i+" ki= "+ki);
 			qp.opt_ce[i] = label[ki];
 			qp.opt_low[i] = 0;
 			qp.opt_up[i] = learn_parm.svm_cost[ki];
-			// System.out.println("docs[ki]:"+ki);
+		
 			kernel_temp = sc.kernel(kernel_parm, docs[ki], docs[ki]);
-			// //logger.info("kernel_temp:" + kernel_temp);
+		
 			qp.opt_g0[i] -= (kernel_temp * a[ki] * (double) label[ki]);
 			qp.opt_g[varnum * i + i] = kernel_temp;
 
@@ -1083,18 +1061,9 @@ public class svm_learn {
 						* (double) label[kj] * kernel_temp;
 				qp.opt_g[varnum * j + i] = (double) label[ki]
 						* (double) label[kj] * kernel_temp;
-				// //logger.info("i=" + i + " j=" + j + " qpij="
-				// // + qp.opt_g[varnum * i + j] + " qpji="
-				// // + qp.opt_g[varnum * j + i]);
-				// logger.info("varnum*j+i:"+(varnum*j+i)+" "+
-				// qp.opt_g[varnum*j+i]);
 
 			}
-			/*
-			 * if(SVMCommon.verbosity>=3) {
-			 * 
-			 * if(i % 20 == 0) { logger.info(i+".."); } }
-			 */
+	
 
 		}
 
@@ -1191,6 +1160,7 @@ public class svm_learn {
 
 	}
 
+	
 	public void reactivate_inactive_examples(int[] label, int[] unlabeled,
 			double[] a, SHRINKSTATE shrink_state, double[] lin, double[] c,
 			int totdoc, int totwords, int iteration, LEARNPARM learn_parm,
