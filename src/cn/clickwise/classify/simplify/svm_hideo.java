@@ -13,49 +13,50 @@ import cn.clickwise.math.random.SimFunc;
 
 public class svm_hideo {
 
-	public static final int PRIMAL_OPTIMAL = 1;
-	public static final int DUAL_OPTIMAL = 2;
-	public static final int MAXITER_EXCEEDED = 3;
-	public static final int NAN_SOLUTION = 4;
-	public static final int ONLY_ONE_VARIABLE = 5;
+	private static final int PRIMAL_OPTIMAL = 1;
+	private static final int DUAL_OPTIMAL = 2;
+	private static final int MAXITER_EXCEEDED = 3;
+	private static final int NAN_SOLUTION = 4;
+	private static final int ONLY_ONE_VARIABLE = 5;
 
-	public static final int LARGEROUND = 0;
-	public static final int SMALLROUND = 1;
+	private static final int SMALLROUND = 1;
 
-
-	public static final double DEF_PRECISION = 1E-5;
-	public static final int DEF_MAX_ITERATIONS = 200;
-	public static final double DEF_LINDEP_SENSITIVITY = 1E-8;
-	public static final double EPSILON_HIDEO = 1E-20;
-	public static final double EPSILON_EQ = 1E-5;
+	private static final double DEF_PRECISION = 1E-5;
+	private static final int DEF_MAX_ITERATIONS = 200;
+	private static final double DEF_LINDEP_SENSITIVITY = 1E-8;
+	private static final double EPSILON_HIDEO = 1E-20;
+	private static final double EPSILON_EQ = 1E-5;
 	
+	/**
+	 * store the values of vector x 
+	 */
+	private double[] primal = null;
+	
+	/**
+	 * store the values of dual variables respect to equality constraints and inequality constraints 
+	 */
+	private double[] dual = null;
 
-	public double[] primal = null;
-	public double[] dual = null;
+	private long precision_violations = 0;
+	private double opt_precision = DEF_PRECISION;
+	private int maxiter = DEF_MAX_ITERATIONS;
+	private double lindep_sensitivity = DEF_LINDEP_SENSITIVITY;
+	private double[] buffer = null;
+	private int[] nonoptimal = null;
 
-	public long precision_violations = 0;
-	public double opt_precision = DEF_PRECISION;
-	public int maxiter = DEF_MAX_ITERATIONS;
-	public double lindep_sensitivity = DEF_LINDEP_SENSITIVITY;
-	public double[] buffer = null;
-	public int[] nonoptimal = null;
+	private  int smallroundcount = 0;
 
-	public  int smallroundcount = 0;
+	private  int roundnumber = 0;
 
-	public  int roundnumber = 0;
-
-	public short verbosity = 0;
-
-	public double progress;
+	private double progress;
+	
 	private static Logger logger = Logger.getLogger(svm_hideo.class);
 
 	public double[] optimize_qp(QP qp, double epsilon_crit, int nx,
 			double threshold, LEARN_PARM learn_param) {
-		//logger.info("epsilon_crit_trace:" + epsilon_crit);
-		int i, j;
+		
+		int i;
 		int result;
-		double eq;
-		// svm_common.verbosity=5;
 		roundnumber++;
 
 		if (primal == null) {
@@ -135,8 +136,6 @@ public class svm_hideo {
 			threshold = 0;
 		}
 
-
-
 		return primal;
 	}
 
@@ -155,7 +154,8 @@ public class svm_hideo {
 
 		double obj_before, obj_after;
 		int b1, b2;
-		double g0_b1 = 0, g0_b2 = 0, ce0_b;
+		double g0_b1 = 0, g0_b2 = 0;
+		//double ce0_b;
 
 		g0_new = new double[n];
 		d = new double[(n + m) * 2 * (n + m) * 2];
@@ -211,7 +211,7 @@ public class svm_hideo {
 				if (i == b2)
 					g0_b2 = g0[i];
 			}
-			ce0_b = ce0;
+			//ce0_b = ce0;
 			for (i = 0; i < n; i++) {
 				if ((i != b1) && (i != b2)) {
 					for (j = 0; j < n; j++) {
@@ -220,7 +220,7 @@ public class svm_hideo {
 						if (j == b2)
 							g0_b2 += start[i] * g[i * n + j];
 					}
-					ce0_b -= (start[i] * ce[i]);
+					//ce0_b -= (start[i] * ce[i]);
 				}
 			}
 			if ((g[b1 * n + b2] == g[b1 * n + b1])
@@ -546,7 +546,8 @@ public class svm_hideo {
 		int i, j, k, iter;
 		double sum, w, maxviol, viol, temp1, temp2, isnantest;
 		double model_b, dist;
-		int retrain, maxfaktor, primal_optimal = 0, at_bound, scalemaxiter;
+		int retrain, maxfaktor, primal_optimal = 0,  scalemaxiter;
+		//double at_bound;
 		double epsilon_a = 1E-15, epsilon_hideo;
 		double eq;
 
@@ -701,7 +702,7 @@ public class svm_hideo {
 
 			retrain = 0;
 			primal_optimal = 1;
-			at_bound = 0;
+			//at_bound = 0;
 			for (i = 0; (i < n); i++) { /* check primal KT-Conditions */
 				dist = -model_b * ce[i];
 				dist += (g0[i] + 1.0);
@@ -721,10 +722,12 @@ public class svm_hideo {
 					retrain = 1;
 					primal_optimal = 0;
 				}
+				/*
 				if ((primal[i] <= (low[i] + epsilon_a))
 						|| (primal[i] >= (up[i] - epsilon_a))) {
 					at_bound++;
 				}
+				*/
 			}
 			if (m > 0) {
 				eq = -ce0[0]; /* check precision of eq-constraint */
