@@ -817,9 +817,6 @@ public class svm_learn {
 			chosen[i] = 1;
 			working2dnum[inum + choosenum] = i;
 			choosenum += 1;
-			if (kernel_cache != null) {
-				kernel_cache_touch(kernel_cache, i);
-			}
 			
 		}
 
@@ -860,20 +857,11 @@ public class svm_learn {
 		}
 	}
 
-	public int kernel_cache_touch(KERNELCACHE kernel_cache, int docnum) {
-		if ((kernel_cache != null) && (kernel_cache.index[docnum] != -1)) {
-			kernel_cache.lru[kernel_cache.index[docnum]] = kernel_cache.time;
-			return 1;
-		}
-
-		return 0;
-	}
 
 	public int select_next_qp_subproblem_rand(int[] label, int[] unlabeled,
 			double[] a, double[] lin, double[] c, int totdoc, int qp_size,
 			LEARNPARM learn_parm, int[] inconsistent, int[] active2dnum,
-			int[] working2dnum, double[] selcrit, int[] select,
-			KERNELCACHE kernel_cache, int[] key, int[] chosen, int iteration) {
+			int[] working2dnum, double[] selcrit, int[] select, int[] key, int[] chosen, int iteration) {
 		int choosenum, i, j, k, activedoc, inum;
 		double s = 0;
 
@@ -903,7 +891,6 @@ public class svm_learn {
 			chosen[i] = 1;
 			working2dnum[inum + choosenum] = i;
 			choosenum += 1;
-			kernel_cache_touch(kernel_cache, i); /* make sure it does not get kicked out of cache */
 		}
 
 		activedoc = 0;
@@ -926,7 +913,6 @@ public class svm_learn {
 			chosen[i] = 1;
 			working2dnum[inum + choosenum] = i;
 			choosenum += 1;
-			kernel_cache_touch(kernel_cache, i); /* make sure it does not get kicked out of cache */
 		}
 		working2dnum[inum + choosenum] = -1; /* complete index */
 		return (choosenum);
