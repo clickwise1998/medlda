@@ -11,7 +11,7 @@ import cn.clickwise.math.random.SimFunc;
  * @author lq
  */
 
-public class svm_hideo {
+public class SVMHideo {
 
 	private static final int PRIMAL_OPTIMAL = 1;
 	private static final int DUAL_OPTIMAL = 2;
@@ -71,10 +71,10 @@ public class svm_hideo {
 
 	private double progress;
 	
-	private static Logger logger = Logger.getLogger(svm_hideo.class);
+	private static Logger logger = Logger.getLogger(SVMHideo.class);
 
 	public double[] optimize_qp(QP qp, double epsilon_crit, int nx,
-			double threshold, LEARN_PARM learn_param) {
+			double threshold, LEARNPARM learn_param) {
 		
 		int i;
 		int result;
@@ -546,7 +546,7 @@ public class svm_hideo {
 		progress = obj_before - obj_after;
 
 		/***free memory*******/
-		
+		/*
 		d=null;
 		d0=null;
 		ig=null;
@@ -559,6 +559,7 @@ public class svm_hideo {
 		ce0_new=null;
 		low_new=null;
 	    up_new=null;
+	    */
 	    /*****************/
 		
 		return ((int) result);
@@ -949,10 +950,10 @@ public class svm_hideo {
 		qp.opt_up[0]=1;
 		qp.opt_up[1]=1;
 		
-		LEARN_PARM learn_parm=new LEARN_PARM();
+		LEARNPARM learn_parm=new LEARNPARM();
 		learn_parm.biased_hyperplane=1;
 		
-		svm_hideo sh=new svm_hideo();
+		SVMHideo sh=new SVMHideo();
 		double[] result=sh.optimize_qp(qp, 0.0001, 10, 0.1, learn_parm);
 		for(int i=0;i<result.length;i++)
 		{

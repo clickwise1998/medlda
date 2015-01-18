@@ -1,6 +1,6 @@
 package cn.clickwise.classify.simplify;
 
-public class LEARN_PARM {
+public class LEARNPARM {
 	 /**
 	  * 选择是回归还是 分类
 	  */
