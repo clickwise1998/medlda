@@ -1,5 +1,5 @@
 package cn.clickwise.classify.simplify;
-
+/*
 public class KERNELCACHE {
 	  public int[] index;
 	  public double[] buffer;
@@ -14,3 +14,4 @@ public class KERNELCACHE {
 	  public int activenum;
 	  public int buffsize;
 }
+*/
