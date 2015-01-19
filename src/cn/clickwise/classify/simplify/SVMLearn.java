@@ -14,9 +14,9 @@ import cn.clickwise.time.utils.TimeOpera;
  * @author lq
  * 
  */
-public class svm_learn {
+public class SVMLearn {
 
-	private static Logger logger = Logger.getLogger(svm_learn.class);
+	private static Logger logger = Logger.getLogger(SVMLearn.class);
 	//////public int kernel_cache_statistic;
 	public static final int MAXSHRINK = 50000;
 	public double maxdiff;
@@ -27,9 +27,8 @@ public class svm_learn {
 	//public double maxviol = 0;
 	//////public double[] alpha_g;
 
-	public svm_common sc=null;
-	public svm_learn() {
-		sc=new svm_common();
+	public SVMLearn() {
+		
 	}
 
 
@@ -61,10 +60,10 @@ public class svm_learn {
 		int[] inconsistent;
 		int[] index;
 		int[] index2dnum;
-		double[] weights;
+		double[] weights=null;
 		double[] slack;
 		double[] alphaslack;
-		double[] aicache;
+		double[] aicache=null;
 		
 		int i;
 		int misclassified, upsupvecnum;
@@ -73,7 +72,7 @@ public class svm_learn {
 		//Setting default regularization parameter C if C is not setted
 		double r_delta_avg;
 		double runtime_start, runtime_end;
-		int iterations, maxslackid, svsetnum = 0;
+		int iterations=0, maxslackid, svsetnum = 0;
 	
 
 		SHRINKSTATE shrink_state = new SHRINKSTATE();
@@ -159,10 +158,7 @@ public class svm_learn {
 				weights = new double[totwords + 1];
 				//svm_common.clear_nvector(weights, totwords);
 				aicache = null;
-			} else {
-				weights = null;
-				aicache = new double[totdoc];
-			}
+			} 
 
 			for (i = 0; i < totdoc; i++) {
 				index[i] = 1;
@@ -392,7 +388,7 @@ public class svm_learn {
 			for (ii = 0; (i = working2dnum[ii]) >= 0; ii++) {
 				if (a[i] != a_old[i]) {
 					for (f = docs[i].fvec; f != null; f = f.next) {	
-						svm_common.add_vector_ns(weights, f, f.factor
+						SVMCommon.add_vector_ns(weights, f, f.factor
 								* ((a[i] - a_old[i]) * label[i]));
 					}
 				}
@@ -400,14 +396,14 @@ public class svm_learn {
 
 			for (jj = 0; (j = active2dnum[jj]) >= 0; jj++) {
 				for (f = docs[j].fvec; f != null; f = f.next) {
-					lin[j] += f.factor * svm_common.sprod_ns(weights, f);
+					lin[j] += f.factor * SVMCommon.sprod_ns(weights, f);
 				}
 			}
 
 			for (ii = 0; (i = working2dnum[ii]) >= 0; ii++) {
 				if (a[i] != a_old[i]) {
 					for (f = docs[i].fvec; f != null; f = f.next) {
-						svm_common.mult_vector_ns(weights, f, 0.0);
+						SVMCommon.mult_vector_ns(weights, f, 0.0);
 					}
 				}
 			}
@@ -426,16 +422,16 @@ public class svm_learn {
 		WORD[] nullword = new WORD[1];
 		nullword[0] = new WORD();
 		nullword[0].wnum = 0;
-		nulldoc = svm_common.create_example(-2, 0, 0, 0.0,
-				svm_common.create_svector(nullword, "", 1.0));
+		nulldoc = SVMCommon.create_example(-2, 0, 0, 0.0,
+				SVMCommon.create_svector(nullword, "", 1.0));
 		avgxlen = 0;
 
 		for (i = 0; i < totdoc; i++) {
-			avgxlen += Math.sqrt(sc.kernel(kernel_parm, docs[i],
+			avgxlen += Math.sqrt(SVMCommon.kernel(kernel_parm, docs[i],
 					docs[i])
 					- 2
-					* sc.kernel(kernel_parm, docs[i], nulldoc)
-					+ sc.kernel(kernel_parm, nulldoc, nulldoc));
+					* SVMCommon.kernel(kernel_parm, docs[i], nulldoc)
+					+ SVMCommon.kernel(kernel_parm, nulldoc, nulldoc));
 		}
 
 		/********free memory**********/
@@ -447,82 +443,6 @@ public class svm_learn {
 		return (avgxlen / totdoc);
 	}
 
-	public boolean kernel_cache_space_available(KERNELCACHE kernel_cache) {
-		if (kernel_cache.elems < kernel_cache.max_elems) {
-			return true;
-		} else {
-			return false;
-		}
-	}
-
-
-	public boolean kernel_cache_check(KERNELCACHE kernel_cache, int docnum) {
-		return (kernel_cache.index[docnum] != -1);
-	}
-
-	public double[] kernel_cache_clean_and_malloc(KERNELCACHE kernel_cache,
-			int docnum) {
-		int result;
-		if ((result = kernel_cache_malloc(kernel_cache)) == -1) {
-			if (kernel_cache_free_lru(kernel_cache)) {
-				result = kernel_cache_malloc(kernel_cache);
-			}
-		}
-
-		kernel_cache.index[docnum] = result;
-		if (result == -1) {
-			return null;
-		}
-
-		kernel_cache.invindex[result] = docnum;
-		kernel_cache.lru[kernel_cache.index[docnum]] = kernel_cache.time;
-
-		return new double[kernel_cache.buffer.length
-				+ (kernel_cache.activenum * kernel_cache.index[docnum])];
-	}
-
-	public int kernel_cache_malloc(KERNELCACHE kernel_cache) {
-		int i;
-		if (kernel_cache_space_available(kernel_cache)) {
-			for (i = 0; i < kernel_cache.max_elems; i++) {
-				if (kernel_cache.occu[i] == 0) {
-					kernel_cache.occu[i] = 1;
-					kernel_cache.elems++;
-					return i;
-				}
-			}
-		}
-
-		return -1;
-	}
-
-	public boolean kernel_cache_free_lru(KERNELCACHE kernel_cache) {
-		int k, least_elem = -1, least_time;
-		least_time = kernel_cache.time + 1;
-
-		for (k = 0; k < kernel_cache.max_elems; k++) {
-			if (kernel_cache.invindex[k] != -1) {
-				if (kernel_cache.lru[k] < least_time) {
-					least_time = kernel_cache.lru[k];
-					least_elem = k;
-				}
-			}
-		}
-
-		if (least_elem != -1) {
-			kernel_cache_free(kernel_cache, least_elem);
-			kernel_cache.index[kernel_cache.invindex[least_elem]] = -1;
-			kernel_cache.invindex[least_elem] = -1;
-			return true;
-		}
-
-		return false;
-	}
-
-	public void kernel_cache_free(KERNELCACHE kernel_cache, int i) {
-		kernel_cache.occu[i] = 0;
-		kernel_cache.elems--;
-	}
 
 	public int compute_index(int[] binfeature, int range, int[] index) {
 		int i, ii;
@@ -542,31 +462,6 @@ public class svm_learn {
 		return ii;
 	}
 
-	public void get_kernel_row(KERNELCACHE kernel_cache, DOC[] docs,
-			int docnum, int totdoc, int[] active2dnum, double[] buffer,
-			KERNELPARM kernel_parm) {
-		int i, j, start;
-		DOC ex;
-		ex = docs[docnum];
-
-		if ((kernel_cache != null) && (kernel_cache.index[docnum] != -1)) {
-			kernel_cache.lru[kernel_cache.index[docnum]] = kernel_cache.time;
-			start = kernel_cache.activenum * kernel_cache.index[docnum];
-			for (i = 0; (j = active2dnum[i]) >= 0; i++) {
-				if (kernel_cache.totdoc2active[j] >= 0) {
-					buffer[j] = kernel_cache.buffer[start
-							+ kernel_cache.totdoc2active[j]];
-				} else {
-					buffer[j] = sc.kernel(kernel_parm, ex, docs[j]);
-				}
-			}
-		} else {
-			for (i = 0; (j = active2dnum[i]) >= 0; i++) {
-				buffer[j] = sc.kernel(kernel_parm, ex, docs[j]);
-			}
-		}
-
-	}
 
 	/**
 	 * update the svm model parmaters ,that is
@@ -709,21 +604,6 @@ public class svm_learn {
 	}
 
 
-
-	public void kernel_cache_reset_lru(KERNELCACHE kernel_cache) {
-		int maxlru = 0, k;
-		for (k = 0; k < kernel_cache.max_elems; k++) {
-			if (maxlru < kernel_cache.lru[k]) {
-				maxlru = kernel_cache.lru[k];
-			}
-		}
-
-		for (k = 0; k < kernel_cache.max_elems; k++) {
-			kernel_cache.lru[k] -= maxlru;
-		}
-
-	}
-
 	public void clear_index(int[] index) {
 		for (int i = 0; i < index.length; i++) {
 			index[i] = -1;
@@ -804,16 +684,8 @@ public class svm_learn {
 		activedoc = 0;
 		for (i = 0; (j = active2dnum[i]) >= 0; i++) {
 			s = label[j];
-			if ((kernel_cache != null) && (cache_only != 0)) {
-				if (kernel_cache.index[j] >= 0) {
-					valid = 1;
-				} else {
-					valid = 0;
-				}
-			} else {
-				valid = 1;
-			}
-
+		    valid = 1;
+			
 			if (valid != 0
 					&& (!((a[j] <= (0 + learn_parm.epsilon_a)) && (s < 0)))
 					&& (!((a[j] >= (learn_parm.svm_cost[j] - learn_parm.epsilon_a)) && (s > 0)))
@@ -937,13 +809,6 @@ public class svm_learn {
 
 	}
 
-	public void cache_multiple_kernel_rows(KERNELCACHE kernel_cache,
-			DOC[] docs, int[] key, int varnum, KERNELPARM kernel_parm) {
-		int i;
-		for (i = 0; i < varnum; i++) { /* fill up kernel cache */
-			cache_kernel_row(kernel_cache, docs, key[i], kernel_parm);
-		}
-	}
 
 	/**
 	 * solve the dual problem
@@ -995,7 +860,7 @@ public class svm_learn {
 		for (i = 0; i < varnum; i++) {
 			a[working2dnum[i]] = a_v[i];
 		}
-
+		
 	}
 
 	public void compute_matrices_for_optimization(DOC[] docs, int[] label,
@@ -1045,15 +910,14 @@ public class svm_learn {
 			qp.opt_low[i] = 0;
 			qp.opt_up[i] = learn_parm.svm_cost[ki];
 		
-			kernel_temp = sc.kernel(kernel_parm, docs[ki], docs[ki]);
+			kernel_temp = SVMCommon.kernel(kernel_parm, docs[ki], docs[ki]);
 		
 			qp.opt_g0[i] -= (kernel_temp * a[ki] * (double) label[ki]);
 			qp.opt_g[varnum * i + i] = kernel_temp;
 
 			for (j = i + 1; j < varnum; j++) {
 				kj = key[j];
-				kernel_temp = sc
-						.kernel(kernel_parm, docs[ki], docs[kj]);
+				kernel_temp = SVMCommon.kernel(kernel_parm, docs[ki], docs[kj]);
 
 				qp.opt_g0[i] -= (kernel_temp * a[kj] * (double) label[kj]);
 				qp.opt_g0[j] -= (kernel_temp * a[ki] * (double) label[ki]);
@@ -1167,7 +1031,7 @@ public class svm_learn {
 			double[] a, SHRINKSTATE shrink_state, double[] lin, double[] c,
 			int totdoc, int totwords, int iteration, LEARNPARM learn_parm,
 			int[] inconsistent, DOC[] docs, KERNELPARM kernel_parm,
-			KERNELCACHE kernel_cache, MODEL model, double[] aicache,
+			 MODEL model, double[] aicache,
 			double[] weights) {
 		int i, j, ii, jj, t;
 		int[] changed2dnum, inactive2dnum;
@@ -1187,7 +1051,7 @@ public class svm_learn {
 			for (i = 0; i < totdoc; i++) {
 				if (a[i] != a_old[i]) {
 					for (f = docs[i].fvec; (f != null); f = f.next) {
-						svm_common.add_vector_ns(weights, f, f.factor
+						SVMCommon.add_vector_ns(weights, f, f.factor
 								* ((a[i] - a_old[i]) * (double) label[i]));
 					}
 					a_old[i] = a[i];
@@ -1197,59 +1061,17 @@ public class svm_learn {
 				if (shrink_state.active[i] == 0) {
 					for (f = docs[i].fvec; f != null; f = f.next) {
 						lin[i] = shrink_state.last_lin[i] + f.factor
-								* svm_common.sprod_ns(weights, f);
+								* SVMCommon.sprod_ns(weights, f);
 					}
 				}
 				shrink_state.last_lin[i] = lin[i];
 			}
 			for (i = 0; i < totdoc; i++) {
 				for (f = docs[i].fvec; f != null; f = f.next) {
-					svm_common.mult_vector_ns(weights, f, 0.0); /*
-																 * set weights
-																 * back to zero
-																 */
+					SVMCommon.mult_vector_ns(weights, f, 0.0); /* set weights back to zero*/
 				}
 			}
-		} else {
-			changed = new int[totdoc];
-			changed2dnum = new int[totdoc];
-			inactive = new int[totdoc];
-			inactive2dnum = new int[totdoc + 11];
-
-			for (t = shrink_state.deactnum - 1; (t >= 0)
-					&& ((shrink_state.a_history[t] != null)); t--) {
-				if (SVMCommon.verbosity >= 2) {
-					System.out.println(t + "..");
-				}
-				a_old = shrink_state.a_history[t];
-				for (i = 0; i < totdoc; i++) {
-
-					if ((shrink_state.active[i] == 0)
-							&& (shrink_state.inactive_since[i] == t)) {
-						inactive[i] = 1;
-					} else {
-						inactive[i] = 0;
-					}
-
-					if (a[i] != a_old[i]) {
-						changed[i] = 1;
-					} else {
-						changed[i] = 0;
-					}
-				}
-				compute_index(inactive, totdoc, inactive2dnum);
-				compute_index(changed, totdoc, changed2dnum);
-
-				for (ii = 0; (i = changed2dnum[ii]) >= 0; ii++) {
-					get_kernel_row(kernel_cache, docs, i, totdoc,
-							inactive2dnum, aicache, kernel_parm);
-					for (jj = 0; (j = inactive2dnum[jj]) >= 0; jj++) {
-						kernel_val = aicache[j];
-						lin[j] += (((a[i] * kernel_val) - (a_old[i] * kernel_val)) * (double) label[i]);
-					}
-				}
-			}
-		}
+		} 
 
 		maxdiff = 0;
 
@@ -1762,68 +1584,6 @@ public class svm_learn {
 		return (activenum);
 	}
 
-	/**
-	 * Remove numshrink columns in the cache which correspond to examples marked
-	 * 0 in after.
-	 */
-	public void kernel_cache_shrink(KERNELCACHE kernel_cache, int totdoc,
-			int numshrink, int[] after)
-	{
-		int i, j, jj, from = 0, to = 0, scount;
-		int[] keep;
-
-		if (SVMCommon.verbosity >= 2) {
-			System.out.println(" Reorganizing cache...");
-		}
-
-		keep = new int[totdoc];
-		for (j = 0; j < totdoc; j++) {
-			keep[j] = 1;
-		}
-		scount = 0;
-		for (jj = 0; (jj < kernel_cache.activenum) && (scount < numshrink); jj++) {
-			j = kernel_cache.active2totdoc[jj];
-			if (after[j] == 0) {
-				scount++;
-				keep[j] = 0;
-			}
-		}
-
-		for (i = 0; i < kernel_cache.max_elems; i++) {
-			for (jj = 0; jj < kernel_cache.activenum; jj++) {
-				j = kernel_cache.active2totdoc[jj];
-				if (keep[j] == 0) {
-					from++;
-				} else {
-					kernel_cache.buffer[to] = kernel_cache.buffer[from];
-					to++;
-					from++;
-				}
-			}
-		}
-
-		kernel_cache.activenum = 0;
-		for (j = 0; j < totdoc; j++) {
-			if ((keep[j] != 0) && (kernel_cache.totdoc2active[j] != -1)) {
-				kernel_cache.active2totdoc[kernel_cache.activenum] = j;
-				kernel_cache.totdoc2active[j] = kernel_cache.activenum;
-				kernel_cache.activenum++;
-			} else {
-				kernel_cache.totdoc2active[j] = -1;
-			}
-		}
-
-		kernel_cache.max_elems = (kernel_cache.buffsize / kernel_cache.activenum);
-		if (kernel_cache.max_elems > totdoc) {
-			kernel_cache.max_elems = totdoc;
-		}
-
-		if (SVMCommon.verbosity >= 2) {
-			System.out.println("done.");
-			System.out.println(" Cache-size in rows = "
-					+ kernel_cache.max_elems);
-		}
-	}
 
 	/** Throw out examples with multipliers at upper bound. This  corresponds to the -i 1 option. 
 	 ATTENTION: this is just a heuristic for finding a close  to minimum number of examples to exclude to 
@@ -1926,39 +1686,36 @@ public class svm_learn {
 			KERNELPARM kernel_parm,
 			SHRINKSTATE shrink_state, MODEL model, double[] a, double[] lin,
 			double[] c) {
-	
-		int[] chosen;
-		int[] key;
-		int i, j, jj;
-		int[] last_suboptimal_at;
-		int noshrink;
-		int[] unlabeled;
 
-		int[] inconsistent;
-		int choosenum, already_chosen = 0, iteration;
-		int misclassified, supvecnum = 0;
-		int[] active2dnum;
-		int inactivenum;
-		int[] working2dnum;
-		int[] selexam;
-		int[] ignore;
-		int activenum, retrain, maxslackid, slackset, jointstep;
-		double criterion, eq_target;
-		double[] a_old;
-		double[] alphaslack;
 		double t0 = 0, t1 = 0, t2 = 0, t3 = 0, t4 = 0, t5 = 0, t6 = 0; /* timing */
 		double epsilon_crit_org;
 		double bestmaxdiff;
 		int bestmaxdiffiter, terminate;
-
+		int i, j, jj;
+		int choosenum, already_chosen = 0, iteration;
+		int misclassified, supvecnum = 0;
+		int noshrink;
+		int inactivenum;
+		int activenum, retrain, maxslackid, slackset, jointstep;
+		double criterion, eq_target;
+		
+		int[] chosen;
+		int[] key;
+		int[] last_suboptimal_at;
+		int[] unlabeled;
+		int[] inconsistent;
+		int[] active2dnum;
+		int[] working2dnum;
+		int[] selexam;
+		int[] ignore;
+		double[] a_old;
+		double[] alphaslack;
 		double[] selcrit; /* buffer for sorting */
-		double[] aicache; /* buffer to keep one row of hessian */
-		double[] weights; /* buffer for weight vector in linear case */
+		double[] aicache=null; /* buffer to keep one row of hessian */
+		double[] weights=null; /* buffer for weight vector in linear case */
 		QP qp = new QP(); /* buffer for one quadratic program */
-		double[] slack; /*
-						 * vector of slack variables for optimization with
-						 * shared slacks
-						 */
+		double[] slack; /* vector of slack variables for optimization with shared slacks*/
+		
 		SVMCommon.verbosity = 0;
 		epsilon_crit_org = learn_parm.epsilon_crit; /* save org */
 		if (kernel_parm.kernel_type == SVMCommon.LINEAR) {
@@ -1992,11 +1749,9 @@ public class svm_learn {
 		qp.opt_up = new double[learn_parm.svm_maxqpsize];
 
 		if (kernel_parm.kernel_type == SVMCommon.LINEAR) {
-			weights = svm_common.create_nvector(totwords);
-			svm_common.clear_nvector(weights, totwords);
-		} else {
-			weights = null;
-		}
+			weights = SVMCommon.create_nvector(totwords);
+			//svm_common.clear_nvector(weights, totwords);
+		} 
 
 		maxslackid = 0;
 
@@ -2048,24 +1803,6 @@ public class svm_learn {
                 selcrit[ci]=0.0;
              }
 			 
-	
-
-			if (SVMCommon.verbosity >= 0) {
-				//if (iteration % 51 == 0) {
-					//System.out.println("Iteration " + iteration + ": ");
-				//	logger.info("Iteration " + iteration + ": ");
-				//}
-			} else if (SVMCommon.verbosity == 1) {
-				System.out.println(".");
-			}
-
-			if (SVMCommon.verbosity >= 2) {
-				t0 = SVMCommon.get_runtime();
-			}
-
-			if (SVMCommon.verbosity >= 3) {
-				System.out.println("\nSelecting working set... ");
-			}
 
 			if (learn_parm.svm_newvarsinqp > learn_parm.svm_maxqpsize) {
 				learn_parm.svm_newvarsinqp = learn_parm.svm_maxqpsize;
@@ -2109,23 +1846,17 @@ public class svm_learn {
 										learn_parm.svm_maxqpsize - choosenum,
 										learn_parm.svm_newvarsinqp) / 2),
 								learn_parm, inconsistent, active2dnum,
-								working2dnum, selcrit, selexam, kernel_cache,
+								working2dnum, selcrit, selexam,
 								1, key, chosen);
 
 						choosenum += already_chosen;
 					}
 					
-					choosenum += select_next_qp_subproblem_grad(
-							label,
-							unlabeled,
-							a,
-							lin,
-							c,
-							totdoc,
+					choosenum += select_next_qp_subproblem_grad(label,unlabeled,a,lin,c,totdoc,
 							Math.min(learn_parm.svm_maxqpsize - choosenum,
 									learn_parm.svm_newvarsinqp - already_chosen),
 							learn_parm, inconsistent, active2dnum,
-							working2dnum, selcrit, selexam, kernel_cache, 0,
+							working2dnum, selcrit, selexam, 0,
 							key, chosen);
 				} else { /* do a step with all examples from same slack set */
 					if (SVMCommon.verbosity >= 2) {
@@ -2153,7 +1884,7 @@ public class svm_learn {
 							unlabeled, a, lin, c, totdoc,
 							learn_parm.svm_maxqpsize, learn_parm, ignore,
 							active2dnum, working2dnum, selcrit, selexam,
-							kernel_cache, 0, key, chosen);
+							 0, key, chosen);
 					learn_parm.biased_hyperplane = 0;
 				}
 			} else { /*
@@ -2165,7 +1896,7 @@ public class svm_learn {
 						a, lin, c, totdoc, Math.min(learn_parm.svm_maxqpsize
 								- choosenum, learn_parm.svm_newvarsinqp),
 						learn_parm, inconsistent, active2dnum, working2dnum,
-						selcrit, selexam, kernel_cache, key, chosen, iteration);
+						selcrit, selexam,  key, chosen, iteration);
 			}
 
 			if (SVMCommon.verbosity >= 2) {
@@ -2237,7 +1968,7 @@ public class svm_learn {
 			}
 
 			update_linear_component(docs, label, active2dnum, a, a_old,
-					working2dnum, totdoc, totwords, kernel_parm, kernel_cache,
+					working2dnum, totdoc, totwords, kernel_parm,
 					lin, aicache, weights);
 			compute_shared_slacks(docs, label, a, lin, c, active2dnum,
 					learn_parm, slack, alphaslack);
@@ -2306,7 +2037,7 @@ public class svm_learn {
 				t1 = SVMCommon.get_runtime();
 				reactivate_inactive_examples(label, unlabeled, a, shrink_state,
 						lin, c, totdoc, totwords, iteration, learn_parm,
-						inconsistent, docs, kernel_parm, kernel_cache, model,
+						inconsistent, docs, kernel_parm, model,
 						aicache, weights);
 				/* Update to new active variables. */
 				activenum = compute_index(shrink_state.active, totdoc,
@@ -2373,35 +2104,26 @@ public class svm_learn {
 								Math.max((int) (totdoc / 500), 100)), a,
 						inconsistent);
 				inactivenum = totdoc - activenum;
-				/*
-				if ((kernel_cache != null)
-						&& (supvecnum > kernel_cache.max_elems)
-						&& ((kernel_cache.activenum - activenum) > Math.max(
-								(int) (activenum / 10), 500))) {
-					kernel_cache_shrink(kernel_cache, totdoc, Math.min(
-							(kernel_cache.activenum - activenum),
-							(kernel_cache.activenum - supvecnum)),
-							shrink_state.active);
-				}
-				*/
 			}
 
 		}//end loop for
 
-		alphaslack=null;
-		slack=null;
+		//free memory
 		chosen=null;
+		key=null;
+		last_suboptimal_at=null;
 		unlabeled=null;
 		inconsistent=null;
-		ignore=null;
-		last_suboptimal_at=null;
-		key=null;
-		selcrit=null;
-		selexam=null;
-		a_old=null;
-		aicache=null;
-		working2dnum=null;
 		active2dnum=null;
+		working2dnum=null;
+		selexam=null;
+		ignore=null;
+		a_old=null;
+		alphaslack=null;
+		selcrit=null;
+		aicache=null; 
+		weights=null; 
+		slack=null; 
 		if(qp!=null)
 		{
 		  qp.opt_ce=null;
@@ -2412,11 +2134,9 @@ public class svm_learn {
 		  qp.opt_up=null;
 		}
 		qp=null;
+		//end free memory
 		
-		if(weights!=null)
-		{
-			weights=null;
-		}
+
 		learn_parm.epsilon_crit = epsilon_crit_org; /* restore org */
 		model.maxdiff = maxdiff;
 
@@ -2560,15 +2280,15 @@ public class svm_learn {
 		KERNELPARM kernel_parm = model.kernel_parm;
 		nullword[0] = new WORD();
 		nullword[0].wnum = 0;
-		nulldoc = svm_common.create_example(-2, 0, 0, 0.0,
-				svm_common.create_svector(nullword, "", 1.0));
+		nulldoc = SVMCommon.create_example(-2, 0, 0, 0.0,
+				SVMCommon.create_svector(nullword, "", 1.0));
 
 		for (j = 1; j < model.sv_num; j++) {
-			xlen = Math.sqrt(sc.kernel(kernel_parm, model.supvec[j],
+			xlen = Math.sqrt(SVMCommon.kernel(kernel_parm, model.supvec[j],
 					model.supvec[j])
 					- 2
-					* sc.kernel(kernel_parm, model.supvec[j], nulldoc)
-					+ sc.kernel(kernel_parm, nulldoc, nulldoc));
+					* SVMCommon.kernel(kernel_parm, model.supvec[j], nulldoc)
+					+ SVMCommon.kernel(kernel_parm, nulldoc, nulldoc));
 			if (xlen > maxxlen) {
 				maxxlen = xlen;
 			}
@@ -2590,7 +2310,7 @@ public class svm_learn {
 
 		maxxlen = 0;
 		for (i = 0; i < totdoc; i++) {
-			xlen = Math.sqrt(sc.kernel(kernel_parm, docs[i], docs[i]));
+			xlen = Math.sqrt(SVMCommon.kernel(kernel_parm, docs[i], docs[i]));
 			if (xlen > maxxlen) {
 				maxxlen = xlen;
 			}
@@ -2633,15 +2353,15 @@ public class svm_learn {
 
 		nullword[0] = new WORD();
 		nullword[0].wnum = 0;
-		nulldoc = svm_common.create_example(-2, 0, 0, 0.0,
-				svm_common.create_svector(nullword, "", 1.0));
+		nulldoc = SVMCommon.create_example(-2, 0, 0, 0.0,
+				SVMCommon.create_svector(nullword, "", 1.0));
 
 		maxxlen = 0;
 		for (i = 0; i < totdoc; i++) {
 	
-			xlen = Math.sqrt(sc.kernel(kernel_parm, docs[i], docs[i])
-					- 2 * sc.kernel(kernel_parm, docs[i], nulldoc)
-					+ sc.kernel(kernel_parm, nulldoc, nulldoc));
+			xlen = Math.sqrt(SVMCommon.kernel(kernel_parm, docs[i], docs[i])
+					- 2 * SVMCommon.kernel(kernel_parm, docs[i], nulldoc)
+					+ SVMCommon.kernel(kernel_parm, nulldoc, nulldoc));
 			if (xlen > maxxlen) {
 				maxxlen = xlen;
 			}
@@ -2665,7 +2385,7 @@ public class svm_learn {
 		/* follows chapter 5.6.4 in [Vapnik/95] */
 
 		if (w < 0) {
-			w = sc.model_length_s(model);
+			w = SVMCommon.model_length_s(model);
 		}
 		if (R < 0) {
 			R = estimate_sphere(model);
@@ -2726,21 +2446,12 @@ public class svm_learn {
 				}
 				if ((learn_parm.rho * a[i] * r_delta_sq + xi) >= 1.0) {
 					if (learn_parm.xa_depth > 0) { /* makes assumptions */
-						sim = distribute_alpha_t_greedily(
-								sv2dnum,
-								svnum,
-								docs,
-								a,
-								i,
-								label,
-								kernel_parm,
-								learn_parm,
+						sim = distribute_alpha_t_greedily(sv2dnum,svnum,
+								docs,a,i,label,kernel_parm,learn_parm,
 								(double) ((1.0 - xi - a[i] * r_delta_sq) / (2.0 * a[i])));
 					}
 					if ((learn_parm.xa_depth == 0)
-							|| ((a[i]
-									* sc.kernel(kernel_parm, docs[i],
-											docs[i]) + a[i] * 2.0 * sim + xi) >= 1.0)) {
+							|| ((a[i]* SVMCommon.kernel(kernel_parm, docs[i],docs[i]) + a[i] * 2.0 * sim + xi) >= 1.0)) {
 						looerror++;
 						if (label[i] > 0) {
 							looposerror++;
@@ -2783,7 +2494,7 @@ public class svm_learn {
 		trow = new double[svnum];
 
 		for (k = 0; k < svnum; k++) {
-			trow[k] = sc.kernel(kernel_parm, docs[docnum],
+			trow[k] = SVMCommon.kernel(kernel_parm, docs[docnum],
 					docs[sv2dnum[k]]);
 		}
 
@@ -2811,7 +2522,7 @@ public class svm_learn {
 
 				if (skip == 0) {
 					val = init_val_sq;
-					val += sc.kernel(kernel_parm, docs[sv2dnum[i]],
+					val += SVMCommon.kernel(kernel_parm, docs[sv2dnum[i]],
 							docs[sv2dnum[i]]);
 					for (j = 0; j < d; j++) {
 						val += 2.0 * cache[i + j * svnum];
@@ -2832,7 +2543,7 @@ public class svm_learn {
 			}
 			if (allskip == 0) {
 				for (k = 0; k < svnum; k++) {
-					cache[d * svnum + k] = sc.kernel(kernel_parm,
+					cache[d * svnum + k] = SVMCommon.kernel(kernel_parm,
 							docs[sv2dnum[best_ex[d]]], docs[sv2dnum[k]]);
 				}
 			}
@@ -2926,47 +2637,6 @@ public class svm_learn {
 				+ " asum=" + asum);
 	}
 
-	public static KERNELCACHE kernel_cache_init(int totdoc, int buffsize) {
-		int i;
-		KERNELCACHE kernel_cache = new KERNELCACHE();
-
-		kernel_cache.index = new int[totdoc];
-		kernel_cache.occu = new int[totdoc];
-		kernel_cache.lru = new int[totdoc];
-		kernel_cache.invindex = new int[totdoc];
-		kernel_cache.active2totdoc = new int[totdoc];
-		kernel_cache.totdoc2active = new int[totdoc];
-		kernel_cache.buffer = new double[buffsize * 1024 * 1024];
-
-		kernel_cache.buffsize = buffsize * 1024 * 1024;
-
-		kernel_cache.max_elems = kernel_cache.buffsize / totdoc;
-		if (kernel_cache.max_elems > totdoc) {
-			kernel_cache.max_elems = totdoc;
-		}
-
-
-		kernel_cache.elems = 0; /* initialize cache */
-		for (i = 0; i < totdoc; i++) {
-			kernel_cache.index[i] = -1;
-			kernel_cache.lru[i] = 0;
-		}
-		for (i = 0; i < totdoc; i++) {
-			kernel_cache.occu[i] = 0;
-			kernel_cache.invindex[i] = -1;
-		}
-
-		kernel_cache.activenum = totdoc;
-		;
-		for (i = 0; i < totdoc; i++) {
-			kernel_cache.active2totdoc[i] = i;
-			kernel_cache.totdoc2active[i] = i;
-		}
-
-		kernel_cache.time = 0;
-
-		return (kernel_cache);
-	}
 
 	public static void main(String[] args) {
 
