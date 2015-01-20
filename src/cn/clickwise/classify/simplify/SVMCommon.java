@@ -66,7 +66,7 @@ public class SVMCommon {
 		  {
 			  if(sv.words[i]!=null)
 			  {
-			    nsv.words[i]=sv.words[i].copy_word();
+			    nsv.words[i]=copy_word(sv.words[i]);
 			  }
 			  else
 			  {
@@ -179,4 +179,217 @@ public class SVMCommon {
 		hc = ((double) c) ;
 		return hc;
 	}
+	
+	public static double[] create_nvector(int n) {
+		double[] vector;
+		vector = new double[n + 1];
+		return vector;
+	}
+	
+	public  static double kernel(KERNELPARM kernel_parm, DOC a, DOC b) {
+		// System.out.println("in kernel");
+		double sum = 0;
+		SVECTOR fa, fb;
+		if (kernel_parm.kernel_type == GRAM) {
+			// System.out.println("kernel_type:" + GRAM);
+			if ((a.kernelid >= 0) && (b.kernelid >= 0)) {
+
+				return kernel_parm.gram_matrix.element[Math.max(a.kernelid,
+						b.kernelid)][Math.min(a.kernelid, b.kernelid)];
+			} else {
+				return 0;
+			}
+		}
+		// System.out.println("fa pro");
+		for (fa = a.fvec; fa != null; fa = fa.next) {
+			for (fb = b.fvec; fb != null; fb = fb.next) {
+
+				if (fa.kernel_id == fb.kernel_id) {
+					// if (sum > 0)
+					// System.out.println("sum:" + sum);
+					sum += fa.factor * fb.factor
+							* single_kernel(kernel_parm, fa, fb);
+				}
+			}
+		}
+
+		return sum;
+	}
+	
+	public  static double single_kernel(KERNELPARM kernel_parm, SVECTOR a,
+			SVECTOR b) {
+
+		switch (kernel_parm.kernel_type) {
+		case LINEAR:
+			return sprod_ss(a, b);
+		case POLY:
+			return Math.pow(kernel_parm.coef_lin * sprod_ss(a, b)
+					+ kernel_parm.coef_const, kernel_parm.poly_degree);
+		case RBF:
+			if (a.twonorm_sq < 0) {
+				a.twonorm_sq = sprod_ss(a, a);
+			} else if (b.twonorm_sq < 0) {
+				b.twonorm_sq = sprod_ss(b, b);
+			}
+			return Math.exp(-kernel_parm.rbf_gamma
+					* (a.twonorm_sq - 2 * sprod_ss(a, b) + b.twonorm_sq));
+		case SIGMOID:
+			return Math.tanh(kernel_parm.coef_lin * sprod_ss(a, b)
+					+ kernel_parm.coef_const);
+		case CUSTOM:
+			return 0;
+		default:
+			System.out.println("Error: Unknown kernel function");
+			System.exit(1);
+
+		}
+
+		return 0;
+	}
+	
+	public static double sprod_ss(SVECTOR a, SVECTOR b) {
+		double sum = 0;
+		WORD[] ai, bj;
+		ai = a.words;
+		bj = b.words;
+
+		int i = 0;
+		int j = 0;
+		
+		while ((i < ai.length) && (j < bj.length)) {
+			if (ai[i] == null || bj[j] == null) {
+				break;
+			}
+			// logger.info("i:"+i+"  j:"+j);
+			if (ai[i].wnum > bj[j].wnum) {
+				j++;
+			} else if (ai[i].wnum < bj[j].wnum) {
+				i++;
+			} else {
+
+				sum += ai[i].weight * bj[j].weight;
+				i++;
+				j++;
+			}
+		}
+
+		return sum;
+	}
+	
+	public static void add_vector_ns(double[] vec_n, SVECTOR vec_s,
+			double faktor) {
+		WORD[] ai;
+		ai = vec_s.words;
+		for (int i = 0; i < ai.length; i++) {
+			if (ai[i] != null) {
+				vec_n[ai[i].wnum] += (faktor * ai[i].weight);
+				//vec_n[ai[i].wnum]=WeightsUpdate.sum(vec_n[ai[i].wnum], WeightsUpdate.mul(faktor, ai[i].weight));
+			} else {
+				continue;
+			}
+		}
+	}
+	
+	public static double sprod_ns(double[] vec_n, SVECTOR vec_s) {
+		double sum = 0;
+		WORD[] ai;
+		ai = vec_s.words;
+
+		for (int i = 0; i < ai.length; i++) {
+			if (ai[i] != null) {
+				
+				sum += (vec_n[ai[i].wnum] * ai[i].weight);
+			} else {
+				continue;
+			}
+		}
+
+		return sum;
+	}
+	
+	public static void mult_vector_ns(double[] vec_n, SVECTOR vec_s,
+			double faktor) {
+		WORD[] ai;
+		ai = vec_s.words;
+		for (int i = 0; i < ai.length; i++) {
+			if (ai[i] == null) {
+				continue;
+			}
+			vec_n[ai[i].wnum] *= (faktor * ai[i].weight);
+		}
+
+	}
+	
+	public static DOC create_example(int docnum, int queryid, int slackid,
+			double costfactor, SVECTOR fvec) {
+
+		DOC example = new DOC();
+
+		example.docnum = docnum;
+		example.kernelid = docnum;
+		example.queryid = queryid;
+		example.slackid = slackid;
+		example.costfactor = costfactor;
+
+		example.fvec = fvec;
+
+		return example;
+	}
+	
+	public static SVECTOR create_svector(WORD[] words, String userdefined,
+			double factor) {
+		SVECTOR vec;
+		int  i;
+
+
+		vec = new SVECTOR();
+		vec.words = new WORD[words.length];
+
+		for (i = 0; i < words.length; i++) {
+			vec.words[i] = copy_word(words[i]);
+		}
+
+		vec.twonorm_sq = -1;
+
+		if (userdefined != null) {
+			vec.userdefined = userdefined;
+		} else {
+			vec.userdefined = null;
+		}
+
+		vec.kernel_id = 0;
+		vec.next = null;
+		vec.factor = factor;
+		return vec;
+	}
+	
+	  public static WORD copy_word(WORD w)
+	  {
+		  WORD nw=new WORD();
+		  nw.weight=w.weight;
+		  nw.wnum=w.wnum;
+		  return nw;
+	  }
+	  
+	  /** compute length of weight vector */
+	  public static double model_length_s(MODEL model)
+		{
+			int i, j;
+			double sum = 0, alphai;
+			DOC supveci;
+			KERNELPARM kernel_parm = model.kernel_parm;
+
+			for (i = 1; i < model.sv_num; i++) {
+				alphai = model.alpha[i];
+				supveci = model.supvec[i];
+				for (j = 1; j < model.sv_num; j++) {
+					sum += alphai * model.alpha[j]
+							* kernel(kernel_parm, supveci, model.supvec[j]);
+				}
+			}
+			return (Math.sqrt(sum));
+		}
+	  
+
+		
 }
