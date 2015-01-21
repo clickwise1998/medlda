@@ -108,8 +108,9 @@ public class svm_common {
 	public static SVECTOR create_svector(WORD[] words, String userdefined,
 			double factor) {
 		SVECTOR vec;
-		int  i;
+		int fnum, i;
 
+		fnum = 0;
 
 		vec = new SVECTOR();
 		vec.words = new WORD[words.length];
@@ -369,7 +370,7 @@ public class svm_common {
 	}
 
 	public  DOC[] read_documents(String docfile, double[] label) {
-		String line;
+		String line, comment;
 		//PrintWriter pw = null;
 		//FileWriter fw = null;
 		DOC[] docs;
@@ -380,7 +381,9 @@ public class svm_common {
 		} catch (Exception e) {
 		}
 		*/
-		int dnum = 0;
+		int dnum = 0, wpos, dpos = 0, dneg = 0, dunlab = 0, queryid, slackid, max_docs;
+		int max_words_doc, ll;
+		double doc_label, costfactor;
 		FileReader fr = null;
 		BufferedReader br = null;
 
@@ -446,7 +449,12 @@ public class svm_common {
 				}
 				
 				/* printf("docnum=%ld: Class=%f ",dnum,doc_label); */
-
+				if (read_doc_label > 0)
+					dpos++;
+				if (read_doc_label < 0)
+					dneg++;
+				if (read_doc_label == 0)
+					dunlab++;
 				if ((read_wpos > 1)
 						&& ((words[read_wpos - 2]).wnum > read_totwords))
 					read_totwords = words[read_wpos - 2].wnum;
@@ -486,8 +494,10 @@ public class svm_common {
 	}
 
 	public  WORD[] parse_document(String line, int max_words_doc) {
-		int wpos = 0;
-
+		int wpos = 0, pos;
+		int wnum;
+		double weight;
+		String featurepair, junk;
 		if (SSO.tioe(line)) {
 			return null;
 		}
@@ -502,7 +512,7 @@ public class svm_common {
 		read_slackid = 0;
 		read_costfactor = 1;
 
-	
+		pos = 0;
 		read_comment = "";
 		String dline = "";
 		/* printf("Comment: '%s'\n",(*comment)); */
@@ -566,8 +576,10 @@ public class svm_common {
 	}
 
 	public WORD[] parse_big_document(String line, int max_words_doc) {
-		int wpos = 0;
-
+		int wpos = 0, pos = 0;
+		int wnum;
+		double weight;
+		String featurepair, junk;
 		if (SSO.tioe(line)) {
 			return null;
 		}
@@ -703,7 +715,7 @@ public class svm_common {
 		String line = "";
 		int temp_docs = 0;
 		int temp_words = 0;
-
+		String[] seg_arr = null;
 		int wcount = 0;
 		String token = "";
 		try {
