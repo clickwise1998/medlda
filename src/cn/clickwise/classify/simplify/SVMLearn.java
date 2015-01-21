@@ -640,8 +640,7 @@ public class SVMLearn {
 		int choosenum, i, j, k, activedoc, inum, valid;
 		double s;
 
-		for (inum = 0; working2dnum[inum] >= 0; inum++)
-			;
+		for (inum = 0; working2dnum[inum] >= 0; inum++);
 	
 		choosenum = 0;
 		activedoc = 0;
