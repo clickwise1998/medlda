@@ -2163,7 +2163,7 @@ public class svm_learn {
 		// logger.info("Running optimizer...");
 
 		/* call the qp-subsolver */
-		svm_hideo shid = new svm_hideo();
+		SVMHideo shid = new SVMHideo();
 
 		a_v = shid.optimize_qp(qp, epsilon_crit_target,
 				learn_parm.svm_maxqpsize, (model.b), learn_parm);
