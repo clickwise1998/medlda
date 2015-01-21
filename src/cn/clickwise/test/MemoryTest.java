@@ -5,7 +5,7 @@ public class MemoryTest {
 	public static void main(String[] args)
 	{
 		
-		if(args.length!=1)
+		if(args.length!=2)
 		{
 			System.err.println("Usage:<word num> <test type>" +
 					"word num:声明的单词个数" +
