@@ -48,5 +48,14 @@ public class DOC {
 		
 		return str;
 	}
+	
+	public void free()
+	{
+		lvec=null;
+		if(fvec!=null)
+		{
+			fvec.destroy();
+		}
+	}
 
 }

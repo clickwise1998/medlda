@@ -40,13 +40,12 @@ public class svm_struct_learn {
 
 	private static Logger logger = Logger.getLogger(svm_struct_learn.class);
 	
-	public svm_common sc=null;
+	
 	
 	public svm_struct_api ssa=null;
 	
 	public svm_struct_learn()
 	{
-	  sc=new svm_common();	
 	  ssa=svm_struct_api_factory.getSvmStructApi();
 	}
 
@@ -64,19 +63,20 @@ public class svm_struct_learn {
 	 * @param sm
 	 * @param alg_type
 	 */
-	public void svm_learn_struct_joint(SAMPLE sample, STRUCT_LEARN_PARM sparm,
-			LEARN_PARM lparm, KERNEL_PARM kparm, STRUCTMODEL sm, int alg_type) {
+	public void svm_learn_struct_joint(SAMPLE sample, STRUCTLEARNPARM sparm,
+			LEARNPARM lparm, KERNELPARM kparm, STRUCTMODEL sm, int alg_type) {
 		int i, j;
 		int numIt = 0;
 		// int argmax_count=0;
 		argmax_count_g = 0;
+		rhs_i_g = 0;
+		rhs_g = 0;
+		
 		int totconstraints = 0;
 		int kernel_type_org;
 		double epsilon, epsilon_cached;
 		double lhsXw;
 		// double rhs_i;
-		rhs_i_g = 0;
-		rhs_g = 0;
 		// double rhs=0;
 		double slack, ceps;
 		double dualitygap, modellength, alphasum;
@@ -148,7 +148,7 @@ public class svm_struct_learn {
 		}
 
 		kparm.gram_matrix = null;
-		if ((alg_type == svm_struct_common.ONESLACK_DUAL_ALG)|| (alg_type == svm_struct_common.ONESLACK_DUAL_CACHE_ALG))
+		if ((alg_type == SVMStructCommon.ONESLACK_DUAL_ALG)|| (alg_type == SVMStructCommon.ONESLACK_DUAL_CACHE_ALG))
 			kparm.gram_matrix = init_kernel_matrix(cset, kparm);
 
 		/* set initial model and slack variables */
@@ -191,7 +191,7 @@ public class svm_struct_learn {
 		/**********************/
 		do { /* iteratively find and add constraints to working set */
 
-			if (svm_struct_common.struct_verbosity >= 1) {
+			if (SVMStructCommon.struct_verbosity >= 1) {
 				logger.info("in loop Iter " + (++numIt) + ": ");
 				System.out.println("in loop Iter " + (numIt) + ": ");
 			}
@@ -349,7 +349,7 @@ public class svm_struct_learn {
 				//System.out.println("kernel type is " + kparm.kernel_type);
 				if (kparm.kernel_type == svm_common.LINEAR) {
 					// logger.info("kernel type is linear and lhs+n="+lhs_n.toString());
-					lhs_g = svm_common.create_svector_n_r(lhs_n, sm.sizePsi,null, 1.0,svm_struct_common.COMPACT_ROUNDING_THRESH);
+					lhs_g = svm_common.create_svector_n_r(lhs_n, sm.sizePsi,null, 1.0,SVMStructCommon.COMPACT_ROUNDING_THRESH);
 					// logger.info("kernel type is linear and lhs="+lhs_g.toString());
 				}
 				doc = svm_common.create_example(cset.m, 0, 1, 1, lhs_g);
@@ -397,18 +397,18 @@ public class svm_struct_learn {
 				cset.m++;
 				totconstraints++;
 				if (alg_type == ONESLACK_DUAL_ALG) {
-					if (svm_struct_common.struct_verbosity >= 2)
+					if (SVMStructCommon.struct_verbosity >= 2)
 						rt2 = svm_common.get_runtime();
 					kparm.gram_matrix = update_kernel_matrix(kparm.gram_matrix,cset.m - 1, cset, kparm);
-					if (svm_struct_common.struct_verbosity >= 2)
+					if (SVMStructCommon.struct_verbosity >= 2)
 						rt_kernel += Math.max(svm_common.get_runtime() - rt2, 0);
 				}
 
 				/**** get new QP solution ****/
-				if (svm_struct_common.struct_verbosity >= 1) {
+				if (SVMStructCommon.struct_verbosity >= 1) {
 					// logger.info("*");
 				}
-				if (svm_struct_common.struct_verbosity >= 2)
+				if (SVMStructCommon.struct_verbosity >= 2)
 					rt2 = svm_common.get_runtime();
 				/*
 				 * set svm precision so that higher than eps of most violated
@@ -426,7 +426,7 @@ public class svm_struct_learn {
 				svmModel = new MODEL();
 				/* Run the QP solver on cset. */
 				kernel_type_org = kparm.kernel_type;
-				if ((alg_type == svm_struct_common.ONESLACK_DUAL_ALG)|| (alg_type == svm_struct_common.ONESLACK_DUAL_CACHE_ALG))
+				if ((alg_type == SVMStructCommon.ONESLACK_DUAL_ALG)|| (alg_type == SVMStructCommon.ONESLACK_DUAL_CACHE_ALG))
 					kparm.kernel_type = svm_common.GRAM; /*use kernel stored in kparm */
 														  														  														
 				// logger.info("svm_learn_struct_joint call svm_learn_optimization in loop");
@@ -470,7 +470,7 @@ public class svm_struct_learn {
 						// logger.info("alphahist_g j="+j+":"+alphahist_g[j]);
 					}
 				}
-				if (svm_struct_common.struct_verbosity >= 2)
+				if (SVMStructCommon.struct_verbosity >= 2)
 					rt_opt += Math.max(svm_common.get_runtime() - rt2, 0);
 
 				/*
@@ -478,7 +478,7 @@ public class svm_struct_learn {
 				 * in a while. Those constraints are then removed to avoid
 				 * bloating the working set beyond necessity.
 				 */
-				if (svm_struct_common.struct_verbosity >= 3) {
+				if (SVMStructCommon.struct_verbosity >= 3) {
 					logger.info("Reducing working set...");
 				}
 
@@ -486,7 +486,7 @@ public class svm_struct_learn {
 				// logger.info("cset.m before:"+cset.m);
 				remove_inactive_constraints(cset, optcount, 50);
 				// logger.info("cset.m after:"+cset.m);
-				if (svm_struct_common.struct_verbosity >= 3)
+				if (SVMStructCommon.struct_verbosity >= 3)
 					logger.info("done. ");
 
 			} else {
@@ -518,7 +518,7 @@ public class svm_struct_learn {
 		sm.primalobj = 0.5*modellength*modellength + sparm.C*viol;
 		/****************************************/
 		
-		if (svm_struct_common.struct_verbosity >= 1) {
+		if (SVMStructCommon.struct_verbosity >= 1) {
 			logger.info("Final epsilon on KKT-Conditions: "+ (Math.max(svmModel.maxdiff, ceps)) + "\n");
 
 			slack = 0;
@@ -544,7 +544,7 @@ public class svm_struct_learn {
 			logger.info("Value of slack variable (on working set): xi=" + slack+ "\n");
 			logger.info("Value of slack variable (global): xi=" + viol + "\n");
 			logger.info("Norm of longest difference vector: ||Psi(x,y)-Psi(x,ybar)||="+ (sl.length_of_longest_document_vector(cset.lhs, cset.m,kparm)) + "\n");
-			if (svm_struct_common.struct_verbosity >= 2)
+			if (SVMStructCommon.struct_verbosity >= 2)
 				logger.info("Runtime in cpu-seconds: " + (rt_total / 100.0)
 						+ " (" + ((100.0 * rt_opt) / rt_total) + " for QP, "
 						+ ((100.0 * rt_kernel) / rt_total) + " for kernel, "
@@ -558,15 +558,15 @@ public class svm_struct_learn {
 						+ ((100.0 * rt_cacheadd) / rt_total)
 						+ " for cache add (incl. "
 						+ ((100.0 * rt_cachesum_g) / rt_total) + " for sum))\n");
-			else if (svm_struct_common.struct_verbosity == 1)
+			else if (SVMStructCommon.struct_verbosity == 1)
 				logger.info("Runtime in cpu-seconds: " + (rt_total / 100.0)
 						+ "\n");
 		}
 
 
 
-		if (svm_struct_common.struct_verbosity >= 4)
-			svm_struct_common.printW(sm.w, sizePsi, n, lparm.svm_c);
+		if (SVMStructCommon.struct_verbosity >= 4)
+			SVMStructCommon.printW(sm.w, sizePsi, n, lparm.svm_c);
 
 		if (svmModel != null) {
 			if (svmModel.kernel_parm == null) {
@@ -742,7 +742,7 @@ public class svm_struct_learn {
 	 * @param argmax_count
 	 */
 	public LABEL find_most_violated_constraint(EXAMPLE ex, SVECTOR fycached,
-			int n, STRUCTMODEL sm, STRUCT_LEARN_PARM sparm)
+			int n, STRUCTMODEL sm, STRUCTLEARNPARM sparm)
 	/*
 	 * returns fydelta=fy-fybar and rhs scalar value that correspond to the most
 	 * violated constraint for example ex
@@ -756,7 +756,7 @@ public class svm_struct_learn {
 
 		// logger.info("in the find_most_violated_constraint");
 
-		if (svm_struct_common.struct_verbosity >= 2)
+		if (SVMStructCommon.struct_verbosity >= 2)
 			rt2 = svm_common.get_runtime();
 		argmax_count_g++;
 		if (sparm.loss_type == SLACK_RESCALING) {
@@ -766,7 +766,7 @@ public class svm_struct_learn {
 			// logger.info("call method find_most_violated_constraint_marginrescaling");
 			ybar = ssa.find_most_violated_constraint_marginrescaling(ex.x, ex.y,sm, sparm);
 		}
-		if (svm_struct_common.struct_verbosity >= 2)
+		if (SVMStructCommon.struct_verbosity >= 2)
 			rt_viol_g += Math.max(svm_common.get_runtime() - rt2, 0);
 
 		//if (svm_struct_api.empty_label(ybar)) {
@@ -774,7 +774,7 @@ public class svm_struct_learn {
 		//}
 
 		/**** get psi(x,y) and psi(x,ybar) ****/
-		if (svm_struct_common.struct_verbosity >= 2)
+		if (SVMStructCommon.struct_verbosity >= 2)
 			rt2 = svm_common.get_runtime();
 		if (fycached != null)
 			fy = svm_common.copy_svector(fycached);
@@ -783,7 +783,7 @@ public class svm_struct_learn {
 		// logger.info("ybar label info:"+ybar.class_index);
 		fybar = ssa.psi(ex.x, ybar, sm, sparm);
 		// logger.info("fydelta find yeah:"+fybar.toString());
-		if (svm_struct_common.struct_verbosity >= 2)
+		if (SVMStructCommon.struct_verbosity >= 2)
 			rt_psi_g += Math.max(svm_common.get_runtime() - rt2, 0);
 		lossval = ssa.loss(ex.y, ybar, sparm);
 
@@ -865,7 +865,7 @@ public class svm_struct_learn {
 	}
 
 	public void svm_learn_struct_joint_custom(SAMPLE sample,
-			STRUCT_LEARN_PARM sparm, LEARN_PARM lparm, KERNEL_PARM kparm,
+			STRUCTLEARNPARM sparm, LEARN_PARM lparm, KERNEL_PARM kparm,
 			STRUCTMODEL sm) {
 
 	}
@@ -916,7 +916,7 @@ public class svm_struct_learn {
 		private SVECTOR[] fycache;
 		private int n;
 		private STRUCTMODEL sm;
-		private STRUCT_LEARN_PARM sparm;
+		private STRUCTLEARNPARM sparm;
 		private int startIndex;
 		private int endIndex;
 		private int threadIndex=0;
@@ -1029,7 +1029,7 @@ public class svm_struct_learn {
 		 * violated constraint for example ex
 		 */
 		private LABEL find_most_violated_constraint_local(EXAMPLE ex, SVECTOR fycached,
-				int n, STRUCTMODEL sm, STRUCT_LEARN_PARM sparm)
+				int n, STRUCTMODEL sm, STRUCTLEARNPARM sparm)
 		{
 			
 			LABEL ybar;
@@ -1153,7 +1153,7 @@ public class svm_struct_learn {
 		}
 
 
-		public void setSparm(STRUCT_LEARN_PARM sparm) {
+		public void setSparm(STRUCTLEARNPARM sparm) {
 			this.sparm = sparm;
 		}
 

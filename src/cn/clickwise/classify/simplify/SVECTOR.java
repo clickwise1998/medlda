@@ -49,7 +49,7 @@ public class SVECTOR {
 		  return wi;
 	  }	  
 	  
-	  public void destroy()
+	  public void free()
 	  {
 		  if(words!=null)
 		  {
@@ -67,7 +67,7 @@ public class SVECTOR {
 		  
 		  while(cur!=null)
 		  {
-			 cur.destroy();
+			 cur.free();
 			 cur=cur.next;
 		  }
 		  

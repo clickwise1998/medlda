@@ -1,4 +1,4 @@
-package cn.clickwise.classify.reform;
+package cn.clickwise.classify.simplify;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -14,15 +14,14 @@ public abstract class svm_struct_api {
 
 	 static Logger logger = Logger.getLogger(svm_struct_api.class);
 
-	public svm_common sc=null;
 	
 	public svm_struct_api()
 	{
-		sc=new svm_common();
+
 	}
 	
 	public abstract void init_struct_model(SAMPLE sample, STRUCTMODEL sm,
-			STRUCT_LEARN_PARM sparm, LEARN_PARM lparm, KERNEL_PARM kparm);
+			STRUCTLEARNPARM sparm, LEARNPARM lparm, KERNELPARM kparm);
 	
 
 	/**
@@ -40,7 +39,7 @@ public abstract class svm_struct_api {
 	 * @return
 	 */
 	public static CONSTSET init_struct_constraints(SAMPLE sample,
-			STRUCTMODEL sm, STRUCT_LEARN_PARM sparm) {
+			STRUCTMODEL sm, STRUCTLEARNPARM sparm) {
 
 		CONSTSET c = new CONSTSET();
 		int sizePsi = sm.sizePsi;
@@ -75,12 +74,12 @@ public abstract class svm_struct_api {
 	 * @return
 	 */
 	public abstract SVECTOR psi(PATTERN x, LABEL y, STRUCTMODEL sm,
-			STRUCT_LEARN_PARM sparm);
+			STRUCTLEARNPARM sparm);
 	
 
 	public static boolean finalize_iteration(double ceps,
 			int cached_constraint, SAMPLE sample, STRUCTMODEL sm,
-			CONSTSET cset, double[] alpha, STRUCT_LEARN_PARM sparm) {
+			CONSTSET cset, double[] alpha, STRUCTLEARNPARM sparm) {
 		/*
 		 * This function is called just before the end of each cutting plane
 		 * iteration. ceps is the amount by which the most violated constraint
@@ -94,18 +93,18 @@ public abstract class svm_struct_api {
 	}
 
 	public  abstract LABEL find_most_violated_constraint_slackrescaling(PATTERN x,
-			LABEL y, STRUCTMODEL sm, STRUCT_LEARN_PARM sparm);
+			LABEL y, STRUCTMODEL sm, STRUCTLEARNPARM sparm);
 	
 
 	public abstract LABEL find_most_violated_constraint_marginrescaling(
-			PATTERN x, LABEL y, STRUCTMODEL sm, STRUCT_LEARN_PARM sparm);
+			PATTERN x, LABEL y, STRUCTMODEL sm, STRUCTLEARNPARM sparm);
 
 	/**
 	 * loss for correct label y and predicted label ybar. The loss for
 	 * y==ybar has to be zero. sparm->loss_function is set with the -l
 	 * option.
 	 */
-	public abstract double loss(LABEL y, LABEL ybar, STRUCT_LEARN_PARM sparm) ;
+	public abstract double loss(LABEL y, LABEL ybar, STRUCTLEARNPARM sparm) ;
 	
 
 	/**
@@ -177,14 +176,14 @@ public abstract class svm_struct_api {
 		return alpha_list;
 	}
 
+	/**
+	 * This function is called after training and allows final touches to
+	 * the model sm. But primarly it allows computing and printing any kind
+	 * of statistic (e.g. training error) you might want.
+	 */
 	public static void print_struct_learning_stats(SAMPLE sample,
 			STRUCTMODEL sm, CONSTSET cset, double[] alpha,
-			STRUCT_LEARN_PARM sparm) {
-		/*
-		 * This function is called after training and allows final touches to
-		 * the model sm. But primarly it allows computing and printing any kind
-		 * of statistic (e.g. training error) you might want.
-		 */
+			STRUCTLEARNPARM sparm) {
 
 		/* Replace SV with single weight vector */
 		/*******************
@@ -192,32 +191,37 @@ public abstract class svm_struct_api {
 		 ******************/
 
 		MODEL model = sm.svm_model;
-		if (model.kernel_parm.kernel_type == svm_common.LINEAR) {
-			if (svm_struct_common.struct_verbosity >= 1) {
+		if (model.kernel_parm.kernel_type == SVMCommon.LINEAR) {
+			if (SVMStructCommon.struct_verbosity >= 1) {
 				logger.info("Compacting linear model...");
 			}
 
-			sm.svm_model = svm_common.compact_linear_model(model);
+			sm.svm_model = SVMCommon.compact_linear_model(model);
 			sm.w = sm.svm_model.lin_weights; /* short cut to weight vector */
 
-			if (svm_struct_common.struct_verbosity >= 1) {
+			if (SVMStructCommon.struct_verbosity >= 1) {
 				logger.info("done\n");
 			}
 		}
+		
+		//free uncompact model
+		model=null;
+		
+		
 	}
 
+	/**
+	 * Called in learning part before anything else is done to allow any
+	 * initializations that might be necessary.
+	 */
 	public static void svm_struct_learn_api_init(String[] args) {
-		/*
-		 * Called in learning part before anything else is done to allow any
-		 * initializations that might be necessary.
-		 */
 	}
 
+	/**
+	 * Prints a help text that is appended to the common help text of
+	 * svm_struct_learn.
+	 */
 	public static void print_struct_help() {
-		/*
-		 * Prints a help text that is appended to the common help text of
-		 * svm_struct_learn.
-		 */
 
 		System.out.print("none\n\n");
 		System.out.print("Based on multi-class SVM formulation described in:\n");
@@ -225,11 +229,11 @@ public abstract class svm_struct_api {
 		System.out.print("Multi-class SVMs, JMLR, 2001.\n");
 	}
 
-	public static void parse_struct_parameters_classify(STRUCT_LEARN_PARM sparm) {
-		/*
-		 * Parses the command line parameters that start with -- for the
-		 * classification module
-		 */
+	/**
+	 * Parses the command line parameters that start with -- for the
+	 * classification module
+	 */
+	public static void parse_struct_parameters_classify(STRUCTLEARNPARM sparm) {
 		int i;
 
 		for (i = 0; (i < sparm.custom_argc)
@@ -244,8 +248,8 @@ public abstract class svm_struct_api {
 		}
 	}
 
-	public static void parse_struct_parameters(STRUCT_LEARN_PARM sparm) {
-		/* Parses the command line parameters that start with -- */
+	/** Parses the command line parameters that start with -- */
+	public static void parse_struct_parameters(STRUCTLEARNPARM sparm) {
 		int i;
 
 		for (i = 0; (i < sparm.custom_argc)
@@ -265,112 +269,21 @@ public abstract class svm_struct_api {
 	}
 
 	public  abstract SAMPLE read_struct_examples(String file,
-			STRUCT_LEARN_PARM sparm) ;
+			STRUCTLEARNPARM sparm) ;
 	
 
 	public abstract void write_struct_model(String file, STRUCTMODEL sm,
-			STRUCT_LEARN_PARM sparm) ;
+			STRUCTLEARNPARM sparm) ;
 	
 
+	/**
+	 * Called in learning part at the very end to allow any clean-up that
+	 * might be necessary.
+	 */
 	public static void svm_struct_learn_api_exit() {
-		/*
-		 * Called in learning part at the very end to allow any clean-up that
-		 * might be necessary.
-		 */
-	}
-
-	/*
-	public static DOC[] reallocDOCS(DOC[] ods, int n) {
-
-		DOC[] ndoc = new DOC[n];
-		if (ods == null) {
-			for (int i = 0; i < n; i++) {
-				ndoc[i] = new DOC();
-			}
-			return ndoc;
-		}
-		for (int i = 0; i < ods.length; i++) {
-			ndoc[i] = ods[i].copyDoc();
-		}
-		for (int i = ods.length; i < n; i++) {
-			ndoc[i] = new DOC();
-		}
-		
-		return ndoc;
-	}
-
-	public static double[] reallocDoubleArr(double[] arr, int nsize) {
-		if (arr != null) {
-			logger.info("double arr length:" + arr.length + " nsize:" + nsize);
-		} else {
-			logger.info("double arr length: null nsize:" + nsize);
-		}
-		double[] narr = new double[nsize];
-		if (arr == null) {
-			for (int ni = 0; ni < nsize; ni++) {
-				narr[ni] = 0;
-			}
-			return narr;
-		}
-
-		if (nsize <= arr.length) {
-			narr = new double[arr.length];
-			for (int ni = 0; ni < nsize; ni++) {
-				narr[ni] = arr[ni];
-			}
-
-			for (int ni = nsize; ni < arr.length; ni++) {
-				narr[ni] = 0;
-			}
-
-			return narr;
-		}
-
-		for (int ni = 0; ni < arr.length; ni++) {
-			narr[ni] = arr[ni];
-		}
-		for (int ni = arr.length; ni < nsize; ni++) {
-			narr[ni] = 0;
-		}
-
-		return narr;
-	}
-
-	public static int[] reallocIntArr(int[] arr, int nsize) {
-		if (arr != null) {
-			logger.info("int arr length:" + arr.length + " nsize:" + nsize);
-		} else {
-			logger.info("int arr length: null nsize:" + nsize);
-		}
-		int[] narr = new int[nsize];
-		if (arr == null) {
-			for (int ni = 0; ni < nsize; ni++) {
-				narr[ni] = 0;
-			}
-			return narr;
-		}
-		if (nsize <= arr.length) {
-			narr = new int[arr.length];
-			for (int ni = 0; ni < nsize; ni++) {
-				narr[ni] = arr[ni];
-			}
-			for (int ni = nsize; ni < arr.length; ni++) {
-				narr[ni] = 0;
-			}
-			return narr;
-		}
-		for (int ni = 0; ni < arr.length; ni++) {
-			narr[ni] = arr[ni];
-		}
-		for (int ni = arr.length; ni < nsize; ni++) {
-			narr[ni] = 0;
-		}
-
-		return narr;
-	}
-
-*/
 	
+	}
+
 	public static DOC[] reallocDOCS(DOC[] ods, int n) {
 
 		DOC[] ndoc = new DOC[n];
@@ -381,7 +294,7 @@ public abstract class svm_struct_api {
 			return ndoc;
 		}
 		for (int i = 0; i < ods.length; i++) {
-			ndoc[i] = ods[i].copyDoc();
+			ndoc[i] = SVMCommon.copyDoc(ods[i]);
 			
 			//free old docs
 			if(ods[i]!=null)
@@ -485,6 +398,7 @@ public abstract class svm_struct_api {
 		
 		return narr;
 	}
+
 	public static String douarr2str(double[] arr) {
 		String str = "";
 		if (arr == null) {
@@ -525,7 +439,7 @@ public abstract class svm_struct_api {
 	}
 
 	public abstract STRUCTMODEL read_struct_model(String file,
-			STRUCT_LEARN_PARM sparm) ;
+			STRUCTLEARNPARM sparm) ;
 
 	/**
 	 * Finds the label yhat for pattern x that scores the highest according to
@@ -536,7 +450,7 @@ public abstract class svm_struct_api {
 	 * return an empty label as recognized by the function empty_label(y).
 	 */
 	public abstract LABEL classify_struct_example(PATTERN x, STRUCTMODEL sm,
-			STRUCT_LEARN_PARM sparm) ;
+			STRUCTLEARNPARM sparm) ;
 	
 
 	public static void write_label(PrintWriter fp, LABEL y) {
@@ -557,7 +471,7 @@ public abstract class svm_struct_api {
 	 * svm_struct_classify. See also the function print_struct_testing_stats.
 	 */
 	public static void eval_prediction(int exnum, EXAMPLE ex, LABEL ypred,
-			STRUCTMODEL sm, STRUCT_LEARN_PARM sparm, STRUCT_TEST_STATS teststats) {
+			STRUCTMODEL sm, STRUCTLEARNPARM sparm, STRUCTTESTSTATS teststats) {
 		if (exnum == 0) { /*
 						 * this is the first time the function is called. So
 						 * initialize the teststats
@@ -573,7 +487,7 @@ public abstract class svm_struct_api {
 	 * prediction.
 	 */
 	public static void print_struct_testing_stats(SAMPLE sample, STRUCTMODEL sm,
-			STRUCT_LEARN_PARM sparm, STRUCT_TEST_STATS teststats) {
+			STRUCTLEARNPARM sparm, STRUCTTESTSTATS teststats) {
 
 	}
 

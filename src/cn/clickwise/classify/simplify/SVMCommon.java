@@ -390,6 +390,93 @@ public class SVMCommon {
 			return (Math.sqrt(sum));
 		}
 	  
+		/**
+		 * Makes a copy of model where the support vectors are replaced with a
+		 * single linear weight vector.
+		 */
+		/* NOTE: It adds the linear weight vector also to newmodel->lin_weights */
+		/* WARNING: This is correct only for linear models! */
+		public static MODEL compact_linear_model(MODEL model)
+		{
+			MODEL newmodel;
+			newmodel = new MODEL();
+			newmodel = copyMODEL(model);
+			add_weight_vector_to_linear_model(newmodel);
+			newmodel.supvec = new DOC[2];
+			newmodel.alpha = new double[2];
+			newmodel.index = null; /* index is not copied */
+			newmodel.supvec[0] = null;
+			newmodel.alpha[0] = 0.0;
+			newmodel.supvec[1] = create_example(-1,0,0,0,
+					create_svector_n(newmodel.lin_weights, newmodel.totwords, null,1.0));
+			newmodel.alpha[1] = 1.0;
+			newmodel.sv_num = 2;
 
+			return (newmodel);
+		}
 		
+		/** compute weight vector in linear case and add to model */
+		public static void add_weight_vector_to_linear_model(MODEL model)
+		{
+			int i;
+			SVECTOR f;
+			//logger.info("model.totwords:" + model.totwords);
+			model.lin_weights = create_nvector(model.totwords);
+			//clear_nvector(model.lin_weights, model.totwords);
+			for (i = 1; i < model.sv_num; i++) {
+				for (f = (model.supvec[i]).fvec; f != null; f = f.next)
+					add_vector_ns(model.lin_weights, f, f.factor * model.alpha[i]);
+			}
+		}
+		
+		public static SVECTOR create_svector_n(double[] nonsparsevec,
+				int maxfeatnum, String userdefined, double factor) {
+			return (create_svector_n_r(nonsparsevec, maxfeatnum, userdefined,
+					factor, 0));
+		}
+
+		public static SVECTOR create_svector_n_r(double[] nonsparsevec,
+				int maxfeatnum, String userdefined, double factor,
+				double min_non_zero) {
+			// logger.info("begin create_svector_n_r");
+			SVECTOR vec;
+			int fnum, i;
+
+			fnum = 0;
+			for (i = 1; i <= maxfeatnum; i++)
+				if ((nonsparsevec[i] < -min_non_zero)
+						|| (nonsparsevec[i] > min_non_zero))
+					fnum++;
+
+			vec = new SVECTOR();
+			vec.words = new WORD[fnum + 1];
+			for (int vi = 0; vi < vec.words.length; vi++) {
+				vec.words[vi] = new WORD();
+			}
+
+			fnum = 0;
+			for (i = 1; i <= maxfeatnum; i++) {
+				if ((nonsparsevec[i] < -min_non_zero)
+						|| (nonsparsevec[i] > min_non_zero)) {
+					vec.words[fnum].wnum = i;
+					vec.words[fnum].weight = nonsparsevec[i];
+					fnum++;
+				}
+			}
+			vec.words[fnum].wnum = 0;
+			vec.twonorm_sq = -1;
+
+			if (userdefined != null) {
+				vec.userdefined = userdefined;
+			} else
+				vec.userdefined = null;
+
+			vec.kernel_id = 0;
+			vec.next = null;
+			vec.factor = factor;
+			// logger.info("end create_svector_n_r");
+			return (vec);
+		}
+		
+	
 }
