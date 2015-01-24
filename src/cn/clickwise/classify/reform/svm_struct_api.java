@@ -375,7 +375,14 @@ public abstract class svm_struct_api {
 */
 	
 	public static void realloc(CONSTSET cset) {
-		DOC[] olhs = cset.lhs;
+		DOC[] olhs=new DOC[cset.lhs.length];
+		for(int i=0;i<olhs.length;i++)
+		{
+			olhs[i]=cset.lhs[i].copyDoc();
+		}
+		
+		//DOC[] olhs = cset.lhs;
+		
 		cset.lhs = new DOC[cset.m];
 		for (int i = 0; i < (cset.m - 1); i++) {
 			cset.lhs[i] = olhs[i].copyDoc();
@@ -392,7 +399,15 @@ public abstract class svm_struct_api {
 	}
 
 	public static void realsmallloc_lhs(CONSTSET cset) {
-		DOC[] olhs = cset.lhs;
+		
+		DOC[] olhs=new DOC[cset.lhs.length];
+		for(int i=0;i<olhs.length;i++)
+		{
+			olhs[i]=cset.lhs[i].copyDoc();
+		}
+		
+		//DOC[] olhs = cset.lhs;
+		
 		cset.lhs = new DOC[cset.m];
 		for (int i = 0; i < (cset.m); i++) {
 			cset.lhs[i] = olhs[i].copyDoc();
@@ -406,7 +421,13 @@ public abstract class svm_struct_api {
 	}
 
 	public static void realsmallloc_rhs(CONSTSET cset) {
-		double[] orhs = cset.rhs;
+		double[] orhs=new double[cset.rhs.length];
+		for(int i=0;i<orhs.length;i++)
+		{
+			orhs[i]=cset.rhs[i];
+		}
+		
+		//double[] orhs = cset.rhs;
 		cset.rhs = new double[cset.m];
 		for (int i = 0; i < (cset.m); i++) {
 			cset.rhs[i] = orhs[i];
@@ -417,7 +438,12 @@ public abstract class svm_struct_api {
 	}
 
 	public static void realloc_rhs(CONSTSET cset) {
-		double[] orhs = cset.rhs;
+		double[] orhs=new double[cset.rhs.length];
+		for(int i=0;i<orhs.length;i++)
+		{
+			orhs[i]=cset.rhs[i];
+		}
+		//double[] orhs = cset.rhs;
 		cset.rhs = new double[cset.m];
 		for (int i = 0; i < (cset.m - 1); i++) {
 			cset.rhs[i] = orhs[i];
@@ -429,7 +455,12 @@ public abstract class svm_struct_api {
 	}
 
 	public static double[] realloc_alpha(double[] alpha, int m) {
-		double[] oalpha = alpha;
+		double[] oalpha=new double[alpha.length];
+		for(int i=0;i<alpha.length;i++)
+		{
+			oalpha[i]=alpha[i];
+		}
+		//double[] oalpha = alpha;
 		alpha = new double[m];
 		for (int i = 0; i < (m - 1); i++) {
 			alpha[i] = oalpha[i];
@@ -443,7 +474,12 @@ public abstract class svm_struct_api {
 	}
 
 	public static int[] realloc_alpha_list(int[] alpha_list, int m) {
-		int[] oalpha_list = alpha_list;
+		int[] oalpha_list=new int[alpha_list.length];
+		for(int i=0;i<alpha_list.length;i++)
+		{
+			oalpha_list[i]=alpha_list[i];
+		}
+		//int[] oalpha_list = alpha_list;
 		alpha_list = new int[m];
 		for (int i = 0; i < (m - 1); i++) {
 			alpha_list[i] = oalpha_list[i];
