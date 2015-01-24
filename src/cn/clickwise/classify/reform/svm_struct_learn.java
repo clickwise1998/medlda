@@ -1104,7 +1104,12 @@ public class svm_struct_learn {
 			rt_total += Math.max(svm_common.get_runtime() - rt1, 0);
             
 			System.gc();
-			
+			/*
+			if(ceps<0.5)
+			{
+				break;
+			}
+			*/
 			
 		} while (cached_constraint != 0|| (ceps > sparm.epsilon)
 				|| svm_struct_api.finalize_iteration(ceps, cached_constraint,sample, sm, cset, alpha_g, sparm));

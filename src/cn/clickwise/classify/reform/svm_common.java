@@ -262,6 +262,13 @@ public class svm_common {
 			double faktor) {
 		WORD[] ai;
 		ai = vec_s.words;
+		/*
+		if(ai==null)
+		{
+		  return;	
+		}
+		*/
+		
 		for (int i = 0; i < ai.length; i++) {
 			if (ai[i] != null) {
 				vec_n[ai[i].wnum] += (faktor * ai[i].weight);
@@ -1838,6 +1845,7 @@ public class svm_common {
 		protected void finalize_n() throws Throwable
 		{
 			try{
+				/*
 				if(read_words!=null)
 				{
 					for(int i=0;i<read_words.length;i++)
@@ -1852,7 +1860,7 @@ public class svm_common {
 				{
 					read_target=null;
 				}
-				
+				*/
 				
 			}
 			finally
