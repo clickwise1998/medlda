@@ -1103,6 +1103,7 @@ public class svm_struct_learn {
 
 			rt_total += Math.max(svm_common.get_runtime() - rt1, 0);
             
+			System.gc();
 			
 			if (ceps < 50) {
 				break;
@@ -1112,7 +1113,8 @@ public class svm_struct_learn {
 			{
 				break;
 			}
-			System.gc();
+			
+			
 
 			
 		} while (cached_constraint != 0|| (ceps > sparm.epsilon)
