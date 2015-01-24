@@ -851,7 +851,7 @@ public class svm_struct_learn {
                 
 				*/
 				
-				int threadNum=7;
+				int threadNum=5;
 				int batNum=(int)((double)n/(double)threadNum);
 				int currentStartIndex=0;
 				int currentEndIndex=0;
