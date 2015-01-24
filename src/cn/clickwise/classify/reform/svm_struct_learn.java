@@ -851,7 +851,7 @@ public class svm_struct_learn {
                 
 				*/
 				
-				int threadNum=5;
+				int threadNum=10;
 				int batNum=(int)((double)n/(double)threadNum);
 				int currentStartIndex=0;
 				int currentEndIndex=0;
@@ -1103,9 +1103,11 @@ public class svm_struct_learn {
 
 			rt_total += Math.max(svm_common.get_runtime() - rt1, 0);
             
-			//if (ceps < 0.5) {
-			//	break;
-			//}
+			
+			if (ceps < 50) {
+				break;
+			}
+			
 			System.gc();
 
 			
@@ -1879,7 +1881,7 @@ public class svm_struct_learn {
 			if(local_ssa!=null)
 			{
 				try{
-				  local_ssa.finalize();
+				  local_ssa.finalize_n();
 				}
 				catch(Throwable e)
 				{

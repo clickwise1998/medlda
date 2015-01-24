@@ -661,7 +661,7 @@ public abstract class svm_struct_api {
 			STRUCT_LEARN_PARM sparm, STRUCT_TEST_STATS teststats) {
 
 	}
-	protected void finalize() throws Throwable
+	protected void finalize_n() throws Throwable
 	{
 		
 	}

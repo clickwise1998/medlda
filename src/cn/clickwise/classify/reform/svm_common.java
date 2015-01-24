@@ -1834,9 +1834,8 @@ public class svm_common {
 		  return nw;
 	  }
 
-	  
-	  @Override 
-		protected void finalize() throws Throwable
+
+		protected void finalize_n() throws Throwable
 		{
 			try{
 				if(read_words!=null)

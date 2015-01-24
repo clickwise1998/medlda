@@ -916,12 +916,12 @@ public class svm_struct_tb extends svm_struct_api {
 		}
 	}
 	
-	@Override 
-	protected void finalize() throws Throwable
+	
+	protected void finalize_n() throws Throwable
 	{
 		if(sc!=null)
 		{
-			sc.finalize();
+			sc.finalize_n();
 		}
 		try{
 			if(read_words!=null)
@@ -953,7 +953,7 @@ public class svm_struct_tb extends svm_struct_api {
 		}
 		finally
 		{
-			super.finalize();
+			super.finalize_n();
 		}
 	}
 }
