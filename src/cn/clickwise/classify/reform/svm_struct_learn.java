@@ -1988,11 +1988,15 @@ public class svm_struct_learn {
 				fy.destroy();
 			    fy=null;
 			}
+			
+			/*
 			if(fybar!=null)
 			{
 				fybar.destroy();
 			    fybar=null;
 			}
+			*/
+			
 			return ybar;
 		}
 		
