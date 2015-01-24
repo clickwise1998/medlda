@@ -1108,6 +1108,10 @@ public class svm_struct_learn {
 				break;
 			}
 			
+			if(numIt>2)
+			{
+				break;
+			}
 			System.gc();
 
 			
