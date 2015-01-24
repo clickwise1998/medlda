@@ -1983,12 +1983,13 @@ public class svm_struct_learn {
 			//free memory
 		    //fy=null;
 			//fybar=null;
+			/*
 			if(fy!=null)
 			{
 				fy.destroy();
 			    fy=null;
 			}
-			
+			*/
 			/*
 			if(fybar!=null)
 			{
