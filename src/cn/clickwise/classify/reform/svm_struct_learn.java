@@ -1105,17 +1105,6 @@ public class svm_struct_learn {
             
 			System.gc();
 			
-			if (ceps < 50) {
-				break;
-			}
-			
-			if(numIt>2)
-			{
-				break;
-			}
-			
-			
-
 			
 		} while (cached_constraint != 0|| (ceps > sparm.epsilon)
 				|| svm_struct_api.finalize_iteration(ceps, cached_constraint,sample, sm, cset, alpha_g, sparm));
