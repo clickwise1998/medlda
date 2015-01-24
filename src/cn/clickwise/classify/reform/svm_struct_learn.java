@@ -1902,8 +1902,8 @@ public class svm_struct_learn {
 			SVECTOR f;
 			for (f = vec_s; f != null; f = f.next)
 				add_vector_ns(vec_n, f, f.factor * faktor);
-			/**********free memory******/
-			f=null;
+			/*****r*****free memory******/
+			//f=null;
 			/**************************/
 		}
 		
@@ -1921,7 +1921,8 @@ public class svm_struct_learn {
 				}
 			}
 			
-			/**********free memory******/
+			/****r******free memory******/
+			/*
 			if(ai!=null)
 			{
 				for(int i=0;i<ai.length;i++)
@@ -1930,6 +1931,7 @@ public class svm_struct_learn {
 				}
 			}
 			ai=null;
+			*/
 			/**************************/
 		}
 		/*
@@ -1978,9 +1980,19 @@ public class svm_struct_learn {
 			setLocal_fydelta_g(fybar);
 			setLocal_rhs_i_g(lossval / (double)n);
 
-			fy=null;
-			fybar=null;
-			
+			//free memory
+		    //fy=null;
+			//fybar=null;
+			if(fy!=null)
+			{
+				fy.destroy();
+			    fy=null;
+			}
+			if(fybar!=null)
+			{
+				fybar.destroy();
+			    fybar=null;
+			}
 			return ybar;
 		}
 		
