@@ -1863,13 +1863,41 @@ public class svm_struct_learn {
 		public void des()
 		{
 			local_lhs_n=null;
-			mostViolatedLabels=null;
+			if(mostViolatedLabels!=null)
+			{
+			   for(int i=0;i<mostViolatedLabels.length;i++)
+			   {
+				   if(mostViolatedLabels[i]!=null)
+				   {
+				     mostViolatedLabels[i].free();
+				     mostViolatedLabels[i]=null;
+				   }
+			   }
+			   mostViolatedLabels=null;
+			   
+			}
+			if(local_ssa!=null)
+			{
+				try{
+				  local_ssa.finalize();
+				}
+				catch(Throwable e)
+				{
+					e.printStackTrace();
+				}
+			}
 			local_ssa=null;
 			violatedValid=null;
 			/**********free memory******/
-			local_fydelta_g=null;
+			if(local_fydelta_g!=null)
+			{
+				local_fydelta_g.destroy();
+				local_fydelta_g=null;
+			}
+			
 			local_lhs_n=null;
 			/**************************/
+			System.gc();
 		}
 		
 		private void add_list_n_ns(double[] vec_n, SVECTOR vec_s,
@@ -2001,7 +2029,7 @@ public class svm_struct_learn {
 			for (i = 0; i < words.length; i++) {
 				//before reform
 				//vec.words[i] = words[i];
-				vec.words[i] = words[i].copy_word();
+				vec.words[i] = svm_common.copy_word(words[i]);
 			}
 			
 			

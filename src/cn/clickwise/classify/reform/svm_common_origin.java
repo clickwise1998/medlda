@@ -1028,7 +1028,7 @@ public class svm_common_origin {
 		// logger.info("shift:"+shift);
 		ai = new WORD[a.words.length];
 		for (int k = 0; k < ai.length; k++) {
-			ai[k] = a.words[k].copy_word();
+			ai[k] = svm_common.copy_word(a.words[k]);
 		}
 		// ai = a.words;
 
@@ -1040,7 +1040,7 @@ public class svm_common_origin {
 		veclength = ai.length;
 		sumi = new WORD[veclength];
 		for (int i = 0; i < ai.length; i++) {
-			sumi[i] = ai[i].copy_word();
+			sumi[i] = svm_common.copy_word(ai[i]);
 			sumi[i].wnum = ai[i].wnum + shift;
 			// logger.info("ai.wnum:"+ai[i].wnum+" sumi wnum:"+sumi[i].wnum);
 		}
@@ -1069,7 +1069,7 @@ public class svm_common_origin {
 		// logger.info("words.length:"+words.length);
 		for (int i = 0; i < words.length; i++) {
 			if (words[i] != null) {
-				vec.words[i] = words[i].copy_word();
+				vec.words[i] = svm_common.copy_word(words[i]);
 			} else {
 				vec.words[i] = null;
 			}
@@ -1460,7 +1460,7 @@ public class svm_common_origin {
 						concat_write[cwi].weight = weight;
 						cwi++;
 					}
-					concat_write[cwi] = concat_read[cri].copy_word();// ?是否正确
+					concat_write[cwi] = svm_common.copy_word(concat_read[cri]);// ?是否正确
 					weight = concat_write[cwi].weight;
 					cri++;
 				}
@@ -1491,7 +1491,7 @@ public class svm_common_origin {
 		}
 
 		for (int i = start_index; i < oarr.length; i++) {
-			warr[i - start_index] = oarr[i].copy_word();
+			warr[i - start_index] = svm_common.copy_word(oarr[i]);
 		}
 
 		return warr;

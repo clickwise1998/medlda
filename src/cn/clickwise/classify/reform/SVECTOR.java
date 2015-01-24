@@ -23,7 +23,7 @@ public class SVECTOR {
 		  {
 			  if(words[i]!=null)
 			  {
-			    sv.words[i]=words[i].copy_word();
+			    sv.words[i]=svm_common.copy_word(words[i]);
 			  }
 			  else
 			  {

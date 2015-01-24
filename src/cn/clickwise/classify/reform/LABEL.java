@@ -27,4 +27,9 @@ public class LABEL {
 	
 	public double[] scores;
 	
+	public void free()
+	{
+		scores=null;
+	}
+	
 }

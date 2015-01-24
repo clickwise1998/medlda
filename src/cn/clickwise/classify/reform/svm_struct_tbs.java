@@ -108,8 +108,8 @@ public class svm_struct_tbs extends svm_struct_api{
 
 		for(int i=0;i<x.doc.fvec.words.length;i++)
 		{
-		  fvec.words[i]=x.doc.fvec.words[i].copy_word();
-		  fvec.words[i+xlen]=x.doc.fvec.words[i].copy_word();
+		  fvec.words[i]=svm_common.copy_word(x.doc.fvec.words[i]);
+		  fvec.words[i+xlen]=svm_common.copy_word(x.doc.fvec.words[i]);
 		  
 		  fvec.words[i].wnum+=(y.first_class-1)*sparm.num_features;
 		  fvec.words[i+xlen].wnum+=((y.second_class-1)*sparm.num_features+y.first_size*sparm.num_features);

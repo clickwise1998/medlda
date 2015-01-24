@@ -112,9 +112,9 @@ public class svm_struct_tb extends svm_struct_api {
 
 		for(int i=0;i<x.doc.fvec.words.length;i++)
 		{
-		  fvec.words[i]=x.doc.fvec.words[i].copy_word();
-		  fvec.words[i+x.doc.fvec.words.length]=x.doc.fvec.words[i].copy_word();
-		  fvec.words[i+x.doc.fvec.words.length*2]=x.doc.fvec.words[i].copy_word();
+		  fvec.words[i]=svm_common.copy_word(x.doc.fvec.words[i]);
+		  fvec.words[i+x.doc.fvec.words.length]=svm_common.copy_word(x.doc.fvec.words[i]);
+		  fvec.words[i+x.doc.fvec.words.length*2]=svm_common.copy_word(x.doc.fvec.words[i]);
 		  
 		  fvec.words[i].wnum+=(y.first_class-1)*sparm.num_features;
 		  fvec.words[i+x.doc.fvec.words.length].wnum+=((y.second_class-1)*sparm.num_features+y.first_size*sparm.num_features);
@@ -913,6 +913,47 @@ public class svm_struct_tb extends svm_struct_api {
 		catch(Exception e)
 		{
 			e.printStackTrace();
+		}
+	}
+	
+	@Override 
+	protected void finalize() throws Throwable
+	{
+		if(sc!=null)
+		{
+			sc.finalize();
+		}
+		try{
+			if(read_words!=null)
+			{
+				for(int i=0;i<read_words.length;i++)
+				{
+					read_words[i]=null;
+				}
+				read_words=null;
+				
+			}
+			
+			if(read_target!=null)
+			{
+				for(int i=0;i<read_target.length;i++)
+				{
+					read_target[i]=null;
+				}
+			}
+			
+			if(posslabels!=null)
+			{
+				for(int i=0;i<posslabels.length;i++)
+				{
+					posslabels[i]=null;
+				}
+			}
+			
+		}
+		finally
+		{
+			super.finalize();
 		}
 	}
 }

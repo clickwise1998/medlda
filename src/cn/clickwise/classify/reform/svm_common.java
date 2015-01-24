@@ -11,6 +11,7 @@ import java.util.regex.Pattern;
 
 import org.apache.log4j.Logger;
 
+
 import cn.clickwise.math.random.SeedRandom;
 import cn.clickwise.str.basic.SSO;
 import cn.clickwise.time.utils.TimeOpera;
@@ -1050,7 +1051,7 @@ public class svm_common {
 		// logger.info("shift:"+shift);
 		ai = new WORD[a.words.length];
 		for (int k = 0; k < ai.length; k++) {
-			ai[k] = a.words[k].copy_word();
+			ai[k] = svm_common.copy_word(a.words[k]);
 		}
 		// ai = a.words;
 
@@ -1062,7 +1063,7 @@ public class svm_common {
 		veclength = ai.length;
 		sumi = new WORD[veclength];
 		for (int i = 0; i < ai.length; i++) {
-			sumi[i] = ai[i].copy_word();
+			sumi[i] = svm_common.copy_word(ai[i]);
 			sumi[i].wnum = ai[i].wnum + shift;
 			// logger.info("ai.wnum:"+ai[i].wnum+" sumi wnum:"+sumi[i].wnum);
 		}
@@ -1108,7 +1109,7 @@ public class svm_common {
 		// logger.info("words.length:"+words.length);
 		for (int i = 0; i < words.length; i++) {
 			if (words[i] != null) {
-				vec.words[i] = words[i].copy_word();
+				vec.words[i] = svm_common.copy_word(words[i]);
 			} else {
 				vec.words[i] = null;
 			}
@@ -1500,7 +1501,7 @@ public class svm_common {
 						concat_write[cwi].weight = weight;
 						cwi++;
 					}
-					concat_write[cwi] = concat_read[cri].copy_word();// ?是否正确
+					concat_write[cwi] = svm_common.copy_word(concat_read[cri]);// ?是否正确
 					weight = concat_write[cwi].weight;
 					cri++;
 				}
@@ -1532,7 +1533,7 @@ public class svm_common {
 		}
 
 		for (int i = start_index; i < oarr.length; i++) {
-			warr[i - start_index] = oarr[i].copy_word();
+			warr[i - start_index] = svm_common.copy_word(oarr[i]);
 		}
 
 		return warr;
@@ -1824,5 +1825,40 @@ public class svm_common {
 		}
 		logger.info(str);
 	}
+	
+	  public static WORD copy_word(WORD w)
+	  {
+		  WORD nw=new WORD();
+		  nw.weight=w.weight;
+		  nw.wnum=w.wnum;
+		  return nw;
+	  }
 
+	  
+	  @Override 
+		protected void finalize() throws Throwable
+		{
+			try{
+				if(read_words!=null)
+				{
+					for(int i=0;i<read_words.length;i++)
+					{
+						read_words[i]=null;
+					}
+					read_words=null;
+					
+				}
+				
+				if(read_target!=null)
+				{
+					read_target=null;
+				}
+				
+				
+			}
+			finally
+			{
+				super.finalize();
+			}
+		}
 }
