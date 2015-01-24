@@ -1,21 +1,16 @@
 package cn.clickwise.classify.simplify;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
-import java.io.FileWriter;
 import java.io.PrintWriter;
 
 import org.apache.log4j.Logger;
 
-import cn.clickwise.str.basic.SSO;
 
-public abstract class svm_struct_api {
+public abstract class SVMStructAPI {
 
-	 static Logger logger = Logger.getLogger(svm_struct_api.class);
+	 static Logger logger = Logger.getLogger(SVMStructAPI.class);
 
 	
-	public svm_struct_api()
+	public SVMStructAPI()
 	{
 
 	}
@@ -117,63 +112,6 @@ public abstract class svm_struct_api {
 	 */
 	public static boolean empty_label(LABEL y) {
 		return (y.class_index < 0.9);
-	}
-
-	public static void realloc(CONSTSET cset) {
-		DOC[] olhs = cset.lhs;
-		cset.lhs = new DOC[cset.m];
-		for (int i = 0; i < (cset.m - 1); i++) {
-			cset.lhs[i] = olhs[i];
-		}
-		cset.lhs[cset.m - 1] = new DOC();
-
-	}
-
-	public static void realsmallloc_lhs(CONSTSET cset) {
-		DOC[] olhs = cset.lhs;
-		cset.lhs = new DOC[cset.m];
-		for (int i = 0; i < (cset.m); i++) {
-			cset.lhs[i] = olhs[i];
-		}
-	}
-
-	public static void realsmallloc_rhs(CONSTSET cset) {
-		double[] orhs = cset.rhs;
-		cset.rhs = new double[cset.m];
-		for (int i = 0; i < (cset.m); i++) {
-			cset.rhs[i] = orhs[i];
-		}
-	}
-
-	public static void realloc_rhs(CONSTSET cset) {
-		double[] orhs = cset.rhs;
-		cset.rhs = new double[cset.m];
-		for (int i = 0; i < (cset.m - 1); i++) {
-			cset.rhs[i] = orhs[i];
-		}
-		cset.rhs[cset.m - 1] = 0;
-	}
-
-	public static double[] realloc_alpha(double[] alpha, int m) {
-		double[] oalpha = alpha;
-		alpha = new double[m];
-		for (int i = 0; i < (m - 1); i++) {
-			alpha[i] = oalpha[i];
-		}
-		alpha[m - 1] = 0;
-
-		return alpha;
-	}
-
-	public static int[] realloc_alpha_list(int[] alpha_list, int m) {
-		int[] oalpha_list = alpha_list;
-		alpha_list = new int[m];
-		for (int i = 0; i < (m - 1); i++) {
-			alpha_list[i] = oalpha_list[i];
-		}
-		alpha_list[m - 1] = 0;
-
-		return alpha_list;
 	}
 
 	/**
@@ -283,6 +221,89 @@ public abstract class svm_struct_api {
 	public static void svm_struct_learn_api_exit() {
 	
 	}
+	
+
+	public static void realloc(CONSTSET cset) {
+		DOC[] olhs = cset.lhs;
+		cset.lhs = new DOC[cset.m];
+		for (int i = 0; i < (cset.m - 1); i++) {
+			cset.lhs[i] = SVMCommon.copyDoc(olhs[i]);
+			
+			//free memory
+			if(olhs[i]!=null)
+			{
+				olhs[i].free();
+				olhs[i]=null;
+			}
+		}
+		cset.lhs[cset.m - 1] = new DOC();
+
+	}
+
+	public static void realsmallloc_lhs(CONSTSET cset) {
+		DOC[] olhs = cset.lhs;
+		cset.lhs = new DOC[cset.m];
+		for (int i = 0; i < (cset.m); i++) {
+			cset.lhs[i] = SVMCommon.copyDoc(olhs[i]);
+			//free memory
+			if(olhs[i]!=null)
+			{
+				olhs[i].free();
+				olhs[i]=null;
+			}
+		}
+	}
+
+	public static void realsmallloc_rhs(CONSTSET cset) {
+		double[] orhs = cset.rhs;
+		cset.rhs = new double[cset.m];
+		for (int i = 0; i < (cset.m); i++) {
+			cset.rhs[i] = orhs[i];
+		}
+		
+		//free memroy
+		orhs=null;
+	}
+
+	public static void realloc_rhs(CONSTSET cset) {
+		double[] orhs = cset.rhs;
+		cset.rhs = new double[cset.m];
+		for (int i = 0; i < (cset.m - 1); i++) {
+			cset.rhs[i] = orhs[i];
+		}
+		cset.rhs[cset.m - 1] = 0;
+		
+		//free memroy
+		orhs=null;
+	}
+
+	public static double[] realloc_alpha(double[] alpha, int m) {
+		double[] oalpha = alpha;
+		alpha = new double[m];
+		for (int i = 0; i < (m - 1); i++) {
+			alpha[i] = oalpha[i];
+		}
+		alpha[m - 1] = 0;
+       
+		//free memroy
+		oalpha=null;
+		
+		return alpha;
+	}
+
+	public static int[] realloc_alpha_list(int[] alpha_list, int m) {
+		int[] oalpha_list = alpha_list;
+		alpha_list = new int[m];
+		for (int i = 0; i < (m - 1); i++) {
+			alpha_list[i] = oalpha_list[i];
+		}
+		alpha_list[m - 1] = 0;
+		
+		//free memroy
+		oalpha_list=null;
+		
+		return alpha_list;
+	}
 
 	public static DOC[] reallocDOCS(DOC[] ods, int n) {
 
@@ -300,6 +321,7 @@ public abstract class svm_struct_api {
 			if(ods[i]!=null)
 			{
 				ods[i].free();
+				ods[i]=null;
 			}
 			
 		}

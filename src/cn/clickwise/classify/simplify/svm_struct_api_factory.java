@@ -2,7 +2,7 @@ package cn.clickwise.classify.simplify;
 
 public class svm_struct_api_factory {
 
-	public static svm_struct_api getSvmStructApi()
+	public static SVMStructAPI getSvmStructApi()
 	{
 		//System.out.println("svmconfig.model_type:"+svmconfig.model_type);
 		if((svmconfig.model_type==0)||(svmconfig.model_type==1))

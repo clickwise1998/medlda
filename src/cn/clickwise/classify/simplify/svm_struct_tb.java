@@ -10,7 +10,7 @@ import java.util.regex.Pattern;
 
 import cn.clickwise.str.basic.SSO;
 
-public class svm_struct_tb extends svm_struct_api {
+public class svm_struct_tb extends SVMStructAPI {
 	
 	public  int read_totdocs;
 	public  int read_totwords;

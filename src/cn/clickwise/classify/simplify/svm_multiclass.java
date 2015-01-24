@@ -8,7 +8,7 @@ import java.io.PrintWriter;
 
 import cn.clickwise.str.basic.SSO;
 
-public class svm_multiclass extends svm_struct_api{
+public class svm_multiclass extends SVMStructAPI{
 
 	public  SAMPLE read_struct_examples(String file,
 			STRUCT_LEARN_PARM sparm) {

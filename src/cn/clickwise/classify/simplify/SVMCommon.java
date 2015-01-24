@@ -173,6 +173,37 @@ public class SVMCommon {
 	  }
 	
 	
+	public static CONSTSET copyCONSTSET(CONSTSET constset)
+	{
+		CONSTSET nconstset=new CONSTSET();
+		nconstset.m=constset.m;
+		
+		if(constset.lhs!=null)
+		{
+			nconstset.lhs=new DOC[constset.lhs.length];
+			for(int i=0;i<constset.lhs.length;i++)
+			{
+				nconstset.lhs[i]=copyDoc(constset.lhs[i]);
+			}
+		}
+		else
+		{
+			nconstset.lhs=null;
+		}
+		
+		if(constset.rhs!=null)
+		{
+			nconstset.rhs=new double[constset.rhs.length];
+			for(int i=0;i<constset.rhs.length;i++)
+			{
+				nconstset.rhs[i]=constset.rhs[i];
+			}
+		}
+		
+		
+		return nconstset;
+	}
+	
 	public static double get_runtime() {
 		int c = (int) TimeOpera.getCurrentTimeLong();
 		double hc = 0;

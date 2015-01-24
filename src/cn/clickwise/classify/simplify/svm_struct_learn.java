@@ -42,7 +42,7 @@ public class svm_struct_learn {
 	
 	
 	
-	public svm_struct_api ssa=null;
+	public SVMStructAPI ssa=null;
 	
 	public svm_struct_learn()
 	{
@@ -136,7 +136,7 @@ public class svm_struct_learn {
 		epsilon = 100.0; /* start with low precision and increase later*/
 		epsilon_cached = epsilon; /* epsilon to use for iterations using constraints constructed from the constraint cache*/
 
-		cset = svm_struct_api.init_struct_constraints(sample, sm, sparm);
+		cset = SVMStructAPI.init_struct_constraints(sample, sm, sparm);
 
 		if (cset.m > 0) {
 			alpha_g = new double[cset.m];
@@ -372,7 +372,7 @@ public class svm_struct_learn {
 				// cset.lhs=new DOC[cset.m+1];
 				int ti = 0;
 				ti = cset.m + 1;
-				cset.lhs = svm_struct_api.reallocDOCS(cset.lhs, ti);			
+				cset.lhs = SVMStructAPI.reallocDOCS(cset.lhs, ti);			
 				cset.lhs[cset.m] = svm_common.create_example(cset.m, 0, 1, 1,lhs_g);
 
 				/**************medlda**********************/
@@ -383,15 +383,15 @@ public class svm_struct_learn {
 				
 				/******************************************/
 				// cset.rhs = new double[cset.m + 1];
-				cset.rhs = svm_struct_api.reallocDoubleArr(cset.rhs, cset.m + 1);
+				cset.rhs = SVMStructAPI.reallocDoubleArr(cset.rhs, cset.m + 1);
 				cset.rhs[cset.m] = rhs_g;
 				// alpha = new double[cset.m + 1];
 				// logger.info("alpha_g:"+svm_struct_api.douarr2str(alpha_g));
-				alpha_g = svm_struct_api.reallocDoubleArr(alpha_g, cset.m + 1);
+				alpha_g = SVMStructAPI.reallocDoubleArr(alpha_g, cset.m + 1);
 				alpha_g[cset.m] = 0;
 				// alphahist = new int[cset.m + 1];
 				// logger.info("alphahist_g:"+svm_struct_api.intarr2str(alphahist_g));
-				alphahist_g = svm_struct_api.reallocIntArr(alphahist_g,cset.m + 1);
+				alphahist_g = SVMStructAPI.reallocIntArr(alphahist_g,cset.m + 1);
 				alphahist_g[cset.m] = optcount;
 				// logger.info("optcount here:"+optcount);
 				cset.m++;
@@ -509,7 +509,7 @@ public class svm_struct_learn {
 
 			
 		} while (cached_constraint != 0|| (ceps > sparm.epsilon)
-				|| svm_struct_api.finalize_iteration(ceps, cached_constraint,sample, sm, cset, alpha_g, sparm));
+				|| SVMStructAPI.finalize_iteration(ceps, cached_constraint,sample, sm, cset, alpha_g, sparm));
 
 
 		/************medlda***********************/
@@ -601,7 +601,7 @@ public class svm_struct_learn {
 		logger.info("model type in slsj:"+svmconfig.model_type);
 		if(svmconfig.model_type!=1)//medlda不要把特征向量加和
 		{
-		  svm_struct_api.print_struct_learning_stats(sample, sm, cset, alpha_g,sparm);
+		  SVMStructAPI.print_struct_learning_stats(sample, sm, cset, alpha_g,sparm);
 		}
 		
 		/**clear****/
@@ -684,11 +684,11 @@ public class svm_struct_learn {
 
 		if (cset.m != m) {
 			cset.m = m;
-			svm_struct_api.realsmallloc_lhs(cset);
-			svm_struct_api.realsmallloc_rhs(cset);
+			SVMStructAPI.realsmallloc_lhs(cset);
+			SVMStructAPI.realsmallloc_rhs(cset);
 
-			alpha_g = svm_struct_api.reallocDoubleArr(alpha_g, cset.m);
-			alphahist_g = svm_struct_api.reallocIntArr(alphahist_g, cset.m);
+			alpha_g = SVMStructAPI.reallocDoubleArr(alpha_g, cset.m);
+			alphahist_g = SVMStructAPI.reallocIntArr(alphahist_g, cset.m);
 
 		}
 	}
@@ -932,7 +932,7 @@ public class svm_struct_learn {
 		/*****local parameters************/
 		private double local_rhs_i_g=0;
 		private SVECTOR local_fydelta_g=null;
-		private svm_struct_api local_ssa=null;
+		private SVMStructAPI local_ssa=null;
 		private LABEL[] mostViolatedLabels=null;
 		private boolean[] violatedValid=null;
 		

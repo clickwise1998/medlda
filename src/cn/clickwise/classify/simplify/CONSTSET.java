@@ -12,4 +12,23 @@ public class CONSTSET {
 	public DOC[] lhs;
 	public double[] rhs;
 	
+	public void free()
+	{
+		if(lhs!=null)
+		{
+			for(int i=0;i<lhs.length;i++)
+			{
+				if(lhs[i]!=null)
+				{
+					lhs[i].free();
+					lhs[i]=null;
+				}
+			}
+			
+		}
+		lhs=null;
+		
+		rhs=null;
+	}
+	
 }
