@@ -261,13 +261,19 @@ public class svm_common {
 	public static void add_vector_ns(double[] vec_n, SVECTOR vec_s,
 			double faktor) {
 		WORD[] ai;
+			
+		if(vec_s==null)
+		{
+		  return;	
+		}
+		
 		ai = vec_s.words;
-		/*
+		
 		if(ai==null)
 		{
 		  return;	
 		}
-		*/
+		
 		
 		for (int i = 0; i < ai.length; i++) {
 			if (ai[i] != null) {
