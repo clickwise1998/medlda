@@ -455,6 +455,7 @@ public abstract class svm_struct_api {
 	}
 
 	public static double[] realloc_alpha(double[] alpha, int m) {
+		/*
 		double[] oalpha=new double[alpha.length];
 		for(int i=0;i<alpha.length;i++)
 		{
@@ -471,9 +472,21 @@ public abstract class svm_struct_api {
 		oalpha=null;
 		
 		return alpha;
+		*/
+		double[] nalpha=new double[m];
+		for (int i = 0; i < (m - 1); i++) {
+			nalpha[i] = alpha[i];
+		}
+		nalpha[m - 1] = 0;
+		
+		//free memroy
+		alpha=null;
+		return nalpha;
+		
 	}
 
 	public static int[] realloc_alpha_list(int[] alpha_list, int m) {
+		/*
 		int[] oalpha_list=new int[alpha_list.length];
 		for(int i=0;i<alpha_list.length;i++)
 		{
@@ -490,6 +503,15 @@ public abstract class svm_struct_api {
 		oalpha_list=null;
 		
 		return alpha_list;
+		*/
+		int[] nalpha_list=new int[m];
+		for (int i = 0; i < (m - 1); i++) {
+			 nalpha_list[i] = alpha_list[i];
+		}
+		nalpha_list[m - 1] = 0;
+		alpha_list=null;
+		
+		return nalpha_list;
 	}
 	
 	public static DOC[] reallocDOCS(DOC[] ods, int n) {
@@ -501,7 +523,8 @@ public abstract class svm_struct_api {
 			}
 			return ndoc;
 		}
-		for (int i = 0; i < ods.length; i++) {
+		int m=ods.length;
+		for (int i = 0; i <m; i++) {
 			ndoc[i] = ods[i].copyDoc();
 			
 			//free old docs
@@ -511,9 +534,14 @@ public abstract class svm_struct_api {
 			}
 			
 		}
-		for (int i = ods.length; i < n; i++) {
+	
+		
+		for (int i = m; i < n; i++) {
 			ndoc[i] = new DOC();
 		}
+		
+		//free memory
+		ods=null;
 		
 		return ndoc;
 	}

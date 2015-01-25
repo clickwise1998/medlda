@@ -1677,6 +1677,9 @@ public class svm_common {
 			}
 		}
 
+		//free memory 
+		ddarr=null;
+		
 		return ndarr;
 
 	}
@@ -1699,11 +1702,18 @@ public class svm_common {
 		weight = create_svector_n(weight_n, totwords, null, 1.0);
 		sum = sprod_ss(weight, weight);
         weight_n=null;
-        free_svector(weight);
+        
+        //reform free weight
+        if(weight!=null)
+        {
+        	weight.destroy();
+        	weight=null;
+        }
+        //free_svector(weight);
 		return (Math.sqrt(sum));
 	}
 
-	public void free_svector(SVECTOR vec)
+	public void ffree_svector(SVECTOR vec)
 	{
 	  SVECTOR next;
 	  while(vec!=null) {
