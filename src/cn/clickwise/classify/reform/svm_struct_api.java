@@ -375,7 +375,7 @@ public abstract class svm_struct_api {
 */
 	
 	
-	/*************relloc version II*******************
+	/*************relloc version II*******************/
 	
 	public static void realloc(CONSTSET cset) {
 		DOC[] olhs=new DOC[cset.lhs.length];
@@ -628,8 +628,8 @@ public abstract class svm_struct_api {
 		
 		return narr;
 	}
-	**************************/
-
+	
+ /********************test***************
 	//add one conset
 	public static void realloc(CONSTSET cset) {
 		
@@ -644,20 +644,10 @@ public abstract class svm_struct_api {
 		cset.lhs = new DOC[cset.m];
 		for (int i = 0; i < (cset.m - 1); i++) {
 			cset.lhs[i] = olhs[i];
-			/*
-			//free memory
-			if(olhs[i]!=null)
-			{
-				olhs[i].free();
-			}
-			olhs[i]=null;
-			*/
+		
 		}
 		
-		/*
-		//free memory
-		olhs=null;
-		*/
+		
 		
 		cset.lhs[cset.m - 1] = new DOC();
 
@@ -666,54 +656,20 @@ public abstract class svm_struct_api {
 	//remove constraint
 	public static void realsmallloc_lhs(CONSTSET cset) {
 		
-		/*
-		DOC[] olhs=new DOC[cset.lhs.length];
-		for(int i=0;i<olhs.length;i++)
-		{
-			olhs[i]=cset.lhs[i];
-		}
-		*/
+	
 		//DOC[] olhs = cset.lhs;
 		int oldm=cset.lhs.length;
 		for(int i=cset.m;i<oldm;i++)
 		{
 			cset.lhs[i]=null;
 		}
-		/*
-		cset.lhs = new DOC[cset.m];
-		for (int i = 0; i < (cset.m); i++) {
-			cset.lhs[i] = olhs[i];
-			
-			//free memory
-			////if(olhs[i]!=null)
-			////{
-			////	olhs[i].free();
-			////}
-			////olhs[i]=null;
-			
-		}
-		*/
+
 			
 		
 	}
    //remove one constset
 	public static void realsmallloc_rhs(CONSTSET cset) {
-		/*
-		double[] orhs=new double[cset.rhs.length];
-		for(int i=0;i<orhs.length;i++)
-		{
-			orhs[i]=cset.rhs[i];
-		}
-		
-		//double[] orhs = cset.rhs;
-		cset.rhs = new double[cset.m];
-		for (int i = 0; i < (cset.m); i++) {
-			cset.rhs[i] = orhs[i];
-		}
-		
-		//free memroy
-		orhs=null;
-		*/
+
 		int oldm=cset.rhs.length;
 		for(int i=cset.m;i<oldm;i++)
 		{
@@ -902,7 +858,7 @@ public abstract class svm_struct_api {
 		
 		return narr;
 	}
-	
+	******************/
 	public static String douarr2str(double[] arr) {
 		String str = "";
 		if (arr == null) {
