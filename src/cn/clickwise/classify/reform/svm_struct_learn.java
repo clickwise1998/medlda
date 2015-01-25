@@ -865,6 +865,7 @@ public class svm_struct_learn {
 				{
 					subThreadsFinished[th]=0;
 				}
+				
 				MostViolated[] mvs=new MostViolated[threadNum];
 				for(int th=0;th<threadNum;th++)
 				{
@@ -923,17 +924,21 @@ public class svm_struct_learn {
 					{
 				 		if((mvs[th].getViolatedValid()[tk])==true)
 				 		{
-						   most_violated_g[tk]=svm_common.copyLABEL(mvs[th].getMostViolatedLabels()[tk]);
+				 		   vecLabel[tk] = most_violated_g[tk].class_index - 1;
+						   most_violated_g[tk]=mvs[th].getMostViolatedLabels()[tk];
 				 		}
 					}
 				 	argmax_count_g+=(mvs[th].getLocal_argmax_count_g());
 				 	mvs[th].des();
 				 	mvs[th]=null;
 				}
+				
+				/*
 				for(int ti=0;ti<n;ti++)
 				{
 					vecLabel[ti] = most_violated_g[ti].class_index - 1;
 				}
+				*/
 			
 				System.out.println("all has finished find most violated");
 				/*
