@@ -374,6 +374,9 @@ public abstract class svm_struct_api {
 
 */
 	
+	
+	/*************relloc version II*******************
+	
 	public static void realloc(CONSTSET cset) {
 		DOC[] olhs=new DOC[cset.lhs.length];
 		for(int i=0;i<olhs.length;i++)
@@ -459,24 +462,24 @@ public abstract class svm_struct_api {
 	}
 
 	public static double[] realloc_alpha(double[] alpha, int m) {
-		/*
-		double[] oalpha=new double[alpha.length];
-		for(int i=0;i<alpha.length;i++)
-		{
-			oalpha[i]=alpha[i];
-		}
+		
+		////double[] oalpha=new double[alpha.length];
+		////for(int i=0;i<alpha.length;i++)
+		////{
+		////	oalpha[i]=alpha[i];
+		////}
 		//double[] oalpha = alpha;
-		alpha = new double[m];
-		for (int i = 0; i < (m - 1); i++) {
-			alpha[i] = oalpha[i];
-		}
-		alpha[m - 1] = 0;
+		////alpha = new double[m];
+		////for (int i = 0; i < (m - 1); i++) {
+		////	alpha[i] = oalpha[i];
+		/////}
+		////alpha[m - 1] = 0;
        
 		//free memroy
-		oalpha=null;
+		////oalpha=null;
 		
-		return alpha;
-		*/
+		////return alpha;
+		
 		double[] nalpha=new double[m];
 		for (int i = 0; i < (m - 1); i++) {
 			nalpha[i] = alpha[i];
@@ -490,24 +493,24 @@ public abstract class svm_struct_api {
 	}
 
 	public static int[] realloc_alpha_list(int[] alpha_list, int m) {
-		/*
-		int[] oalpha_list=new int[alpha_list.length];
-		for(int i=0;i<alpha_list.length;i++)
-		{
-			oalpha_list[i]=alpha_list[i];
-		}
+		
+		////int[] oalpha_list=new int[alpha_list.length];
+		////for(int i=0;i<alpha_list.length;i++)
+		////{
+		////	oalpha_list[i]=alpha_list[i];
+		////}
 		//int[] oalpha_list = alpha_list;
-		alpha_list = new int[m];
-		for (int i = 0; i < (m - 1); i++) {
-			alpha_list[i] = oalpha_list[i];
-		}
-		alpha_list[m - 1] = 0;
+		////alpha_list = new int[m];
+		////for (int i = 0; i < (m - 1); i++) {
+		////	alpha_list[i] = oalpha_list[i];
+		////}
+		////alpha_list[m - 1] = 0;
 		
 		//free memroy
-		oalpha_list=null;
+		/////oalpha_list=null;
 		
-		return alpha_list;
-		*/
+		/////return alpha_list;
+		
 		int[] nalpha_list=new int[m];
 		for (int i = 0; i < (m - 1); i++) {
 			 nalpha_list[i] = alpha_list[i];
@@ -552,13 +555,6 @@ public abstract class svm_struct_api {
 	}
 
 	public static double[] reallocDoubleArr(double[] arr, int nsize) {
-		/*
-		if (arr != null) {
-			logger.info("double arr length:" + arr.length + " nsize:" + nsize);
-		} else {
-			logger.info("double arr length: null nsize:" + nsize);
-		}
-		*/
 		
 		double[] narr = new double[nsize];
 		if (arr == null) {
@@ -599,13 +595,6 @@ public abstract class svm_struct_api {
 	}
 
 	public static int[] reallocIntArr(int[] arr, int nsize) {
-		/*
-		if (arr != null) {
-			logger.info("int arr length:" + arr.length + " nsize:" + nsize);
-		} else {
-			logger.info("int arr length: null nsize:" + nsize);
-		}
-		*/
 		
 		int[] narr = new int[nsize];
 		if (arr == null) {
@@ -639,6 +628,260 @@ public abstract class svm_struct_api {
 		
 		return narr;
 	}
+	**************************/
+	
+	public static void realloc(CONSTSET cset) {
+		DOC[] olhs=new DOC[cset.lhs.length];
+		for(int i=0;i<olhs.length;i++)
+		{
+			olhs[i]=cset.lhs[i].copyDoc();
+		}
+		
+		//DOC[] olhs = cset.lhs;
+		
+		cset.lhs = new DOC[cset.m];
+		for (int i = 0; i < (cset.m - 1); i++) {
+			cset.lhs[i] = olhs[i].copyDoc();
+			
+			//free memory
+			if(olhs[i]!=null)
+			{
+				olhs[i].free();
+			}
+			olhs[i]=null;
+		}
+		
+		//free memory
+		olhs=null;
+		
+		cset.lhs[cset.m - 1] = new DOC();
+
+	}
+
+	public static void realsmallloc_lhs(CONSTSET cset) {
+		
+		DOC[] olhs=new DOC[cset.lhs.length];
+		for(int i=0;i<olhs.length;i++)
+		{
+			olhs[i]=cset.lhs[i].copyDoc();
+		}
+		
+		//DOC[] olhs = cset.lhs;
+		
+		cset.lhs = new DOC[cset.m];
+		for (int i = 0; i < (cset.m); i++) {
+			cset.lhs[i] = olhs[i].copyDoc();
+			//free memory
+			if(olhs[i]!=null)
+			{
+				olhs[i].free();
+			}
+			olhs[i]=null;
+		}
+	}
+
+	public static void realsmallloc_rhs(CONSTSET cset) {
+		double[] orhs=new double[cset.rhs.length];
+		for(int i=0;i<orhs.length;i++)
+		{
+			orhs[i]=cset.rhs[i];
+		}
+		
+		//double[] orhs = cset.rhs;
+		cset.rhs = new double[cset.m];
+		for (int i = 0; i < (cset.m); i++) {
+			cset.rhs[i] = orhs[i];
+		}
+		
+		//free memroy
+		orhs=null;
+	}
+
+	public static void realloc_rhs(CONSTSET cset) {
+		double[] orhs=new double[cset.rhs.length];
+		for(int i=0;i<orhs.length;i++)
+		{
+			orhs[i]=cset.rhs[i];
+		}
+		//double[] orhs = cset.rhs;
+		cset.rhs = new double[cset.m];
+		for (int i = 0; i < (cset.m - 1); i++) {
+			cset.rhs[i] = orhs[i];
+		}
+		cset.rhs[cset.m - 1] = 0;
+		
+		//free memroy
+		orhs=null;
+	}
+
+	public static double[] realloc_alpha(double[] alpha, int m) {
+		
+		////double[] oalpha=new double[alpha.length];
+		////for(int i=0;i<alpha.length;i++)
+		////{
+		////	oalpha[i]=alpha[i];
+		////}
+		//double[] oalpha = alpha;
+		////alpha = new double[m];
+		////for (int i = 0; i < (m - 1); i++) {
+		////	alpha[i] = oalpha[i];
+		/////}
+		////alpha[m - 1] = 0;
+       
+		//free memroy
+		////oalpha=null;
+		
+		////return alpha;
+		
+		double[] nalpha=new double[m];
+		for (int i = 0; i < (m - 1); i++) {
+			nalpha[i] = alpha[i];
+		}
+		nalpha[m - 1] = 0;
+		
+		//free memroy
+		alpha=null;
+		return nalpha;
+		
+	}
+
+	public static int[] realloc_alpha_list(int[] alpha_list, int m) {
+		
+		////int[] oalpha_list=new int[alpha_list.length];
+		////for(int i=0;i<alpha_list.length;i++)
+		////{
+		////	oalpha_list[i]=alpha_list[i];
+		////}
+		//int[] oalpha_list = alpha_list;
+		////alpha_list = new int[m];
+		////for (int i = 0; i < (m - 1); i++) {
+		////	alpha_list[i] = oalpha_list[i];
+		////}
+		////alpha_list[m - 1] = 0;
+		
+		//free memroy
+		/////oalpha_list=null;
+		
+		/////return alpha_list;
+		
+		int[] nalpha_list=new int[m];
+		for (int i = 0; i < (m - 1); i++) {
+			 nalpha_list[i] = alpha_list[i];
+		}
+		nalpha_list[m - 1] = 0;
+		alpha_list=null;
+		
+		return nalpha_list;
+	}
+	
+	public static DOC[] reallocDOCS(DOC[] ods, int n) {
+
+		DOC[] ndoc = new DOC[n];
+		if (ods == null) {
+			for (int i = 0; i < n; i++) {
+				ndoc[i] = new DOC();
+			}
+			return ndoc;
+		}
+		int m=ods.length;
+		for (int i = 0; i <m; i++) {
+			ndoc[i] = ods[i].copyDoc();
+			
+			//free old docs
+			if(ods[i]!=null)
+			{
+				ods[i].free();
+			}
+			ods[i]=null;
+			
+		}
+	
+		
+		for (int i = m; i < n; i++) {
+			ndoc[i] = new DOC();
+		}
+		
+		//free memory
+		ods=null;
+		
+		return ndoc;
+	}
+
+	public static double[] reallocDoubleArr(double[] arr, int nsize) {
+		
+		double[] narr = new double[nsize];
+		if (arr == null) {
+			for (int ni = 0; ni < nsize; ni++) {
+				narr[ni] = 0;
+			}
+			
+			return narr;
+		}
+
+		if (nsize <= arr.length) {
+			narr = new double[arr.length];
+			for (int ni = 0; ni < nsize; ni++) {
+				narr[ni] = arr[ni];
+			}
+
+			for (int ni = nsize; ni < arr.length; ni++) {
+				narr[ni] = 0;
+			}
+
+			//free old mem
+			arr=null;
+			
+			return narr;
+		}
+
+		for (int ni = 0; ni < arr.length; ni++) {
+			narr[ni] = arr[ni];
+		}
+		for (int ni = arr.length; ni < nsize; ni++) {
+			narr[ni] = 0;
+		}
+		
+		//free old mem
+		arr=null;
+
+		return narr;
+	}
+
+	public static int[] reallocIntArr(int[] arr, int nsize) {
+		
+		int[] narr = new int[nsize];
+		if (arr == null) {
+			for (int ni = 0; ni < nsize; ni++) {
+				narr[ni] = 0;
+			}
+			return narr;
+		}
+		if (nsize <= arr.length) {
+			narr = new int[arr.length];
+			for (int ni = 0; ni < nsize; ni++) {
+				narr[ni] = arr[ni];
+			}
+			for (int ni = nsize; ni < arr.length; ni++) {
+				narr[ni] = 0;
+			}
+			//free old mem
+			arr=null;
+			
+			return narr;
+		}
+		for (int ni = 0; ni < arr.length; ni++) {
+			narr[ni] = arr[ni];
+		}
+		for (int ni = arr.length; ni < nsize; ni++) {
+			narr[ni] = 0;
+		}
+
+		//free old mem
+		arr=null;
+		
+		return narr;
+	}
+	
 	public static String douarr2str(double[] arr) {
 		String str = "";
 		if (arr == null) {
