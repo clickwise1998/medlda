@@ -32,4 +32,12 @@ public class LABEL {
 		scores=null;
 	}
 	
+	public void initValue()
+	{
+		first_class=0;
+		second_class=0;
+		third_class=0;
+		class_index=0;
+	}
+	
 }

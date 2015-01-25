@@ -391,9 +391,13 @@ public abstract class svm_struct_api {
 			if(olhs[i]!=null)
 			{
 				olhs[i].free();
-				olhs[i]=null;
 			}
+			olhs[i]=null;
 		}
+		
+		//free memory
+		olhs=null;
+		
 		cset.lhs[cset.m - 1] = new DOC();
 
 	}
@@ -415,8 +419,8 @@ public abstract class svm_struct_api {
 			if(olhs[i]!=null)
 			{
 				olhs[i].free();
-				olhs[i]=null;
 			}
+			olhs[i]=null;
 		}
 	}
 
@@ -532,6 +536,7 @@ public abstract class svm_struct_api {
 			{
 				ods[i].free();
 			}
+			ods[i]=null;
 			
 		}
 	

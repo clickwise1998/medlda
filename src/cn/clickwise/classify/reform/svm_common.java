@@ -1856,12 +1856,40 @@ public class svm_common {
 		  nw.wnum=w.wnum;
 		  return nw;
 	  }
+	  
+	  public static LABEL copyLABEL(LABEL label)
+	  {
+		  if(label==null)
+		  {
+			 return null; 
+		  }
+		  
+		  LABEL nlabel=new LABEL();
+		  nlabel.class_index=label.class_index;
+		  nlabel.num_classes=label.num_classes;
+		  nlabel.first_class=label.first_class;
+		  nlabel.second_class=label.second_class;
+		  nlabel.third_class=label.third_class;
+		  nlabel.first_size=label.first_size;
+		  nlabel.second_size=label.second_size;
+		  nlabel.third_size=label.third_size;
+	
+		  if(label.scores!=null)
+		  { 
+			  nlabel.scores=new double[label.scores.length];
+			  for(int i=0;i<label.scores.length;i++)
+			  {
+				  nlabel.scores[i]=label.scores[i];
+			  }
+		  }
+		  return nlabel;
+	  }
 
 
 		protected void finalize_n() throws Throwable
 		{
 			try{
-				/*
+				
 				if(read_words!=null)
 				{
 					for(int i=0;i<read_words.length;i++)
@@ -1876,8 +1904,7 @@ public class svm_common {
 				{
 					read_target=null;
 				}
-				*/
-				
+					
 			}
 			finally
 			{

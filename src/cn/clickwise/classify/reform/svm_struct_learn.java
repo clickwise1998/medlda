@@ -661,6 +661,11 @@ public class svm_struct_learn {
 			// logger.info("kernel type is LINEAR \n");
 			lhs_n = svm_common.create_nvector(sm.sizePsi);
 		}
+		most_violated_g=new LABEL[n];
+		for(int tk=0;tk<most_violated_g.length;tk++)
+		{
+			most_violated_g[tk]=new LABEL();
+		}
 		/* randomize order or training examples */
 		if (batch_size < n)
 			randmapping = svm_common.random_order(n);
@@ -819,7 +824,7 @@ public class svm_struct_learn {
 				rt_total += Math.max(svm_common.get_runtime() - rt1, 0);
 
 				double rtPrepareStart=svm_common.get_runtime();
-				most_violated_g=new LABEL[n];
+				
 				
 				/*
 				for (i = 0; i < n; i++) {
@@ -902,8 +907,9 @@ public class svm_struct_learn {
 				
 				for(int tk=0;tk<most_violated_g.length;tk++)
 				{
-					most_violated_g[tk]=new LABEL();
+					most_violated_g[tk].initValue();
 				}
+				
 				//update 
 				for(int th=0;th<threadNum;th++)
 				{
@@ -917,20 +923,33 @@ public class svm_struct_learn {
 					{
 				 		if((mvs[th].getViolatedValid()[tk])==true)
 				 		{
-						   most_violated_g[tk]=mvs[th].getMostViolatedLabels()[tk];
+						   most_violated_g[tk]=svm_common.copyLABEL(mvs[th].getMostViolatedLabels()[tk]);
 				 		}
 					}
 				 	argmax_count_g+=(mvs[th].getLocal_argmax_count_g());
 				 	mvs[th].des();
 				 	mvs[th]=null;
 				}
-				
 				for(int ti=0;ti<n;ti++)
 				{
 					vecLabel[ti] = most_violated_g[ti].class_index - 1;
 				}
+			
 				System.out.println("all has finished find most violated");
-				
+				/*
+				if(most_violated_g!=null)
+				{
+					for(int ti=0;ti<most_violated_g.length;ti++)
+					{
+						if(most_violated_g[ti]!=null)
+						{
+							most_violated_g[ti].free();
+						}		
+						most_violated_g[ti]=null;
+					}
+					most_violated_g=null;
+				}
+				*/
 				
 				double rtPrepareEnd=svm_common.get_runtime();
 				logger.info("numIt:"+numIt+" prepareTime:"+((rtPrepareEnd-rtPrepareStart)/100));
@@ -1873,8 +1892,8 @@ public class svm_struct_learn {
 				   if(mostViolatedLabels[i]!=null)
 				   {
 				     mostViolatedLabels[i].free();
-				     mostViolatedLabels[i]=null;
 				   }
+				     mostViolatedLabels[i]=null;
 			   }
 			   mostViolatedLabels=null;
 			   
@@ -1890,13 +1909,14 @@ public class svm_struct_learn {
 				}
 			}
 			local_ssa=null;
+			
 			violatedValid=null;
 			/**********free memory******/
 			if(local_fydelta_g!=null)
 			{
 				local_fydelta_g.destroy();
-				local_fydelta_g=null;
 			}
+			local_fydelta_g=null;
 			
 			local_lhs_n=null;
 			/**************************/

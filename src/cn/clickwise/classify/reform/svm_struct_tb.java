@@ -924,7 +924,7 @@ public class svm_struct_tb extends svm_struct_api {
 			sc.finalize_n();
 		}
 		try{
-			/*
+			
 			if(read_words!=null)
 			{
 				for(int i=0;i<read_words.length;i++)
@@ -950,7 +950,7 @@ public class svm_struct_tb extends svm_struct_api {
 					posslabels[i]=null;
 				}
 			}
-			*/
+			
 			
 		}
 		finally
