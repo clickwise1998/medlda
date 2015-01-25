@@ -1054,18 +1054,19 @@ public class svm_common {
 		return true;
 	}
 
+	//从a 生成新向量,不能改变a 的值
 	public static SVECTOR shift_s(SVECTOR a, int shift) {
 		SVECTOR vec;
 		//WORD[] sum;
 		WORD[] sumi;
-		WORD[] ai;
+		////WORD[] ai;
 		int veclength;
 		String userdefined = "";
 		// logger.info("shift:"+shift);
-		ai = new WORD[a.words.length];
-		for (int k = 0; k < ai.length; k++) {
-			ai[k] = svm_common.copy_word(a.words[k]);
-		}
+		////ai = new WORD[a.words.length];
+		////for (int k = 0; k < ai.length; k++) {
+		////	ai[k] = svm_common.copy_word(a.words[k]);
+		////}
 		// ai = a.words;
 
 		/*
@@ -1073,11 +1074,11 @@ public class svm_common {
 		 * wwinfo=wwinfo+a.words[k].wnum+":"+a.words[k].weight+" "; }
 		 * logger.info("wwwinfo:"+wwinfo);
 		 */
-		veclength = ai.length;
+		veclength = a.words.length;
 		sumi = new WORD[veclength];
-		for (int i = 0; i < ai.length; i++) {
-			sumi[i] = svm_common.copy_word(ai[i]);
-			sumi[i].wnum = ai[i].wnum + shift;
+		for (int i = 0; i < veclength; i++) {
+			sumi[i] = svm_common.copy_word(a.words[i]);
+			sumi[i].wnum = a.words[i].wnum + shift;
 			// logger.info("ai.wnum:"+ai[i].wnum+" sumi wnum:"+sumi[i].wnum);
 		}
 
@@ -1092,6 +1093,7 @@ public class svm_common {
 		 */
 
 		vec = svm_common.create_svector_shallow(sumi, userdefined, a.factor);
+		/*
 		if(ai!=null)
 		{
 			for(int i=0;i<ai.length;i++)
@@ -1100,6 +1102,7 @@ public class svm_common {
 			}
 			ai=null;
 		}
+		*/
 		
 		if(sumi!=null)
 		{
