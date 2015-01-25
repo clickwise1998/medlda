@@ -629,58 +629,76 @@ public abstract class svm_struct_api {
 		return narr;
 	}
 	**************************/
-	
+
+	//add one conset
 	public static void realloc(CONSTSET cset) {
+		
 		DOC[] olhs=new DOC[cset.lhs.length];
 		for(int i=0;i<olhs.length;i++)
 		{
-			olhs[i]=cset.lhs[i].copyDoc();
+			olhs[i]=cset.lhs[i];
 		}
 		
 		//DOC[] olhs = cset.lhs;
 		
 		cset.lhs = new DOC[cset.m];
 		for (int i = 0; i < (cset.m - 1); i++) {
-			cset.lhs[i] = olhs[i].copyDoc();
-			
+			cset.lhs[i] = olhs[i];
+			/*
 			//free memory
 			if(olhs[i]!=null)
 			{
 				olhs[i].free();
 			}
 			olhs[i]=null;
+			*/
 		}
 		
+		/*
 		//free memory
 		olhs=null;
+		*/
 		
 		cset.lhs[cset.m - 1] = new DOC();
 
 	}
 
+	//remove constraint
 	public static void realsmallloc_lhs(CONSTSET cset) {
 		
+		/*
 		DOC[] olhs=new DOC[cset.lhs.length];
 		for(int i=0;i<olhs.length;i++)
 		{
-			olhs[i]=cset.lhs[i].copyDoc();
+			olhs[i]=cset.lhs[i];
 		}
-		
+		*/
 		//DOC[] olhs = cset.lhs;
-		
+		int oldm=cset.lhs.length;
+		for(int i=cset.m;i<oldm;i++)
+		{
+			cset.lhs[i]=null;
+		}
+		/*
 		cset.lhs = new DOC[cset.m];
 		for (int i = 0; i < (cset.m); i++) {
-			cset.lhs[i] = olhs[i].copyDoc();
+			cset.lhs[i] = olhs[i];
+			
 			//free memory
-			if(olhs[i]!=null)
-			{
-				olhs[i].free();
-			}
-			olhs[i]=null;
+			////if(olhs[i]!=null)
+			////{
+			////	olhs[i].free();
+			////}
+			////olhs[i]=null;
+			
 		}
+		*/
+			
+		
 	}
-
+   //remove one constset
 	public static void realsmallloc_rhs(CONSTSET cset) {
+		/*
 		double[] orhs=new double[cset.rhs.length];
 		for(int i=0;i<orhs.length;i++)
 		{
@@ -695,8 +713,16 @@ public abstract class svm_struct_api {
 		
 		//free memroy
 		orhs=null;
+		*/
+		int oldm=cset.rhs.length;
+		for(int i=cset.m;i<oldm;i++)
+		{
+			cset.rhs[i]=0;
+		}
+		
 	}
 
+	//add one constset
 	public static void realloc_rhs(CONSTSET cset) {
 		double[] orhs=new double[cset.rhs.length];
 		for(int i=0;i<orhs.length;i++)
@@ -714,6 +740,7 @@ public abstract class svm_struct_api {
 		orhs=null;
 	}
 
+	//add one constset
 	public static double[] realloc_alpha(double[] alpha, int m) {
 		
 		////double[] oalpha=new double[alpha.length];
@@ -774,6 +801,7 @@ public abstract class svm_struct_api {
 		return nalpha_list;
 	}
 	
+	//add one conset
 	public static DOC[] reallocDOCS(DOC[] ods, int n) {
 
 		DOC[] ndoc = new DOC[n];
@@ -783,26 +811,19 @@ public abstract class svm_struct_api {
 			}
 			return ndoc;
 		}
+		
 		int m=ods.length;
 		for (int i = 0; i <m; i++) {
-			ndoc[i] = ods[i].copyDoc();
+			ndoc[i] = ods[i];
 			
 			//free old docs
-			if(ods[i]!=null)
-			{
-				ods[i].free();
-			}
-			ods[i]=null;
 			
 		}
 	
-		
 		for (int i = m; i < n; i++) {
 			ndoc[i] = new DOC();
 		}
 		
-		//free memory
-		ods=null;
 		
 		return ndoc;
 	}
