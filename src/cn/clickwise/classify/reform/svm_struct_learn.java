@@ -940,7 +940,7 @@ public class svm_struct_learn {
 				}
 				*/
 			
-				System.out.println("all has finished find most violated");
+				//System.out.println("all has finished find most violated");
 				/*
 				if(most_violated_g!=null)
 				{
@@ -1815,7 +1815,7 @@ public class svm_struct_learn {
 	
 	public synchronized void updateSubThreadsFinished(int threadIndex,int status)
 	{
-		System.out.println("thread "+threadIndex+" is setting status");
+		//System.out.println("thread "+threadIndex+" is setting status");
 		subThreadsFinished[threadIndex]=status;
 	}
 	

@@ -929,7 +929,7 @@ public class svm_struct_learn {
 				{
 					vecLabel[ti] = most_violated_g[ti].class_index - 1;
 				}
-				System.out.println("all has finished find most violated");
+				//System.out.println("all has finished find most violated");
 				
 				
 				double rtPrepareEnd=svm_common.get_runtime();
@@ -1788,7 +1788,7 @@ public class svm_struct_learn {
 	
 	public synchronized void updateSubThreadsFinished(int threadIndex,int status)
 	{
-		System.out.println("thread "+threadIndex+" is setting status");
+		//System.out.println("thread "+threadIndex+" is setting status");
 		subThreadsFinished[threadIndex]=status;
 	}
 	
