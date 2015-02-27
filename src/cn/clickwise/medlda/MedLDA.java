@@ -11,6 +11,7 @@ import java.util.Vector;
 
 import org.apache.log4j.Logger;
 
+/*
 import cn.clickwise.classify.svm_struct.KERNEL_PARM;
 import cn.clickwise.classify.svm_struct.LEARN_PARM;
 import cn.clickwise.classify.svm_struct.SAMPLE;
@@ -21,6 +22,20 @@ import cn.clickwise.classify.svm_struct.svm_struct_api;
 import cn.clickwise.classify.svm_struct.svm_struct_common;
 import cn.clickwise.classify.svm_struct.svm_struct_learn;
 import cn.clickwise.classify.svm_struct.svmconfig;
+*/
+import cn.clickwise.classify.sspm.KERNEL_PARM;
+import cn.clickwise.classify.sspm.LEARN_PARM;
+import cn.clickwise.classify.sspm.SAMPLE;
+import cn.clickwise.classify.sspm.STRUCTMODEL;
+import cn.clickwise.classify.sspm.STRUCT_LEARN_PARM;
+import cn.clickwise.classify.sspm.svm_common;
+import cn.clickwise.classify.sspm.svm_struct_api;
+import cn.clickwise.classify.sspm.svm_struct_api_factory;
+import cn.clickwise.classify.sspm.svm_struct_common;
+import cn.clickwise.classify.sspm.svm_struct_learn;
+import cn.clickwise.classify.sspm.svmconfig;
+import cn.clickwise.evaluation.ECORPUS;
+import cn.clickwise.evaluation.EDOC;
 import cn.clickwise.math.random.SeedRandom;
 import cn.clickwise.str.basic.SSO;
 import cn.clickwise.time.utils.TimeOpera;
@@ -48,6 +63,8 @@ public class MedLDA {
 	private int m_nNumTerms;
 
 	private double[][] m_dLogProbW;
+	
+	private int m_numDocs=0;
 
 	/**
 	 * V*2的数组，第一列是 word 不被选择的权重，即Sv=0,第二列是word被选择的权重，即Sv=1
@@ -136,8 +153,12 @@ public class MedLDA {
 			double wval=0;
 			for(int k=0;k<m_nK;k++)
 			{
+				/*****valid result*****
 				wval+=compute_wprob_mrgterm(doc, phi,ss.getNum_docs(), n, k,
 						param);
+			     *********************/
+				wval+=compute_wprob_mrgterm(doc, phi,ss.getNum_docs(), n, k,
+						param)/((double) doc.getTotal());
 			}
 
 			if(MedLDAConfig.weighttype==0)
@@ -167,7 +188,7 @@ public class MedLDA {
 	public boolean mle(SuffStats ss, Params param, boolean bInit) {
 		int k;
 		int w;
-
+        double ldamstart=TimeOpera.getCurrentTimeLong();
 		// beta parameters(K*N)
 		for (k = 0; k < m_nK; k++) {
 			for (w = 0; w < m_nNumTerms; w++) {
@@ -221,6 +242,9 @@ public class MedLDA {
 			//}
 		}
 	
+		 double ldamend=TimeOpera.getCurrentTimeLong();
+		 logger.info("lda mstep run time:"+(ldamend-ldamstart)/((double)1000));
+		 System.out.println("lda mstep run time:"+(ldamend-ldamstart)/((double)1000));
 		//update wprob parameters
 		if(MedLDAConfig.isWordSelection==true)
 		{
@@ -228,9 +252,17 @@ public class MedLDA {
 		  {
 			 if(MedLDAConfig.weighttype==0)
 			 {
+				 // incorporate priors(-k * w / sigmaSq;) 里面的w应该是 wpotent[w][1]
+				 //ss.wprob_suffstats[w][0]=ss.wprob_suffstats[w][0]+wpotent[w][0];
+				// ss.wprob_suffstats[w][1]=ss.wprob_suffstats[w][0]+wpotent[w][1];
+				 
+				 /******valid result
 				 wpotent[w][0]+=ss.wprob_suffstats[w][0];
 				 wpotent[w][1]+=ss.wprob_suffstats[w][1];
-	
+	             ************/
+				 wpotent[w][0]=Utils.optWeight(ss.wprob_suffstats[w][0], wpotent[w][0]);
+				 wpotent[w][1]=Utils.optWeight(ss.wprob_suffstats[w][1], wpotent[w][1]);
+				 
 			 }
 			 else if(MedLDAConfig.weighttype==1)
 			 {
@@ -238,6 +270,7 @@ public class MedLDA {
 			     wprob[w]=Utils.potential2probs(wpotent[w]);
 			 }
 		  }
+		  Utils.printGradient("example/wprob_suffstats.txt",ss.wprob_suffstats);
 		}
 		//normalizeWprob();
 		//
@@ -276,7 +309,8 @@ public class MedLDA {
      
 	public int run_em(String start, String directory, Corpus corpus,
 			Params param) {
-
+		
+		m_numDocs=corpus.num_docs;
 		m_dDeltaEll = param.getDELTA_ELL();
 
 		int d, n;
@@ -343,11 +377,12 @@ public class MedLDA {
 				lhood = 0;
 				zero_init_ss(ss);
 
-				if(ci>2)
+				if(ci>5)
 				{
 					break;
 				}
 				ci++;
+				double estart=TimeOpera.getCurrentTimeLong();
 				// e-step
 				for (d = 0; d < corpus.num_docs; d++) {
 					for (n = 0; n < max_length; n++)// initialize to uniform
@@ -356,22 +391,29 @@ public class MedLDA {
 							phi[n][k] = 1.0 / (double) param.getNTOPICS();
 						}
 					}
-						if (d % 1000 == 0) {
-							logger.info("Document " + d);
-						}
+					if (d % 1000 == 0) {
+						logger.info("Document " + d);
+					}
 					lhood += doc_e_step(corpus.docs[d], var_gamma[d],
 									phi, ss, param);
 						
 					
 				}
-
+				
+				double eend=TimeOpera.getCurrentTimeLong();
+				
+                System.out.println("estep run time:"+(eend-estart)/((double)1000));
+                logger.info("estep run time:"+(eend-estart)/((double)1000));
 				// m-step
+                double mstart=TimeOpera.getCurrentTimeLong();
 				if (mle(ss, param, false)) {
 					nIt = i + 1;
 				} else {
 					break;
 				}
-
+				double mend=TimeOpera.getCurrentTimeLong();
+				System.out.println("mstep run time:"+(mend-mstart)/((double)1000));
+				logger.info("mstep run time:"+(mend-mstart)/((double)1000));
 				// check for convergence
 				lhood += m_dsvm_primalobj;
 
@@ -566,6 +608,7 @@ public class MedLDA {
 				phisum = 0;
 
 				for (int k = 0; k < m_nK; k++) {
+					
 					oldphi[k] = phi[n][k];
 
 					/*
@@ -610,7 +653,6 @@ public class MedLDA {
 	 * @param param
 	 * @return
 	 */
-
 	public double inference_pred(Document doc, double[] var_gamma,
 			double[][] phi, Params param) {
 
@@ -632,7 +674,6 @@ public class MedLDA {
 		}
 
 		var_iter = 0;
-
 		while ((converged > param.VAR_CONVERGED)
 				&& ((var_iter < param.VAR_MAX_ITER) || (param.VAR_MAX_ITER == -1))) {
 			var_iter++;
@@ -722,7 +763,9 @@ public class MedLDA {
 				/************wordnut***************/
 				if(MedLDAConfig.weighttype==0)
 				{
-				  dval += m_dMu[muIx] * (m_dEta[gndetaIx] - m_dEta[etaIx])*wpotent[doc.words[n]][1]*phi[n][k];
+				 /*********valid result*******/
+				 // dval += m_dMu[muIx] * (m_dEta[gndetaIx] - m_dEta[etaIx])*wpotent[doc.words[n]][1]*phi[n][k];
+					dval += m_dMu[muIx] * (m_dEta[gndetaIx] - m_dEta[etaIx])*phi[n][k];
 				}
 				else if(MedLDAConfig.weighttype==1)
 				{
@@ -785,7 +828,7 @@ public class MedLDA {
 				for (int n = 0; n < doc.length; n++) {
 					if(MedLDAConfig.isWordSelection==false)
 					{
-					dVal += phi[n][k] * (double) doc.counts[n]
+					    dVal += phi[n][k] * (double) doc.counts[n]
 							/ (double) doc.total;
 					}
 					else if(MedLDAConfig.isWordSelection==true)
@@ -821,14 +864,34 @@ public class MedLDA {
 		}
 		double perwordlikelihood1 = sumlikelihood / nterms;
 		double perwordlikelihood2 = sumavglikelihood / corpus.num_docs;
-
+     
 		int nAcc = 0;
+		ECORPUS ecorpus=new ECORPUS();
+		
 		for (int d = 0; d < corpus.num_docs; d++)
+		{
 			if (corpus.docs[d].gndlabel == corpus.docs[d].predlabel)
 				nAcc += 1;
+			ecorpus.add(new EDOC(corpus.docs[d].gndlabel,corpus.docs[d].predlabel));
+		}
+		
 		double dAcc = (double) nAcc / corpus.num_docs;
-
+		
+        double avgPrecision=0;
+        double avgRecall=0;
+        double f;
+        ecorpus.analysis();
+        avgPrecision=ecorpus.getAvgPrecision();
+        avgRecall=ecorpus.getAvgRecall();
+        f=ecorpus.getF();
+        
+        logger.info("upmul:" +  Utils.upmul);
+        logger.info("isup:" +  Utils.isUp);
+        logger.info("labelSize:" +  ecorpus.getLabelSize());
 		logger.info("Accuracy:" + dAcc);
+		logger.info("AvgPrecision:" + avgPrecision);
+		logger.info("AvgRecall:" + avgRecall);
+		logger.info("F:" + f);
 		PrintWriter fileptr = null;
 
 		try {
@@ -1105,7 +1168,7 @@ public class MedLDA {
 				}
 
 				for (j = 0; j < m_nNumTerms; j++) {
-					x = sc.nextDouble();
+					x = sc.nextDouble();	
 					if(MedLDAConfig.isWordSelection==true)
 					{
 					  if(selstat[j]==true)
@@ -1120,6 +1183,17 @@ public class MedLDA {
 					}
 					else
 					{
+						/*
+						if((Math.random())>0.1)
+						{
+					        m_dLogProbW[i][j] = x;
+						}
+						else
+						{
+						    m_dLogProbW[i][j] = 0;
+						}
+						*/
+						//*************normal result******
 					    m_dLogProbW[i][j] = x;
 					}
 				}
@@ -1280,7 +1354,8 @@ public class MedLDA {
 		String buff;
 		buff = ss.dir + "/Feature.txt";
 		outputLowDimData(buff, ss);
-		svm_struct_api ssa=new svm_struct_api();
+		//svm_struct_api ssa=new svm_struct_api();
+		svm_struct_api ssa=svm_struct_api_factory.getSvmStructApi();
 		/* read the training examples */
 		SAMPLE sample = ssa.read_struct_examples(buff, struct_parm);
 
@@ -1312,16 +1387,7 @@ public class MedLDA {
 			logger.info("svm param.SVM_ALGTYPE is 2");
 			for (int k = 1; k < structmodel.svm_model.sv_num; k++) {
 				int[] vecLabel = structmodel.svm_model.supvec[k].lvec;
-				/*
-                String str="";
-                logger.info("k="+k);
-                for(int ak=0;ak<vecLabel.length;ak++)
-                {
-                	str=str+ak+":"+vecLabel[ak]+" ";
-                }
-                logger.info(str);
-                */
-				
+			
 				double dval = structmodel.svm_model.alpha[k] / ss.num_docs;
 				 //logger.info("dval:"+dval);
 				for (int d = 0; d < ss.num_docs; d++) {
@@ -1497,6 +1563,11 @@ public class MedLDA {
 	}
 
 	public void outputLowDimData(String filename, SuffStats ss) {
+		if(MedLDAConfig.isWordSelection==true)
+		{
+		  //normalizeExp(ss);
+		   normalizeExpAvg(ss);
+		}
 		try {
 			PrintWriter fileptr = new PrintWriter(new FileWriter(filename));
 
@@ -1516,7 +1587,50 @@ public class MedLDA {
 			e.printStackTrace();
 		}
 	}
-
+	
+	public void normalizeExp(SuffStats ss)
+	{
+		double sum=0;
+		
+		for (int d = 0; d < ss.num_docs; d++) {
+			sum=0;
+			for (int k = 0; k < m_nK; k++) {
+				sum+=Math.abs(ss.exp[d][k]);	
+			}
+			if(sum==0)
+			{
+				sum=1;
+			}
+			for (int k = 0; k < m_nK; k++) {
+				ss.exp[d][k]=ss.exp[d][k]/(sum);	
+			}	
+		}
+	}
+	
+	public void normalizeExpAvg(SuffStats ss)
+	{
+		double sum=0;
+		int nonzero=0;
+		for (int d = 0; d < ss.num_docs; d++) {
+			for (int k = 0; k < m_nK; k++) {
+				if(ss.exp[d][k]!=0)
+				{
+					nonzero++;
+					sum+=Math.abs(ss.exp[d][k]);	
+				}		
+			}	
+		}
+		
+		sum=sum/nonzero+1;
+		
+		for (int d = 0; d < ss.num_docs; d++) {
+		
+			for (int k = 0; k < m_nK; k++) {
+				ss.exp[d][k]=ss.exp[d][k]/sum;	
+			}	
+		}
+	}
+	
 	public double[] getM_alpha() {
 		return m_alpha;
 	}

@@ -12,4 +12,6 @@ public class MedLDAConfig {
 	//0 linear
 	//1 softmax
 	public static int weighttype=0;
+	
+	
 }

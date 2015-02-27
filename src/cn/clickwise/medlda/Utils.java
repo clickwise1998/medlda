@@ -1,5 +1,7 @@
 package cn.clickwise.medlda;
 
+import java.io.FileWriter;
+import java.io.PrintWriter;
 import java.util.ArrayList;
 
 import org.apache.log4j.Logger;
@@ -7,6 +9,9 @@ import org.apache.log4j.Logger;
 import cn.clickwise.sort.utils.SortStrArray;
 
 public class Utils {
+	
+	public static boolean isUp=true;
+	public static double upmul=0;
 	
 	private static Logger logger = Logger.getLogger(Utils.class);
 	
@@ -19,6 +24,7 @@ public class Utils {
 		} else {
 			v = log_a+Math.log(1 + Math.exp(log_b-log_a));
 		}
+		
 		return(v);
 	}
 	
@@ -189,6 +195,15 @@ public class Utils {
 		return newpoint;
 	}
 	
+	public static double optWeight(double gradient,double oldpoint)
+	{
+		double steplength=1;
+		double newpoint=0;
+
+		newpoint=oldpoint+steplength*gradient;
+		return newpoint;
+	}
+	
 	public static boolean[] selectState(double[][] probs)
 	{
 		boolean[] selstat=new boolean[probs.length];
@@ -206,24 +221,50 @@ public class Utils {
 		//}
 		
 		/*
-		int lowthreshodIndex=(int)(sorted.length*(0.9));
+		int lowthreshodIndex=(int)(sorted.length*(0.5));
 		double lowthreshold=Double.parseDouble((sorted[lowthreshodIndex].split("\001"))[1]);
        	System.out.println("lowthreshold:"+lowthreshold);
-		*/
-		int upthreshodIndex=(int)(sorted.length*(0.3));		
-		double upthreshold=Double.parseDouble((sorted[upthreshodIndex].split("\001"))[1]);
-		System.out.println("upthreshold:"+upthreshold);
+	   */
+		double upthreshold=0;
+		double lowthreshold=0;
+		
+		logger.info("true upmul:"+upmul);
+		if(isUp==true)
+		{
+		    int upthreshodIndex=(int)(sorted.length*(upmul));		
+		    upthreshold=Double.parseDouble((sorted[upthreshodIndex].split("\001"))[1]);
+		    System.out.println("upthreshold:"+upthreshold);
+		}
+		else
+		{
+			int lowthreshodIndex=(int)(sorted.length*(upmul));
+			lowthreshold=Double.parseDouble((sorted[lowthreshodIndex].split("\001"))[1]);
+	       	System.out.println("lowthreshold:"+lowthreshold);
+		}
 		
 		
 		for(int i=0;i<probs.length;i++)
 		{
-			if((Math.abs(probs[i][1])>upthreshold))
-			{
-				selstat[i]=true;
+			if(isUp==true){
+			     if((Math.abs(probs[i][1])>upthreshold))
+			    {
+				   selstat[i]=true;
+			    }
+			    else
+			    {
+				   selstat[i]=false;
+			    }
 			}
 			else
 			{
-				selstat[i]=false;
+				if((Math.abs(probs[i][1])<lowthreshold))
+				{
+					selstat[i]=true;
+				}
+				else
+				{
+					selstat[i]=false;
+				}
 			}
 		}
 		
@@ -243,4 +284,21 @@ public class Utils {
 		*/
 		return selstat;
 	}
+	
+	public static void printGradient(String gradient_file,double[][] wprob_suffstats)
+	{
+	  	try{
+	  		PrintWriter pw=new PrintWriter(new FileWriter(gradient_file));
+	  		for(int i=0;i<wprob_suffstats.length;i++)
+	  		{
+	  			pw.println(i+":"+wprob_suffstats[i][1]);
+	  		}
+	  		pw.close();
+	  	}
+	  	catch(Exception e)
+	  	{
+	  		e.printStackTrace();
+	  	}
+	}
+	
 }

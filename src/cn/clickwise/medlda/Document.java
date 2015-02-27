@@ -8,6 +8,7 @@ public class Document {
 	
 	public int lossAugLabel;
 	
+	
 	public double lhood;
 	
 	public int[] words;

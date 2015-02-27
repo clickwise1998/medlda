@@ -834,6 +834,8 @@ public class svm_struct_learn {
 				sc.progress_n = 0;
 				rt_total += Math.max(svm_common.get_runtime() - rt1, 0);
 
+				double rtPrepareStart=svm_common.get_runtime();
+				
 				for (i = 0; i < n; i++) {
 					rt1 = svm_common.get_runtime();
 
@@ -864,6 +866,9 @@ public class svm_struct_learn {
 
 				} /* end of example loop */
 
+				double rtPrepareEnd=svm_common.get_runtime();
+				logger.info("numIt:"+numIt+" prepareTime:"+((rtPrepareEnd-rtPrepareStart)/100));
+				
 				rt1 = svm_common.get_runtime();
 
 				/* create sparse vector from dense sum */
@@ -893,6 +898,8 @@ public class svm_struct_learn {
 
 			}
 			ceps = Math.max(0, rhs_g - lhsXw - slack);
+			
+			double rtOptimizeStart=svm_common.get_runtime();
 			if ((ceps > sparm.epsilon) || cached_constraint != 0) {
 				/**** resize constraint matrix and add new constraint ****/
 				// cset.lhs=new DOC[cset.m+1];
@@ -1021,7 +1028,8 @@ public class svm_struct_learn {
 
 			}
 
-			
+			double rtOptimizeEnd=svm_common.get_runtime();
+			logger.info("numIt:"+numIt+" optimize time:"+((rtOptimizeEnd-rtOptimizeStart)/100));
 			//if (svm_struct_common.struct_verbosity >= 1) {
 				logger.info("(NumConst=" + cset.m + ", SV="+ (svmModel.sv_num - 1) + ", CEps=" + ceps + ", QPEps="+ svmModel.maxdiff + ")\n");
 				System.out.println("(NumConst=" + cset.m + ", SV="+ (svmModel.sv_num - 1) + ", CEps=" + ceps + ", QPEps="+ svmModel.maxdiff + ")\n");

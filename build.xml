@@ -9,7 +9,7 @@ project
 |-build.xml
 -->
 <property name="lib.dir" value="lib"/>
-<property name="src.dir" value="src"/>
+<property name="src.dir" value="src_temp"/>
 <property name="classes.dir" value="bin"/>
 <property name="output.dir" value="out"/>
 <property name="jarname" value="medlda.jar"/>

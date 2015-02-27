@@ -5,6 +5,9 @@ import java.io.PrintWriter;
 
 import org.apache.log4j.Logger;
 
+import cn.clickwise.classify.sspm.svmconfig;
+import cn.clickwise.evaluation.ECORPUS;
+import cn.clickwise.evaluation.EDOC;
 import cn.clickwise.file.utils.FileWriterUtil;
 
 public class svm_struct_classify {
@@ -17,6 +20,7 @@ public class svm_struct_classify {
 	
 	public static void main(String[] args) throws Exception
 	{
+		//svmconfig.model_type=1;
 		int correct=0,incorrect=0,no_accuracy=0;
 		int i;
 		double t1,runtime=0;
@@ -86,7 +90,7 @@ public class svm_struct_classify {
 		
 		
 		predfl=FileWriterUtil.getPW(predictionsfile);
-		
+		ECORPUS ecorpus=new ECORPUS();	
 		for(i=0;i<testsample.n;i++)
 		{
 			
@@ -97,6 +101,11 @@ public class svm_struct_classify {
 			{
 				continue;
 			}
+			if(svmconfig.model_type==0)
+			{
+				ecorpus.add(new EDOC(testsample.examples[i].y.class_index,y.class_index));
+			}
+			
 			logger.info("y:"+y.class_index+"  testsample.examples["+i+"].y:"+testsample.examples[i].y.class_index);
 			runtime+=(svm_common.get_runtime()-t1);
 			svm_struct_api.write_label(predfl, y);
@@ -137,11 +146,31 @@ public class svm_struct_classify {
 			logger.info("Runtime (without IO) in cpu-seconds:"+(float)(runtime/100.0));
 		}
 		
-		//if((no_accuracy==0)&&(svm_struct_common.struct_verbosity>=1))
-		//{
-			logger.info("Average loss on test set:"+(float)avgloss);
-			logger.info("Zero/one-error on test set "+(float)100.0*incorrect/testsample.n+"("+correct+" correct, "+incorrect+" incorrect,"+testsample.n+", total");
-		//}
+	
+		
+			if(svmconfig.model_type==0)
+			{
+				logger.info("Average loss on test set:"+(float)avgloss);
+				logger.info("Zero/one-error on test set "+(float)100.0*((double)incorrect/(double)(correct+incorrect))+"("+correct+" correct, "+incorrect+" incorrect,"+testsample.n+", total");
+			    ecorpus.analysis();
+			    double avgPrecision=0;
+			    double avgRecall=0;
+			    double f;
+			    ecorpus.analysis();
+			    avgPrecision=ecorpus.getAvgPrecision();
+			    avgRecall=ecorpus.getAvgRecall();
+			    f=ecorpus.getF();
+			        
+			    logger.info("labelSize:" +  ecorpus.getLabelSize());
+			    logger.info("AvgPrecision:" + avgPrecision);
+				logger.info("AvgRecall:" + avgRecall);
+				logger.info("F:" + f);
+			}
+			else
+			{
+				logger.info("Average loss on test set:"+(float)avgloss);
+				logger.info("Zero/one-error on test set "+(float)100.0*incorrect/testsample.n+"("+correct+" correct, "+incorrect+" incorrect,"+testsample.n+", total");
+			}
 		
 		svm_struct_api.print_struct_testing_stats(testsample, model, sparm, teststats);
 		

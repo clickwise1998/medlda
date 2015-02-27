@@ -1,0 +1,10 @@
+真正抽象svm_struct_api
+svm_multiclass 
+40062 train Average loss on test set:22.819784
+
+单词增加会明显使优化变慢
+样本增加会明显使准备优化变慢
+%%%样本不均匀也会影响分类的准确度
+
+下一步的工作是将准备优化的阶段变为多线程
+即 svm_learn_struct_joint 的prepare部分

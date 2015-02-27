@@ -59,7 +59,7 @@ public class svm_common {
 	/**
 	 * default optimization algorithm to use:
 	 */
-	public static final int DEFAULT_ALG_TYPE = 4;
+	//public static final int DEFAULT_ALG_TYPE = 4;
 
 	/**
 	 * store Psi(x,y) once instead of recomputing it every time:

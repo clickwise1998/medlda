@@ -94,8 +94,8 @@ public class WordWeight {
 	public static void main(String[] args)
 	{
 		String wei_file="temp120_c16_f10/final.wwei";
-		String dict_file="example/gendict.txt";
-		String output_file="example/wordwei.txt";
+		String dict_file="example/gendictansj12.txt";
+		String output_file="example/wordweingram.txt";
 		WordWeight ww=new WordWeight();
 		ww.wordWeight(wei_file, dict_file, output_file);
 	}
