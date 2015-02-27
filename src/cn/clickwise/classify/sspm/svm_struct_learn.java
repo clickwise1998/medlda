@@ -851,7 +851,7 @@ public class svm_struct_learn {
                 
 				*/
 				
-				int threadNum=10;
+				int threadNum=7;
 				int batNum=(int)((double)n/(double)threadNum);
 				int currentStartIndex=0;
 				int currentEndIndex=0;
@@ -929,7 +929,7 @@ public class svm_struct_learn {
 				{
 					vecLabel[ti] = most_violated_g[ti].class_index - 1;
 				}
-				System.out.println("all has finished find most violated");
+				//System.out.println("all has finished find most violated");
 				
 				
 				double rtPrepareEnd=svm_common.get_runtime();
@@ -1106,6 +1106,7 @@ public class svm_struct_learn {
 			//if (ceps < 0.5) {
 			//	break;
 			//}
+			System.gc();
 
 			
 		} while (cached_constraint != 0|| (ceps > sparm.epsilon)
@@ -1787,7 +1788,7 @@ public class svm_struct_learn {
 	
 	public synchronized void updateSubThreadsFinished(int threadIndex,int status)
 	{
-		System.out.println("thread "+threadIndex+" is setting status");
+		//System.out.println("thread "+threadIndex+" is setting status");
 		subThreadsFinished[threadIndex]=status;
 	}
 	
@@ -1865,6 +1866,10 @@ public class svm_struct_learn {
 			mostViolatedLabels=null;
 			local_ssa=null;
 			violatedValid=null;
+			/**********free memory******/
+			local_fydelta_g=null;
+			local_lhs_n=null;
+			/**************************/
 		}
 		
 		private void add_list_n_ns(double[] vec_n, SVECTOR vec_s,
@@ -1872,10 +1877,14 @@ public class svm_struct_learn {
 			SVECTOR f;
 			for (f = vec_s; f != null; f = f.next)
 				add_vector_ns(vec_n, f, f.factor * faktor);
+			/**********free memory******/
+			f=null;
+			/**************************/
 		}
 		
 		private  void add_vector_ns(double[] vec_n, SVECTOR vec_s,
 				double faktor) {
+			
 			WORD[] ai;
 			ai = vec_s.words;
 			for (int i = 0; i < ai.length; i++) {
@@ -1886,6 +1895,17 @@ public class svm_struct_learn {
 					continue;
 				}
 			}
+			
+			/**********free memory******/
+			if(ai!=null)
+			{
+				for(int i=0;i<ai.length;i++)
+				{
+					ai[i]=null;
+				}
+			}
+			ai=null;
+			/**************************/
 		}
 		/*
 		 * returns fydelta=fy-fybar and rhs scalar value that correspond to the most
@@ -1979,8 +1999,12 @@ public class svm_struct_learn {
 			vec.words = new WORD[words.length];
 
 			for (i = 0; i < words.length; i++) {
-				vec.words[i] = words[i];
+				//before reform
+				//vec.words[i] = words[i];
+				vec.words[i] = words[i].copy_word();
 			}
+			
+			
 
 			vec.twonorm_sq = -1;
 

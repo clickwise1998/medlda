@@ -1042,7 +1042,7 @@ public class svm_common {
 
 	public static SVECTOR shift_s(SVECTOR a, int shift) {
 		SVECTOR vec;
-		WORD[] sum;
+		//WORD[] sum;
 		WORD[] sumi;
 		WORD[] ai;
 		int veclength;
@@ -1078,6 +1078,23 @@ public class svm_common {
 		 */
 
 		vec = svm_common.create_svector_shallow(sumi, userdefined, a.factor);
+		if(ai!=null)
+		{
+			for(int i=0;i<ai.length;i++)
+			{
+				ai[i]=null;
+			}
+			ai=null;
+		}
+		
+		if(sumi!=null)
+		{
+			for(int i=0;i<sumi.length;i++)
+			{
+				sumi[i]=null;
+			}
+			sumi=null;
+		}
 		// logger.info("vec in sv:"+vec.toString());
 		return vec;
 	}

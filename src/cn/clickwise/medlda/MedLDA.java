@@ -11,6 +11,7 @@ import java.util.Vector;
 
 import org.apache.log4j.Logger;
 
+/*
 import cn.clickwise.classify.svm_struct.KERNEL_PARM;
 import cn.clickwise.classify.svm_struct.LEARN_PARM;
 import cn.clickwise.classify.svm_struct.SAMPLE;
@@ -21,6 +22,20 @@ import cn.clickwise.classify.svm_struct.svm_struct_api;
 import cn.clickwise.classify.svm_struct.svm_struct_common;
 import cn.clickwise.classify.svm_struct.svm_struct_learn;
 import cn.clickwise.classify.svm_struct.svmconfig;
+*/
+import cn.clickwise.classify.sspm.KERNEL_PARM;
+import cn.clickwise.classify.sspm.LEARN_PARM;
+import cn.clickwise.classify.sspm.SAMPLE;
+import cn.clickwise.classify.sspm.STRUCTMODEL;
+import cn.clickwise.classify.sspm.STRUCT_LEARN_PARM;
+import cn.clickwise.classify.sspm.svm_common;
+import cn.clickwise.classify.sspm.svm_struct_api;
+import cn.clickwise.classify.sspm.svm_struct_api_factory;
+import cn.clickwise.classify.sspm.svm_struct_common;
+import cn.clickwise.classify.sspm.svm_struct_learn;
+import cn.clickwise.classify.sspm.svmconfig;
+import cn.clickwise.evaluation.ECORPUS;
+import cn.clickwise.evaluation.EDOC;
 import cn.clickwise.math.random.SeedRandom;
 import cn.clickwise.str.basic.SSO;
 import cn.clickwise.time.utils.TimeOpera;
@@ -173,7 +188,7 @@ public class MedLDA {
 	public boolean mle(SuffStats ss, Params param, boolean bInit) {
 		int k;
 		int w;
-
+        double ldamstart=TimeOpera.getCurrentTimeLong();
 		// beta parameters(K*N)
 		for (k = 0; k < m_nK; k++) {
 			for (w = 0; w < m_nNumTerms; w++) {
@@ -227,6 +242,9 @@ public class MedLDA {
 			//}
 		}
 	
+		 double ldamend=TimeOpera.getCurrentTimeLong();
+		 logger.info("lda mstep run time:"+(ldamend-ldamstart)/((double)1000));
+		 System.out.println("lda mstep run time:"+(ldamend-ldamstart)/((double)1000));
 		//update wprob parameters
 		if(MedLDAConfig.isWordSelection==true)
 		{
@@ -291,6 +309,7 @@ public class MedLDA {
      
 	public int run_em(String start, String directory, Corpus corpus,
 			Params param) {
+		
 		m_numDocs=corpus.num_docs;
 		m_dDeltaEll = param.getDELTA_ELL();
 
@@ -363,6 +382,7 @@ public class MedLDA {
 					break;
 				}
 				ci++;
+				double estart=TimeOpera.getCurrentTimeLong();
 				// e-step
 				for (d = 0; d < corpus.num_docs; d++) {
 					for (n = 0; n < max_length; n++)// initialize to uniform
@@ -379,14 +399,21 @@ public class MedLDA {
 						
 					
 				}
-
+				
+				double eend=TimeOpera.getCurrentTimeLong();
+				
+                System.out.println("estep run time:"+(eend-estart)/((double)1000));
+                logger.info("estep run time:"+(eend-estart)/((double)1000));
 				// m-step
+                double mstart=TimeOpera.getCurrentTimeLong();
 				if (mle(ss, param, false)) {
 					nIt = i + 1;
 				} else {
 					break;
 				}
-
+				double mend=TimeOpera.getCurrentTimeLong();
+				System.out.println("mstep run time:"+(mend-mstart)/((double)1000));
+				logger.info("mstep run time:"+(mend-mstart)/((double)1000));
 				// check for convergence
 				lhood += m_dsvm_primalobj;
 
@@ -581,6 +608,7 @@ public class MedLDA {
 				phisum = 0;
 
 				for (int k = 0; k < m_nK; k++) {
+					
 					oldphi[k] = phi[n][k];
 
 					/*
@@ -625,7 +653,6 @@ public class MedLDA {
 	 * @param param
 	 * @return
 	 */
-
 	public double inference_pred(Document doc, double[] var_gamma,
 			double[][] phi, Params param) {
 
@@ -647,7 +674,6 @@ public class MedLDA {
 		}
 
 		var_iter = 0;
-
 		while ((converged > param.VAR_CONVERGED)
 				&& ((var_iter < param.VAR_MAX_ITER) || (param.VAR_MAX_ITER == -1))) {
 			var_iter++;
@@ -838,14 +864,34 @@ public class MedLDA {
 		}
 		double perwordlikelihood1 = sumlikelihood / nterms;
 		double perwordlikelihood2 = sumavglikelihood / corpus.num_docs;
-
+     
 		int nAcc = 0;
+		ECORPUS ecorpus=new ECORPUS();
+		
 		for (int d = 0; d < corpus.num_docs; d++)
+		{
 			if (corpus.docs[d].gndlabel == corpus.docs[d].predlabel)
 				nAcc += 1;
+			ecorpus.add(new EDOC(corpus.docs[d].gndlabel,corpus.docs[d].predlabel));
+		}
+		
 		double dAcc = (double) nAcc / corpus.num_docs;
-
+		
+        double avgPrecision=0;
+        double avgRecall=0;
+        double f;
+        ecorpus.analysis();
+        avgPrecision=ecorpus.getAvgPrecision();
+        avgRecall=ecorpus.getAvgRecall();
+        f=ecorpus.getF();
+        
+        logger.info("upmul:" +  Utils.upmul);
+        logger.info("isup:" +  Utils.isUp);
+        logger.info("labelSize:" +  ecorpus.getLabelSize());
 		logger.info("Accuracy:" + dAcc);
+		logger.info("AvgPrecision:" + avgPrecision);
+		logger.info("AvgRecall:" + avgRecall);
+		logger.info("F:" + f);
 		PrintWriter fileptr = null;
 
 		try {
@@ -1308,7 +1354,8 @@ public class MedLDA {
 		String buff;
 		buff = ss.dir + "/Feature.txt";
 		outputLowDimData(buff, ss);
-		svm_struct_api ssa=new svm_struct_api();
+		//svm_struct_api ssa=new svm_struct_api();
+		svm_struct_api ssa=svm_struct_api_factory.getSvmStructApi();
 		/* read the training examples */
 		SAMPLE sample = ssa.read_struct_examples(buff, struct_parm);
 
@@ -1340,16 +1387,7 @@ public class MedLDA {
 			logger.info("svm param.SVM_ALGTYPE is 2");
 			for (int k = 1; k < structmodel.svm_model.sv_num; k++) {
 				int[] vecLabel = structmodel.svm_model.supvec[k].lvec;
-				/*
-                String str="";
-                logger.info("k="+k);
-                for(int ak=0;ak<vecLabel.length;ak++)
-                {
-                	str=str+ak+":"+vecLabel[ak]+" ";
-                }
-                logger.info(str);
-                */
-				
+			
 				double dval = structmodel.svm_model.alpha[k] / ss.num_docs;
 				 //logger.info("dval:"+dval);
 				for (int d = 0; d < ss.num_docs; d++) {

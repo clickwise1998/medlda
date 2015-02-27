@@ -10,6 +10,9 @@ import cn.clickwise.sort.utils.SortStrArray;
 
 public class Utils {
 	
+	public static boolean isUp=true;
+	public static double upmul=0;
+	
 	private static Logger logger = Logger.getLogger(Utils.class);
 	
 	public static double log_sum(double log_a, double log_b)
@@ -222,22 +225,46 @@ public class Utils {
 		double lowthreshold=Double.parseDouble((sorted[lowthreshodIndex].split("\001"))[1]);
        	System.out.println("lowthreshold:"+lowthreshold);
 	   */
+		double upthreshold=0;
+		double lowthreshold=0;
 		
-		
-		int upthreshodIndex=(int)(sorted.length*(0.02));		
-		double upthreshold=Double.parseDouble((sorted[upthreshodIndex].split("\001"))[1]);
-		System.out.println("upthreshold:"+upthreshold);
+		logger.info("true upmul:"+upmul);
+		if(isUp==true)
+		{
+		    int upthreshodIndex=(int)(sorted.length*(upmul));		
+		    upthreshold=Double.parseDouble((sorted[upthreshodIndex].split("\001"))[1]);
+		    System.out.println("upthreshold:"+upthreshold);
+		}
+		else
+		{
+			int lowthreshodIndex=(int)(sorted.length*(upmul));
+			lowthreshold=Double.parseDouble((sorted[lowthreshodIndex].split("\001"))[1]);
+	       	System.out.println("lowthreshold:"+lowthreshold);
+		}
 		
 		
 		for(int i=0;i<probs.length;i++)
 		{
-			if((Math.abs(probs[i][1])>upthreshold))
-			{
-				selstat[i]=true;
+			if(isUp==true){
+			     if((Math.abs(probs[i][1])>upthreshold))
+			    {
+				   selstat[i]=true;
+			    }
+			    else
+			    {
+				   selstat[i]=false;
+			    }
 			}
 			else
 			{
-				selstat[i]=false;
+				if((Math.abs(probs[i][1])<lowthreshold))
+				{
+					selstat[i]=true;
+				}
+				else
+				{
+					selstat[i]=false;
+				}
 			}
 		}
 		

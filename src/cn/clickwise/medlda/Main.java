@@ -1,10 +1,14 @@
 package cn.clickwise.medlda;
 
 import java.io.File;
-
+/*
 import cn.clickwise.classify.svm_struct.svm_common;
 import cn.clickwise.classify.svm_struct.svmconfig;
+*/
+import cn.clickwise.classify.sspm.svm_common;
+import cn.clickwise.classify.sspm.svmconfig;
 import cn.clickwise.file.utils.FileCreateUtil;
+import cn.clickwise.str.basic.SSO;
 
 public class Main {
 	
@@ -99,10 +103,41 @@ public class Main {
 				param.NLABELS = Integer.parseInt(args[1]);
 				param.INNER_CV=false;
 				c.read_data(param.test_filename, param.NLABELS);
+				
+				if(MedLDAConfig.isWordSelection==true)
+				{
+				  for(int k=3;k<args.length;k++)
+				  {
+					 if(SSO.tioe(args[k]))
+					 {
+						  continue;
+					 }
+					  
+				    double upmul=Double.parseDouble(args[k]);
+				    Utils.isUp=true;
+				    Utils.upmul=upmul;
+					MedLDA model=new MedLDA();
+					double dAcc = model.infer(args[2], c, param,"");
+					System.err.printf("Accuracy: %.3f\n", dAcc);
+					model=null;
+					
+				    Utils.isUp=false;
+				    Utils.upmul=1-upmul;
+				    model=new MedLDA();
+					dAcc = model.infer(args[2], c, param,"");
+					System.err.printf("Accuracy: %.3f\n", dAcc);
+					model=null;
+					
+				  }
+				  
+				}
+				else{
+				
 				MedLDA model=new MedLDA();
 				double dAcc = model.infer(args[2], c, param,"");
 				System.err.printf("Accuracy: %.3f\n", dAcc);
 				model=null;
+				}
 			}
 
 		} else {

@@ -125,6 +125,10 @@ public class svm_struct_tb extends svm_struct_api {
 		SVECTOR vec = svm_common.create_svector_shallow(fvec.words, userdefined, x.doc.fvec.factor);
 		// logger.info("fvec psi:"+fvec.toString());
 		//vec.kernel_id = y.class_index;
+		if(fvec!=null)
+		{
+			fvec.destroy();
+		}
 		fvec=null;
 		return vec;
 	}
@@ -567,7 +571,7 @@ public class svm_struct_tb extends svm_struct_api {
 		int  j;
 		boolean first = true;
 		double score=0.0, bestscore = -1;
-		WORD[] words;
+		//WORD[] words;
 
 		int ci=0;
 		doc = x.doc.copyDoc();
@@ -576,11 +580,11 @@ public class svm_struct_tb extends svm_struct_api {
 		y.first_size=sparm.first_size;
 		y.second_size=sparm.second_size;
 		y.third_size=sparm.third_size;
-		words = doc.fvec.words;
+		//words = doc.fvec.words;
 
 		
-		for (j = 0; j <words.length; j++) {
-			if (words[j].wnum > sparm.num_features) {
+		for (j = 0; j <doc.fvec.words.length; j++) {
+			if (doc.fvec.words[j].wnum > sparm.num_features) {
 				//System.out.println(doc.fvec.words[j].wnum+" is set to 0");
 				return null;
 				//words[j].wnum = 0;

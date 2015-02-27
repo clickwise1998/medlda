@@ -130,65 +130,7 @@ public class svm_hideo {
 			}
 			precision_violations++;
 		}
-		/*
-		 * System.out.println(); System.out.println("result:"+result);
-		 * System.out.println("PRIMAL_OPTIMAL:"+PRIMAL_OPTIMAL);
-		 * System.out.println("roundnumber:"+roundnumber);
-		 * System.out.println("progress:"+progress);
-		 */
-		// if(false)
-      /*
-		String q_str = "\n";
-		eq = qp.opt_ce0[0];
-		for (i = 0; i < qp.opt_n; i++) {
-			eq += primal[i] * qp.opt_ce[i];
-			q_str += ("" + qp.opt_g0[i] + ": ");
-
-			for (j = 0; j < qp.opt_n; j++) {
-				q_str += (qp.opt_g[i * qp.opt_n + j] + " ");
-			}
-
-			q_str += (":a=" + primal[i]);
-			q_str += (":nonopti=" + nonoptimal[i]);
-			q_str += (":y=" + qp.opt_ce[i] + "\n");
-		}
-
-		logger.info("q_str1:\n" + q_str);
-		logger.info("eq-constraint1=" + eq);
-		logger.info("b1=" + threshold);
-		logger.info("smallroundcount1=" + smallroundcount);
-
-		logger.info("result=" + result + " PRIMAL_OPTIMAL=" + PRIMAL_OPTIMAL
-				+ " roundnumber=" + roundnumber + " progress=" + progress);
-
-		logger.info("opt_precision:" + opt_precision);
-		logger.info("epsilon_crit:" + epsilon_crit);
-		logger.info("learn_param.epsilon_a:" + learn_param.epsilon_a);
-		logger.info("maxiter:" + maxiter);
-		logger.info("lindep_sensitivity:" + lindep_sensitivity);
-		
-
-		String primal_str = "";
-		for (int p = 0; p < nx; p++) {
-			primal_str += (p + ":" + primal[p] + " ");
-		}
-
-		logger.info("primal_str:" + primal_str);
-
-		String dual_str = "";
-
-		for (int p = 0; p < 2 * (nx + 1); p++) {
-			dual_str += (p + ":" + dual[p] + " ");
-		}
-
-		logger.info("dual_str:" + dual_str);
-
-		String nonoptimal_str = "";
-		for (int p = 0; p < nx; p++) {
-			nonoptimal_str += (p + ":" + nonoptimal[p] + " ");
-		}
-		logger.info("nonoptimal_str:" + nonoptimal_str);
-		*/
+	
 		
 
 		if ((result != PRIMAL_OPTIMAL) || (roundnumber % 31 == 0)
@@ -237,32 +179,7 @@ public class svm_hideo {
 			threshold = 0;
 		}
 
-		// if(svm_common.verbosity>=4)
-		// {
-		/*
-		System.out.println();
-		eq = qp.opt_ce0[0];
 
-		q_str = "\n";
-		for (i = 0; i < qp.opt_n; i++) {
-			eq += primal[i] * qp.opt_ce[i];
-			q_str += ("" + qp.opt_g0[i] + ": ");
-
-			for (j = 0; j < qp.opt_n; j++) {
-				q_str += (qp.opt_g[i * qp.opt_n + j] + " ");
-			}
-
-			q_str += (":a=" + primal[i]);
-			q_str += (":nonopti=" + nonoptimal[i]);
-			q_str += (":y=" + qp.opt_ce[i] + "\n");
-		}
-
-		logger.info("q_str2:\n" + q_str);
-		logger.info("eq-constraint=" + eq);
-		logger.info("b=" + threshold);
-		logger.info("smallroundcount=" + smallroundcount);
-         */
-		// }
 
 		return primal;
 	}
@@ -708,33 +625,22 @@ public class svm_hideo {
 		obj_after = calculate_qp_objective(n, g, g0, primal);
 		progress = obj_before - obj_after;
 
-		/***free memory*******
-		 
-		double[] d, d0, ig, dual_old, temp, start;
-		double[] g0_new, g_new, ce_new, ce0_new, low_new, up_new;
-		double add, t;
-		int result;
-
-		double obj_before, obj_after;
-		int b1, b2;
-		double g0_b1 = 0, g0_b2 = 0, ce0_b;
-
-		g0_new = new double[n];
-		d = new double[(n + m) * 2 * (n + m) * 2];
-		d0 = new double[(n + m) * 2];
-		ce_new = new double[n];
-		ce0_new = new double[m];
-		ig = new double[n * n];
-		dual_old = new double[(n + m) * 2];
-		low_new = new double[n];
-		up_new = new double[n];
-		start = new double[n];
-		g_new = new double[n * n];
-		temp = new double[n];
+		/***free memory*******/
 		
-		 *****************/
+		d=null;
+		d0=null;
+		ig=null;
+		dual_old=null;
+		temp=null;
+		start=null;
+		g0_new=null;
+		g_new=null;
+		ce_new=null;
+		ce0_new=null;
+		low_new=null;
+	    up_new=null;
+	    /*****************/
 		
-
 		return ((int) result);
 	}
 
@@ -752,8 +658,7 @@ public class svm_hideo {
 		//logger.info("in solve_dual");
 
 		if ((m < 0) || (m > 1)) {
-			System.err
-					.println("SOLVE DUAL: inappropriate number of eq-constrains!");
+			System.err.println("SOLVE DUAL: inappropriate number of eq-constrains!");
 		}
 
 		for (i = 0; i < 2 * (n + m); i++) {
